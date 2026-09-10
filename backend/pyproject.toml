@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "vault-backend"
+version = "0.1.0"
+description = "Permission-Aware Enterprise Knowledge System - Backend"
+authors = ["Daniel"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
+alembic = "^1.13.1"
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
+groq = "^0.4.2"
+cohere = "^4.48"
+pinecone-client = "^3.0.0"
+langchain = "^0.1.4"
+langchain-community = "^0.0.16"
+sentence-transformers = "^2.3.1"
+pypdf = "^4.0.1"
+python-docx = "^1.1.0"
+beautifulsoup4 = "^4.12.3"
+pandas = "^2.2.0"
+httpx = "^0.26.0"
+tenacity = "^8.2.3"
+structlog = "^24.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+pytest-asyncio = "^0.23.3"
+pytest-cov = "^4.1.0"
+ruff = "^0.2.1"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

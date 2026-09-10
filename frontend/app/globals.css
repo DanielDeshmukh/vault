@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Linear-inspired color system */
+    --primary: 235 56% 65%;           /* #5e6ad2 lavender-blue */
+    --primary-hover: 235 60% 76%;     /* #828fff lighter lavender */
+    --primary-focus: 235 55% 65%;     /* #5e69d1 focus tint */
+    --on-primary: 0 0% 100%;          /* #ffffff */
+
+    /* Ink (text) */
+    --foreground: 220 5% 96%;         /* #f7f8f8 ink */
+    --ink-muted: 216 12% 82%;         /* #d0d6e0 */
+    --ink-subtle: 220 5% 55%;         /* #8a8f98 */
+    --ink-tertiary: 220 4% 42%;       /* #62666d */
+
+    /* Canvas & surfaces */
+    --background: 240 20% 2%;         /* #010102 deepest dark */
+    --surface-1: 220 5% 7%;           /* #0f1011 charcoal */
+    --surface-2: 200 4% 9%;           /* #141516 */
+    --surface-3: 200 4% 10%;          /* #18191a */
+    --surface-4: 180 3% 10%;          /* #191a1b */
+
+    /* Hairlines */
+    --border: 228 8% 16%;             /* #23252a */
+    --border-strong: 240 5% 21%;      /* #34343a */
+    --input: 228 8% 16%;
+
+    /* Semantic */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142 72% 41%;           /* #27a644 */
+    --ring: 235 56% 65%;
+
+    /* Radius */
+    --radius: 8px;
+  }
+
+  .dark {
+    --background: 240 20% 2%;
+    --foreground: 220 5% 96%;
+    --card: 220 5% 7%;
+    --card-foreground: 220 5% 96%;
+    --popover: 220 5% 7%;
+    --popover-foreground: 220 5% 96%;
+    --primary: 235 56% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 5% 7%;
+    --secondary-foreground: 220 5% 96%;
+    --muted: 220 5% 7%;
+    --muted-foreground: 220 5% 55%;
+    --accent: 220 5% 7%;
+    --accent-foreground: 220 5% 96%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 228 8% 16%;
+    --input: 228 8% 16%;
+    --ring: 235 56% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
