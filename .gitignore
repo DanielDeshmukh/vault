@@ -40,8 +40,6 @@ Thumbs.db
 
 # Project specific
 PLAN.md
-*.md
-!README.md
 
 # Docker
 docker-compose.override.yml
