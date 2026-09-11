@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Query", href: "/" },
-  { name: "Documents", href: "/documents" },
+  { name: "Query", href: "/dashboard" },
+  { name: "Documents", href: "/dashboard/documents" },
 ];
 
 export function Sidebar() {

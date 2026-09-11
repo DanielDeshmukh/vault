@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
     try {
       await api.register(formData);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
