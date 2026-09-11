@@ -66,3 +66,29 @@ frontend/node_modules/
 # Python
 backend/__pycache__/
 backend/.venv/
+
+# Testing
+backend/.pytest_cache/
+backend/htmlcov/
+backend/coverage.xml
+backend/.coverage
+
+# mypy
+backend/.mypy_cache/
+
+# ruff
+backend/.ruff_cache/
+
+# Pre-commit
+.pre-commit-cache/
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment variables
+.env
+.env.local
+.env.*.local

@@ -57,3 +57,12 @@ strict = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "security: Security tests",
+    "eval: Evaluation tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
