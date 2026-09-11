@@ -19,7 +19,11 @@ class PineconeClient:
     @property
     def index(self):
         if self._index is None:
-            self._index = self.client.Index(settings.PINECONE_INDEX_NAME)
+            host = getattr(settings, "PINECONE_INDEX_HOST", None)
+            if host:
+                self._index = self.client.Index(settings.PINECONE_INDEX_NAME, host=host)
+            else:
+                self._index = self.client.Index(settings.PINECONE_INDEX_NAME)
         return self._index
     
     async def create_index(self, dimension: int = 768):
