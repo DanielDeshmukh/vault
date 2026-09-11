@@ -6,10 +6,7 @@
     },
     {
       "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 30
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -20,6 +17,9 @@
     {
       "src": "/health",
       "dest": "/api/index.py"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
