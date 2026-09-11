@@ -160,7 +160,7 @@ class IngestionPipeline:
             department=metadata.department,
             access_level=metadata.access_level,
             owner_id=user_id,
-            metadata={
+            doc_metadata={
                 "tags": metadata.tags,
                 "allowed_roles": metadata.allowed_roles,
                 "allowed_users": metadata.allowed_users,

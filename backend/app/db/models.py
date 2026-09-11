@@ -62,7 +62,7 @@ class Document(Base):
     department = Column(String(100), index=True)
     access_level = Column(Integer, default=0, index=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    metadata = Column(JSON, default=dict)
+    doc_metadata = Column("metadata", JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
