@@ -41,7 +41,7 @@ export default function DocumentsPage() {
       formData.append("department", "general");
       formData.append("access_level", "0");
 
-      const response = await fetch("http://localhost:8000/api/ingest/", {
+      const response = await fetch("/api/ingest/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${api.getToken()}`,
