@@ -36,6 +36,22 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+    # Recreate Pinecone index with correct dimension (1024 for Cohere embed-english-v3.0)
+    from app.db.pinecone import pinecone_client
+    try:
+        existing = [idx.name for idx in pinecone_client.client.list_indexes()]
+        if settings.PINECONE_INDEX_NAME in existing:
+            idx_info = pinecone_client.client.describe_index(settings.PINECONE_INDEX_NAME)
+            # Check if dimension matches Cohere embed-english-v3.0 (1024)
+            if hasattr(idx_info, 'dimension') and idx_info.dimension != 1024:
+                pinecone_client.client.delete_index(settings.PINECONE_INDEX_NAME)
+                pinecone_client._index = None
+                await pinecone_client.create_index(dimension=1024)
+        else:
+            await pinecone_client.create_index(dimension=1024)
+    except Exception:
+        pass  # Index creation is best-effort
+
 
 @app.get("/health")
 async def health():
