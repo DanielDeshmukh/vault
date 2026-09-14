@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.api.router import api_router
 from app.db.sessions import engine, Base
+from sqlalchemy import select
 
 
 app = FastAPI(
@@ -35,6 +36,17 @@ async def startup():
     # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Seed: promote qa@vault.com to admin if not already
+    from sqlalchemy import update
+    from app.db.sessions import async_session
+    from app.db.models import User
+    async with async_session() as session:
+        result = await session.execute(select(User).where(User.email == "qa@vault.com"))
+        qa_user = result.scalar_one_or_none()
+        if qa_user and not qa_user.is_admin:
+            await session.execute(update(User).where(User.id == qa_user.id).values(is_admin=True))
+            await session.commit()
 
     # Ensure Pinecone index has correct dimension (1024 for Cohere embed-english-v3.0)
     from app.db.pinecone import pinecone_client
