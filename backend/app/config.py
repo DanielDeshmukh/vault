@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     
     # Groq
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama3-70b-8192"
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
     EMBEDDING_MODEL: str = "embed-english-v3.0"
     
     # Cohere
