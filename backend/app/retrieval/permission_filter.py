@@ -40,19 +40,26 @@ class PermissionFilter:
         # Build filter conditions
         conditions = []
         
-        # 1. Access level filter - user can only see documents at or below their max level
-        conditions.append({
-            "access_level": {"$lte": int(max_level)}
-        })
-        
-        # 2. Account filter - if user has specific account access
+        # 1. Access level filter OR owner match - user can see docs at their level OR their own docs
         if allowed_accounts:
-            conditions.append({
+            account_cond = {
                 "$or": [
                     {"account_id": {"$in": allowed_accounts}},
-                    {"account_id": {"$eq": "internal"}}  # Always include internal docs
+                    {"account_id": {"$eq": "internal"}}
                 ]
-            })
+            }
+        else:
+            account_cond = None
+        
+        # 2. Combined: (access_level <= max OR owner_id == user.id)
+        or_conditions = [
+            {"access_level": {"$lte": int(max_level)}},
+            {"owner_id": {"$eq": str(user.id)}}
+        ]
+        if account_cond:
+            or_conditions.append(account_cond)
+        
+        conditions.append({"$or": or_conditions})
         
         # 3. Role filter - if user has specific roles
         if allowed_roles:
