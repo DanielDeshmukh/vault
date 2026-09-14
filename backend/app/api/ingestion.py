@@ -25,7 +25,7 @@ class DirectIngestRequest(BaseModel):
     access_level: int = 0
 
 
-@router.post("/", response_model=IngestionResponse)
+@router.post("", response_model=IngestionResponse)
 async def ingest_document(
     file: UploadFile = File(...),
     source: str = Form("csv"),

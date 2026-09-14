@@ -31,7 +31,7 @@ class QueryResponse(BaseModel):
     trace_id: str
 
 
-@router.post("/", response_model=QueryResponse)
+@router.post("", response_model=QueryResponse)
 async def query(
     request: QueryRequest,
     current_user: User = Depends(get_current_user)
