@@ -82,15 +82,16 @@ class HybridSearch:
         return search_results[:top_k]
     
     async def _get_embedding(self, text: str) -> list[float]:
-        """Get embedding vector for text using Groq."""
-        from groq import Groq
+        """Get embedding vector for text using Cohere."""
+        import cohere
         from app.config import settings
         
-        client = Groq(api_key=settings.GROQ_API_KEY)
+        client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
         
-        response = client.embeddings.create(
-            model=settings.EMBEDDING_MODEL,
-            input=text
+        response = client.embed(
+            texts=[text],
+            model=settings.COHERE_EMBED_MODEL,
+            input_type="search_query",
         )
         
-        return response.data[0].embedding
+        return response.embeddings[0]

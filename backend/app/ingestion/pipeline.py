@@ -7,6 +7,21 @@ from app.ingestion.parsers.router import ParserRouter
 from app.ingestion.chunker import SemanticChunker, Chunk
 from app.ingestion.metadata import MetadataEnricher
 from app.db.models import Document, DocumentChunk
+from app.db.pinecone import pinecone_client
+
+
+async def _get_embedding(text: str) -> list[float]:
+    """Get embedding vector for text using Cohere."""
+    import cohere
+    from app.config import settings
+
+    client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
+    response = client.embed(
+        texts=[text],
+        model=settings.COHERE_EMBED_MODEL,
+        input_type="search_document",
+    )
+    return response.embeddings[0]
 
 
 @dataclass
@@ -76,9 +91,31 @@ class IngestionPipeline:
                     content=parsed_content,
                     document_id=str(doc.id)
                 )
-                
-                # Store chunks
-                await self._store_chunks(db, doc.id, chunks)
+
+                # Generate embeddings for chunks
+                pinecone_vectors = []
+                for i, chunk in enumerate(chunks):
+                    try:
+                        embedding = await _get_embedding(chunk.content)
+                        pinecone_vectors.append({
+                            "id": f"{doc.id}-chunk-{i}",
+                            "values": embedding,
+                            "metadata": {
+                                "content": chunk.content[:500],
+                                "document_id": str(doc.id),
+                                "title": raw_doc.title,
+                                "source": raw_doc.source.value,
+                                "account_id": raw_doc.metadata.get("account_id", "unknown"),
+                                "department": raw_doc.metadata.get("department", "general"),
+                                "access_level": raw_doc.metadata.get("access_level", 0),
+                                "owner_id": user_id,
+                            }
+                        })
+                    except Exception as e:
+                        result.errors.append(f"Embedding error for chunk {i}: {str(e)}")
+
+                # Store chunks + embeddings
+                await self._store_chunks(db, doc.id, chunks, pinecone_vectors)
                 
                 result.documents_processed += 1
                 result.chunks_created += len(chunks)
@@ -129,9 +166,31 @@ class IngestionPipeline:
                 content=parsed_content,
                 document_id=str(doc.id)
             )
-            
-            # Store chunks
-            await self._store_chunks(db, doc.id, chunks)
+
+            # Generate embeddings for chunks
+            pinecone_vectors = []
+            for i, chunk in enumerate(chunks):
+                try:
+                    embedding = await _get_embedding(chunk.content)
+                    pinecone_vectors.append({
+                        "id": f"{doc.id}-chunk-{i}",
+                        "values": embedding,
+                        "metadata": {
+                            "content": chunk.content[:500],
+                            "document_id": str(doc.id),
+                            "title": raw_doc.title,
+                            "source": raw_doc.source.value,
+                            "account_id": raw_doc.metadata.get("account_id", "unknown"),
+                            "department": raw_doc.metadata.get("department", "general"),
+                            "access_level": raw_doc.metadata.get("access_level", 0),
+                            "owner_id": user_id,
+                        }
+                    })
+                except Exception as e:
+                    result.errors.append(f"Embedding error for chunk {i}: {str(e)}")
+
+            # Store chunks + embeddings
+            await self._store_chunks(db, doc.id, chunks, pinecone_vectors)
             
             result.documents_processed = 1
             result.chunks_created = len(chunks)
@@ -174,9 +233,10 @@ class IngestionPipeline:
         self,
         db: AsyncSession,
         document_id: str,
-        chunks: list[Chunk]
+        chunks: list[Chunk],
+        pinecone_vectors: Optional[list[dict]] = None,
     ):
-        """Store chunks in PostgreSQL."""
+        """Store chunks in PostgreSQL and upsert embeddings to Pinecone."""
         for i, chunk in enumerate(chunks):
             doc_chunk = DocumentChunk(
                 document_id=document_id,
@@ -184,3 +244,7 @@ class IngestionPipeline:
                 chunk_index=i
             )
             db.add(doc_chunk)
+
+        # Upsert embeddings to Pinecone if provided
+        if pinecone_vectors:
+            await pinecone_client.upsert_vectors(vectors=pinecone_vectors)

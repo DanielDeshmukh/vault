@@ -15,11 +15,12 @@ class Settings(BaseSettings):
     # Groq
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama3-70b-8192"
-    EMBEDDING_MODEL: str = "nomic-embed-text"
+    EMBEDDING_MODEL: str = "embed-english-v3.0"
     
     # Cohere
     COHERE_API_KEY: str = ""
     COHERE_MODEL: str = "rerank-english-v3.0"
+    COHERE_EMBED_MODEL: str = "embed-english-v3.0"
     
     # JWT
     JWT_SECRET_KEY: str = "supersecretkey123"
