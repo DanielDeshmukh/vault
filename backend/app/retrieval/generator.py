@@ -1,4 +1,4 @@
-from groq import Groq
+import cohere
 from typing import Optional
 from dataclasses import dataclass
 
@@ -15,9 +15,9 @@ class GeneratedAnswer:
 
 class CitationGenerator:
     """
-    Generate cited answers using Groq LLM.
+    Generate cited answers using Cohere Command.
     
-    Uses Llama 3 70B for fast, high-quality generation with
+    Uses Cohere for fast, high-quality generation with
     inline citations to source documents.
     """
     
@@ -35,28 +35,16 @@ RULES:
 Format your response with clear, cited statements. Each major claim should have at least one citation."""
     
     def __init__(self):
-        self.client = Groq(api_key=settings.GROQ_API_KEY)
-        self.model = settings.GROQ_MODEL
+        self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
     
     async def generate(
         self,
         query: str,
         results: list[SearchResult]
     ) -> GeneratedAnswer:
-        """
-        Generate a cited answer from search results.
-        
-        Args:
-            query: The user's question
-            results: Search results to use as context
-            
-        Returns:
-            GeneratedAnswer with citations
-        """
-        # Build context from search results
+        """Generate a cited answer from search results."""
         context = self._build_context(results)
         
-        # Create user message
         user_message = f"""Sources:
 {context}
 
@@ -64,21 +52,15 @@ Question: {query}
 
 Answer using ONLY the provided sources. Cite sources with [document_id] inline."""
         
-        # Generate response
-        response = self.client.chat.completions.create(
-            model=self.model,
+        response = self.client.chat(
+            model=settings.COHERE_CHAT_MODEL,
             messages=[
                 {"role": "system", "content": self.SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
+                {"role": "user", "content": user_message},
             ],
-            temperature=0.1,  # Low temp for factual accuracy
-            max_tokens=2048,
-            stop=["\n\n\n"]  # Stop at section breaks
         )
         
-        answer_text = response.choices[0].message.content
-        
-        # Extract citations from the answer
+        answer_text = response.message.content[0].text
         citations = self._extract_citations(answer_text, results)
         
         return GeneratedAnswer(
@@ -110,11 +92,9 @@ Answer using ONLY the provided sources. Cite sources with [document_id] inline."
         """Extract citations from the answer text."""
         import re
         
-        # Find all [doc_id] patterns
         citation_pattern = r'\[([^\]]+)\]'
         matches = re.findall(citation_pattern, answer)
         
-        # Map citations to result metadata
         citations = []
         seen = set()
         
@@ -123,7 +103,6 @@ Answer using ONLY the provided sources. Cite sources with [document_id] inline."
                 continue
             seen.add(match)
             
-            # Find matching result
             for result in results:
                 doc_id = result.metadata.get("document_id", "")
                 if doc_id == match or result.id == match:

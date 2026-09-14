@@ -14,13 +14,14 @@ class Settings(BaseSettings):
     
     # Groq
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
     EMBEDDING_MODEL: str = "embed-english-v3.0"
     
     # Cohere
     COHERE_API_KEY: str = ""
     COHERE_MODEL: str = "rerank-english-v3.0"
     COHERE_EMBED_MODEL: str = "embed-english-v3.0"
+    COHERE_CHAT_MODEL: str = "command-a-03-2025"
     
     # JWT
     JWT_SECRET_KEY: str = "supersecretkey123"
