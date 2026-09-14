@@ -21,7 +21,8 @@ async def _get_embedding(text: str) -> list[float]:
         model=settings.COHERE_EMBED_MODEL,
         input_type="search_document",
     )
-    return response.embeddings[0]
+    # Cohere v2 returns embeddings.float as a list of lists
+    return response.embeddings.float[0]
 
 
 @dataclass

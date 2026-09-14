@@ -94,4 +94,5 @@ class HybridSearch:
             input_type="search_query",
         )
         
-        return response.embeddings[0]
+        # Cohere v2 returns embeddings.float as a list of lists
+        return response.embeddings.float[0]
