@@ -67,6 +67,9 @@ class HybridSearch:
             include_metadata=True
         )
         logging.warning(f"Pinecone unfiltered results: {len(unfiltered)} matches")
+        for r in unfiltered:
+            meta = r.get("metadata", {})
+            logging.warning(f"  Vector id={r.get('id')} owner_id={meta.get('owner_id')} access_level={meta.get('access_level')}")
         
         results = await self.pinecone.query_vectors(
             vector=embedding,
