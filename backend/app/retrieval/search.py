@@ -56,12 +56,15 @@ class HybridSearch:
         embedding = await self._get_embedding(query)
         
         # Execute vector search with permission filter
+        import logging
+        logging.warning(f"Pinecone filter: {filter_dict}")
         results = await self.pinecone.query_vectors(
             vector=embedding,
-            top_k=top_k * 2,  # Get more results for reranking
+            top_k=top_k * 2,
             filter=filter_dict,
             include_metadata=True
         )
+        logging.warning(f"Pinecone results: {len(results)} matches")
         
         # Convert to SearchResult objects
         search_results = []
