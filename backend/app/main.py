@@ -10,6 +10,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="Permission-Aware Enterprise Knowledge System",
     version="0.1.0",
+    redirect_slashes=False,
 )
 
 # CORS
