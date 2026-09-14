@@ -86,7 +86,7 @@ class ApiClient {
 
   // Query endpoints
   async query(question: string, context?: string) {
-    return this.request<QueryResponse>("/api/query/", {
+    return this.request<QueryResponse>("/api/query", {
       method: "POST",
       body: { question, context },
     });
@@ -94,7 +94,7 @@ class ApiClient {
 
   // Document endpoints
   async listDocuments() {
-    return this.request<Document[]>("/api/documents/");
+    return this.request<Document[]>("/api/documents");
   }
 
   async getDocument(id: string) {
