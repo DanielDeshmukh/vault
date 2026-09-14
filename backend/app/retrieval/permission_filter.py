@@ -67,7 +67,6 @@ class PermissionFilter:
         conditions.append({
             "$or": [
                 {"owner_id": {"$eq": str(user.id)}},
-                {"owner_id": {"$eq": None}},
                 {"owner_id": {"$eq": ""}}
             ]
         })
