@@ -26,7 +26,7 @@ class DocumentResponse(BaseModel):
         from_attributes = True
 
 
-@router.get("/", response_model=list[DocumentResponse])
+@router.get("", response_model=list[DocumentResponse])
 async def list_documents(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
