@@ -42,7 +42,7 @@ class PermissionFilter:
         
         # 1. Access level filter - user can only see documents at or below their max level
         conditions.append({
-            "access_level": {"$lte": max_level}
+            "access_level": {"$lte": int(max_level)}
         })
         
         # 2. Account filter - if user has specific account access
