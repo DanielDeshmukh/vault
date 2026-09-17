@@ -1,6 +1,6 @@
 "use client";
 
-import { Sidebar } from "@/components/layout/sidebar";
+import { Sidebar, SidebarProvider } from "@/components/layout/sidebar";
 
 export default function DashboardLayout({
   children,
@@ -8,9 +8,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <main className="flex-1 overflow-auto lg:pt-0 pt-14 min-w-0">{children}</main>
+      </div>
+    </SidebarProvider>
   );
 }

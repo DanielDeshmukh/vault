@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { api, QueryResponse, Citation } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSidebar } from "@/components/layout/sidebar";
 
 export default function QueryPage() {
   const [question, setQuestion] = useState("");
@@ -12,10 +13,34 @@ export default function QueryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toggleCollapsed } = useSidebar();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K or Cmd+K - focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      // Ctrl+B or Cmd+B - toggle sidebar
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        toggleCollapsed();
+      }
+      // Escape - blur search
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [toggleCollapsed]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +76,10 @@ export default function QueryPage() {
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="flex gap-3">
             <Input
+              ref={inputRef}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask a question about your documents..."
+              placeholder="Ask a question... (Ctrl+K)"
               className="flex-1 h-11"
               disabled={loading}
             />
