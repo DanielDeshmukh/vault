@@ -114,16 +114,18 @@ function SidebarContent({ user, pathname, onLogout, collapsed }: { user: User | 
         )}
       </nav>
 
-      {user && !collapsed && (
+      {user && (
         <div className="border-t border-border p-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-sm font-medium text-ink-muted">
+          <div className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}>
+            <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-sm font-medium text-ink-muted flex-shrink-0">
               {user.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{user.full_name}</p>
-              <p className="text-xs text-ink-tertiary truncate">{user.email}</p>
-            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{user.full_name}</p>
+                <p className="text-xs text-ink-tertiary truncate">{user.email}</p>
+              </div>
+            )}
             <button onClick={onLogout} className="p-1.5 rounded-md text-ink-tertiary hover:text-foreground hover:bg-surface-2 transition-colors" title="Sign out">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
