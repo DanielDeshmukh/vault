@@ -174,6 +174,7 @@ export interface Document {
   account_id?: string;
   department?: string;
   access_level: number;
+  content?: string;
 }
 
 export const api = new ApiClient(API_URL);

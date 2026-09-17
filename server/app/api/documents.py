@@ -21,9 +21,26 @@ class DocumentResponse(BaseModel):
     access_level: int
     owner_id: Optional[str] = None
     created_at: Optional[str] = None
+    content: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+ACCESS_LEVEL_MAP = {
+    "public": 0,
+    "internal": 1,
+    "confidential": 2,
+    "restricted": 3,
+}
+
+def user_access_level(user: User) -> int:
+    if user.is_admin:
+        return 3
+    if user.roles:
+        highest = max(ACCESS_LEVEL_MAP.get(r.name.lower(), 0) for r in user.roles)
+        return highest
+    return 0
 
 
 @router.get("", response_model=list[DocumentResponse])
@@ -65,6 +82,12 @@ async def get_document(
         raise HTTPException(status_code=404, detail="Document not found")
     if doc.owner_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Access denied")
+
+    user_level = user_access_level(current_user)
+    if user_level < doc.access_level:
+        raise HTTPException(status_code=403, detail="Insufficient access level for this document")
+
+    content = doc.content if user_level >= doc.access_level else None
     return DocumentResponse(
         id=str(doc.id),
         title=doc.title,
@@ -74,6 +97,7 @@ async def get_document(
         access_level=doc.access_level,
         owner_id=str(doc.owner_id) if doc.owner_id else None,
         created_at=doc.created_at.isoformat() if doc.created_at else None,
+        content=content,
     )
 
 
