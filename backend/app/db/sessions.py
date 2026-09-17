@@ -28,6 +28,8 @@ engine = create_async_engine(
     echo=settings.DEBUG,
     future=True,
     connect_args=_connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300,
 )
 
 async_session = async_sessionmaker(

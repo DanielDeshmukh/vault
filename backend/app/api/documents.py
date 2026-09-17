@@ -31,9 +31,12 @@ async def list_documents(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Document).where(Document.owner_id == current_user.id).order_by(Document.created_at.desc())
-    )
+    if current_user.is_admin:
+        result = await db.execute(select(Document).order_by(Document.created_at.desc()))
+    else:
+        result = await db.execute(
+            select(Document).where(Document.owner_id == current_user.id).order_by(Document.created_at.desc())
+        )
     docs = result.scalars().all()
     return [
         DocumentResponse(
