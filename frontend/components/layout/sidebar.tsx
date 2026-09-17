@@ -60,33 +60,24 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 border-r border-border bg-surface-1 flex flex-col">
-      {/* Logo */}
       <div className="flex h-14 items-center border-b border-border px-4">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
           <span className="font-bold font-display text-lg tracking-tight">Vault</span>
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
-        <div className="mb-3">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary/60 mb-1">
-            General
-          </p>
-        </div>
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary mb-1">
+          General
+        </p>
         {navigation.map((item) => (
           <Link
             key={item.name}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               pathname === item.href
-                ? "bg-surface-2 text-foreground shadow-sm"
+                ? "bg-surface-2 text-foreground"
                 : "text-ink-muted hover:bg-surface-2/50 hover:text-foreground"
             )}
           >
@@ -102,19 +93,17 @@ export function Sidebar() {
 
         {user?.is_admin && (
           <>
-            <div className="pt-4 pb-2">
-              <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary/60 mb-1">
-                Admin
-              </p>
-            </div>
+            <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary">
+              Admin
+            </p>
             {adminNavigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   pathname === item.href
-                    ? "bg-surface-2 text-foreground shadow-sm"
+                    ? "bg-surface-2 text-foreground"
                     : "text-ink-muted hover:bg-surface-2/50 hover:text-foreground"
                 )}
               >
@@ -131,11 +120,10 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* User Section */}
       {user && (
         <div className="border-t border-border p-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+            <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-sm font-medium text-ink-muted">
               {user.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div className="flex-1 min-w-0">
