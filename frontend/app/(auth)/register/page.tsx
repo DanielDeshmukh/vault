@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ROLES = [
-  { value: "Public", label: "Public - Basic access" },
-  { value: "Internal", label: "Internal - Company-wide access" },
-  { value: "Confidential", label: "Confidential - Sensitive data" },
-  { value: "Restricted", label: "Restricted - Limited access" },
-];
-
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -22,7 +15,7 @@ export default function RegisterPage() {
     password: "",
     full_name: "",
     department: "",
-    role_name: "Internal",
+    designation: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,7 +35,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -60,6 +53,10 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
+
+            <div className="p-3 rounded-md bg-muted/50 border border-border text-sm text-muted-foreground">
+              Your account will be reviewed by an admin before you can access the system.
+            </div>
 
             <div className="space-y-2">
               <label htmlFor="full_name" className="text-sm font-medium text-foreground">
@@ -105,22 +102,17 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="role_name" className="text-sm font-medium text-foreground">
-                Role
+              <label htmlFor="designation" className="text-sm font-medium text-foreground">
+                Designation
               </label>
-              <select
-                id="role_name"
-                name="role_name"
-                value={formData.role_name}
+              <Input
+                id="designation"
+                name="designation"
+                value={formData.designation}
                 onChange={handleChange}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                {ROLES.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+                required
+                placeholder="Software Engineer, HR Manager, Intern..."
+              />
             </div>
 
             <div className="space-y-2">

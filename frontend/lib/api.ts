@@ -58,7 +58,7 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async register(data: { email: string; password: string; full_name: string; department: string; role_name: string }) {
+  async register(data: { email: string; password: string; full_name: string; department: string; designation: string }) {
     const response = await this.request<{ access_token: string; user: User }>("/api/auth/register", {
       method: "POST",
       body: data,
@@ -73,6 +73,9 @@ class ApiClient {
       body: data,
     });
     this.setToken(response.access_token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vault_user", JSON.stringify(response.user));
+    }
     return response;
   }
 
@@ -82,6 +85,37 @@ class ApiClient {
 
   logout() {
     this.setToken(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("vault_user");
+    }
+  }
+
+  // Admin endpoints
+  async adminListUsers() {
+    return this.request<AdminUser[]>("/api/admin/users");
+  }
+
+  async adminAssignRole(userId: string, roleName: string) {
+    return this.request(`/api/admin/users/${userId}/role`, {
+      method: "PUT",
+      body: { role_name: roleName },
+    });
+  }
+
+  async adminApproveUser(userId: string) {
+    return this.request(`/api/admin/users/${userId}/approve`, { method: "PUT" });
+  }
+
+  async adminRejectUser(userId: string) {
+    return this.request(`/api/admin/users/${userId}/reject`, { method: "PUT" });
+  }
+
+  async adminDeleteUser(userId: string) {
+    return this.request(`/api/admin/users/${userId}`, { method: "DELETE" });
+  }
+
+  async adminListRoles() {
+    return this.request<{ name: string; access_level: number; description: string }[]>("/api/admin/roles");
   }
 
   // Query endpoints
@@ -111,7 +145,13 @@ export interface User {
   email: string;
   full_name: string;
   department: string;
+  designation?: string;
   is_admin: boolean;
+  is_approved?: boolean;
+}
+
+export interface AdminUser extends User {
+  roles: string[];
 }
 
 export interface QueryResponse {

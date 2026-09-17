@@ -23,7 +23,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
     department: str
-    role_name: Optional[str] = "Internal"
+    designation: Optional[str] = None
 
 
 class UserLogin(BaseModel):
@@ -36,7 +36,9 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     department: str
+    designation: Optional[str] = None
     is_admin: bool
+    is_approved: bool = True
     
     class Config:
         from_attributes = True
@@ -58,24 +60,16 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create user
+    # Create user (no role assigned — admin must approve)
     user = User(
         email=user_data.email,
         hashed_password=get_password_hash(user_data.password),
         full_name=user_data.full_name,
         department=user_data.department,
+        designation=user_data.designation,
+        is_approved=False,
     )
     db.add(user)
-    await db.flush()
-    
-    # Assign role
-    role_name = user_data.role_name or "Internal"
-    result = await db.execute(select(Role).where(Role.name == role_name))
-    role = result.scalar_one_or_none()
-    if role:
-        user_role = UserRole(user_id=user.id, role_id=role.id)
-        db.add(user_role)
-    
     await db.commit()
     await db.refresh(user)
     
@@ -92,7 +86,9 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             email=user.email,
             full_name=user.full_name,
             department=user.department,
+            designation=user.designation,
             is_admin=user.is_admin,
+            is_approved=user.is_approved,
         )
     )
 
@@ -126,7 +122,9 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             email=user.email,
             full_name=user.full_name,
             department=user.department,
+            designation=user.designation,
             is_admin=user.is_admin,
+            is_approved=user.is_approved,
         )
     )
 
@@ -138,5 +136,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         full_name=current_user.full_name,
         department=current_user.department,
+        designation=current_user.designation,
         is_admin=current_user.is_admin,
+        is_approved=current_user.is_approved,
     )

@@ -3,14 +3,30 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 const navigation = [
   { name: "Query", href: "/dashboard" },
   { name: "Documents", href: "/dashboard/documents" },
 ];
 
+const adminNavigation = [
+  { name: "Users", href: "/dashboard/admin/users" },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem("vault_user");
+    if (user) {
+      try {
+        const parsed = JSON.parse(user);
+        setIsAdmin(parsed.is_admin === true);
+      } catch {}
+    }
+  }, []);
 
   return (
     <aside className="w-64 border-r border-border bg-surface-1">
@@ -34,6 +50,27 @@ export function Sidebar() {
             {item.name}
           </Link>
         ))}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-2">
+              <p className="px-3 text-xs font-semibold uppercase text-ink-muted/60">Admin</p>
+            </div>
+            {adminNavigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-surface-2 text-foreground"
+                    : "text-ink-muted hover:bg-surface-2 hover:text-foreground"
+                )}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </>
+        )}
       </nav>
     </aside>
   );

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -49,6 +49,13 @@ async def query(
     """
     # Create trace
     trace = trace_logger.create_trace(current_user, request.question)
+    
+    # Check if user is approved and has a role
+    if not current_user.is_admin and not current_user.is_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is pending admin approval. You cannot query documents yet."
+        )
     
     try:
         start_time = datetime.utcnow()
