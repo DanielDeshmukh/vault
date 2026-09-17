@@ -199,7 +199,7 @@ export function Sidebar() {
 
       {/* Desktop sidebar */}
       <aside className={cn(
-        "hidden lg:flex flex-col h-screen sticky top-0 bg-surface-1 border-r border-border transition-all duration-200",
+        "hidden lg:flex flex-col min-h-screen bg-surface-1 border-r border-border transition-all duration-200 flex-shrink-0",
         collapsed ? "w-16" : "w-64"
       )}>
         <SidebarContent user={user} pathname={pathname} onLogout={handleLogout} collapsed={collapsed} />
