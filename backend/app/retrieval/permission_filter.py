@@ -22,6 +22,12 @@ class PermissionFilter:
         """
         Build a Pinecone filter based on user's permissions.
         
+        A document is accessible if ANY of these are true:
+        1. access_level <= user's max_level
+        2. owner_id == user.id
+        3. allowed_roles intersects user's roles (when allowed_roles is non-empty)
+        4. account_id is in user's allowed accounts (when applicable)
+        
         Args:
             user: The authenticated user
             
@@ -37,52 +43,22 @@ class PermissionFilter:
         allowed_accounts = await get_user_allowed_account_ids(user, self.db)
         allowed_roles = await get_user_allowed_role_names(user, self.db)
         
-        # Build filter conditions
-        conditions = []
-        
-        # 1. Access level filter OR owner match - user can see docs at their level OR their own docs
-        if allowed_accounts:
-            account_cond = {
-                "$or": [
-                    {"account_id": {"$in": allowed_accounts}},
-                    {"account_id": {"$eq": "internal"}}
-                ]
-            }
-        else:
-            account_cond = None
-        
-        # 2. Combined: (access_level <= max OR owner_id == user.id)
+        # Build OR conditions for what the user CAN access
         or_conditions = [
             {"access_level": {"$lte": int(max_level)}},
-            {"owner_id": {"$eq": str(user.id)}}
+            {"owner_id": {"$eq": str(user.id)}},
         ]
-        if account_cond:
-            or_conditions.append(account_cond)
         
-        conditions.append({"$or": or_conditions})
+        # Add account filter if applicable
+        if allowed_accounts:
+            or_conditions.append({"account_id": {"$in": allowed_accounts}})
+            or_conditions.append({"account_id": {"$eq": "internal"}})
         
-        # 3. Role filter - if user has specific roles
+        # Add role filter if applicable
         if allowed_roles:
-            conditions.append({
-                "$or": [
-                    {"allowed_roles": {"$in": allowed_roles}},
-                    {"allowed_roles": {"$eq": []}}  # Empty = accessible to all with level
-                ]
-            })
+            or_conditions.append({"allowed_roles": {"$in": allowed_roles}})
         
-        # 4. Owner filter - user can always access their own documents
-        conditions.append({
-            "$or": [
-                {"owner_id": {"$eq": str(user.id)}},
-                {"owner_id": {"$eq": ""}}
-            ]
-        })
-        
-        # Combine all conditions
-        if len(conditions) == 1:
-            return conditions[0]
-        
-        return {"$and": conditions}
+        return {"$or": or_conditions}
     
     async def can_access_document(self, user: User, document_id: str) -> bool:
         """Check if a user can access a specific document."""
