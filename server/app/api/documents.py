@@ -22,6 +22,7 @@ class DocumentResponse(BaseModel):
     owner_id: Optional[str] = None
     created_at: Optional[str] = None
     content: Optional[str] = None
+    can_access: bool = True
 
     class Config:
         from_attributes = True
@@ -48,13 +49,9 @@ async def list_documents(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if current_user.is_admin:
-        result = await db.execute(select(Document).order_by(Document.created_at.desc()))
-    else:
-        result = await db.execute(
-            select(Document).where(Document.owner_id == current_user.id).order_by(Document.created_at.desc())
-        )
+    result = await db.execute(select(Document).order_by(Document.created_at.desc()))
     docs = result.scalars().all()
+    user_level = user_access_level(current_user)
     return [
         DocumentResponse(
             id=str(d.id),
@@ -65,6 +62,7 @@ async def list_documents(
             access_level=d.access_level,
             owner_id=str(d.owner_id) if d.owner_id else None,
             created_at=d.created_at.isoformat() if d.created_at else None,
+            can_access=user_level >= d.access_level,
         )
         for d in docs
     ]

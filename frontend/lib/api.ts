@@ -175,6 +175,7 @@ export interface Document {
   department?: string;
   access_level: number;
   content?: string;
+  can_access?: boolean;
 }
 
 export const api = new ApiClient(API_URL);
