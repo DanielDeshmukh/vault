@@ -4,9 +4,10 @@ from typing import Optional
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.auth.jwt import get_current_user
-from app.db.models import User, Document, DocumentChunk
+from app.db.models import User, UserRole, Role, Document, DocumentChunk
 from app.db.sessions import get_db
 
 router = APIRouter()
@@ -35,12 +36,17 @@ ACCESS_LEVEL_MAP = {
     "restricted": 3,
 }
 
-def user_access_level(user: User) -> int:
+async def user_access_level(user: User, db: AsyncSession) -> int:
     if user.is_admin:
         return 3
-    if user.roles:
-        highest = max(ACCESS_LEVEL_MAP.get(r.name.lower(), 0) for r in user.roles)
-        return highest
+    result = await db.execute(
+        select(Role.name)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == user.id)
+    )
+    role_names = [r[0].lower() for r in result.all()]
+    if role_names:
+        return max(ACCESS_LEVEL_MAP.get(r, 0) for r in role_names)
     return 0
 
 
@@ -51,7 +57,7 @@ async def list_documents(
 ):
     result = await db.execute(select(Document).order_by(Document.created_at.desc()))
     docs = result.scalars().all()
-    user_level = user_access_level(current_user)
+    user_level = await user_access_level(current_user, db)
     return [
         DocumentResponse(
             id=str(d.id),
@@ -78,10 +84,8 @@ async def get_document(
     doc = result.scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    if doc.owner_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Access denied")
 
-    user_level = user_access_level(current_user)
+    user_level = await user_access_level(current_user, db)
     if user_level < doc.access_level:
         raise HTTPException(status_code=403, detail="Insufficient access level for this document")
 
@@ -109,8 +113,8 @@ async def delete_document(
     doc = result.scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    if doc.owner_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Access denied")
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Only admins can delete documents")
 
     # Delete chunks first
     chunks_result = await db.execute(
