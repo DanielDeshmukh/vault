@@ -59,7 +59,7 @@ class ApiClient {
 
   // Auth endpoints
   async register(data: { email: string; password: string; full_name: string; department: string; designation: string }) {
-    const response = await this.request<{ access_token: string; user: User }>("/api/auth/register", {
+    const response = await this.request<{ access_token: string; user: User }>("/api/backend/auth/register", {
       method: "POST",
       body: data,
     });
@@ -68,7 +68,7 @@ class ApiClient {
   }
 
   async login(data: { email: string; password: string }) {
-    const response = await this.request<{ access_token: string; user: User }>("/api/auth/login", {
+    const response = await this.request<{ access_token: string; user: User }>("/api/backend/auth/login", {
       method: "POST",
       body: data,
     });
@@ -80,7 +80,7 @@ class ApiClient {
   }
 
   async getMe() {
-    return this.request<User>("/api/auth/me");
+    return this.request<User>("/api/backend/auth/me");
   }
 
   logout() {
@@ -92,7 +92,7 @@ class ApiClient {
 
   // Admin endpoints
   async adminListUsers() {
-    return this.request<AdminUser[]>("/api/admin/users");
+    return this.request<AdminUser[]>("/api/backend/admin/users");
   }
 
   async adminAssignRole(userId: string, roleName: string) {
@@ -115,12 +115,12 @@ class ApiClient {
   }
 
   async adminListRoles() {
-    return this.request<{ name: string; access_level: number; description: string }[]>("/api/admin/roles");
+    return this.request<{ name: string; access_level: number; description: string }[]>("/api/backend/admin/roles");
   }
 
   // Query endpoints
   async query(question: string, context?: string) {
-    return this.request<QueryResponse>("/api/query", {
+    return this.request<QueryResponse>("/api/backend/query", {
       method: "POST",
       body: { question, context },
     });
@@ -128,7 +128,7 @@ class ApiClient {
 
   // Document endpoints
   async listDocuments() {
-    return this.request<Document[]>("/api/documents");
+    return this.request<Document[]>("/api/backend/documents");
   }
 
   async getDocument(id: string) {
