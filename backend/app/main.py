@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.api.router import api_router
-from app.db.sessions import engine, Base
+from app.db.sessions import engine, Base, async_session
 from sqlalchemy import select
 
 
@@ -37,13 +37,17 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # Seed real-world public documents (government handbooks, NIST, CISA)
-    from scripts.seed_real_data import seed_real_data
-    try:
-        await seed_real_data()
-    except Exception as e:
-        import logging
-        logging.warning(f"Seed error (non-fatal): {e}")
+    # Seed real-world public documents (runs locally, not on Vercel)
+    # On Vercel, data persists in Neon DB from local seed
+    # To seed locally: cd backend && python -m scripts.seed_local
+    from sqlalchemy import select, func
+    from app.db.models import User
+    async with async_session() as session:
+        result = await session.execute(select(func.count(User.id)))
+        user_count = result.scalar()
+        if not user_count or user_count == 0:
+            import logging
+            logging.warning("No users found. Run: cd backend && python -m scripts.seed_local")
 
     # Ensure Pinecone index has correct dimension (1024 for Cohere embed-english-v3.0)
     from app.db.pinecone import pinecone_client
