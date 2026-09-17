@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   description: "Permission-aware enterprise knowledge retrieval",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/vault-icon.png",
+    apple: "/vault-icon.png",
   },
   appleWebApp: {
     capable: true,
