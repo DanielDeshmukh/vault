@@ -14,14 +14,6 @@
       "dest": "/api/index.py"
     },
     {
-      "src": "/health",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
       "handle": "filesystem"
     },
     {
