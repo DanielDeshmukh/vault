@@ -3,9 +3,23 @@
 import { useEffect, useState } from "react";
 import { api, AdminUser } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ROLES = ["Public", "Internal", "Confidential", "Restricted"];
+
+const ROLE_COLORS: Record<string, string> = {
+  Public: "bg-surface-3 text-ink-muted",
+  Internal: "bg-blue-500/15 text-blue-400",
+  Confidential: "bg-amber-500/15 text-amber-400",
+  Restricted: "bg-red-500/15 text-red-400",
+};
+
+function RoleBadge({ role }: { role: string }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${ROLE_COLORS[role] || "bg-surface-3 text-ink-muted"}`}>
+      {role}
+    </span>
+  );
+}
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -81,9 +95,9 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-bold font-display">User Management</h1>
+        <h1 className="text-xl md:text-2xl font-bold font-display">User Management</h1>
         <p className="text-sm text-ink-muted mt-1">Review registrations and assign roles</p>
       </div>
 
@@ -95,91 +109,114 @@ export default function AdminUsersPage() {
       )}
 
       {/* Pending Approvals */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
-            Pending Approval
-            {pendingUsers.length > 0 && (
-              <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
-                {pendingUsers.length}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pendingUsers.length === 0 ? (
-            <p className="text-sm text-ink-muted">No pending registrations</p>
-          ) : (
-            <div className="space-y-3">
-              {pendingUsers.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  assigning={assigning}
-                  onAssignRole={handleAssignRole}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                  onDelete={handleDelete}
-                  showApproval
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <Section
+        title="Pending Approval"
+        count={pendingUsers.length}
+        countColor="bg-yellow-500/15 text-yellow-400"
+        empty="No pending registrations"
+      >
+        {pendingUsers.map((user) => (
+          <UserCard
+            key={user.id}
+            user={user}
+            assigning={assigning}
+            onAssignRole={handleAssignRole}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onDelete={handleDelete}
+            showApproval
+          />
+        ))}
+      </Section>
 
       {/* Active Users */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Active Users ({approvedUsers.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {approvedUsers.length === 0 ? (
-            <p className="text-sm text-ink-muted">No active users</p>
-          ) : (
-            <div className="space-y-3">
-              {approvedUsers.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  assigning={assigning}
-                  onAssignRole={handleAssignRole}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <Section
+        title="Active Users"
+        count={approvedUsers.length}
+        empty="No active users"
+      >
+        {approvedUsers.map((user) => (
+          <UserCard
+            key={user.id}
+            user={user}
+            assigning={assigning}
+            onAssignRole={handleAssignRole}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onDelete={handleDelete}
+          />
+        ))}
+      </Section>
 
-      {/* Admin Users */}
+      {/* Admins */}
       {adminUsers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Admins</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {adminUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg bg-surface-2">
-                  <div>
-                    <p className="font-medium">{user.full_name}</p>
-                    <p className="text-sm text-ink-muted">{user.email}</p>
-                  </div>
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">Admin</span>
-                </div>
-              ))}
+        <Section title="Admins" count={adminUsers.length} empty="No admins">
+          {adminUsers.map((user) => (
+            <div key={user.id} className="flex items-center gap-3 p-3 rounded-lg bg-surface-2 border border-border">
+              <Avatar name={user.full_name} />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{user.full_name}</p>
+                <p className="text-xs text-ink-muted truncate">{user.email}</p>
+              </div>
+              <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded font-medium">Admin</span>
             </div>
-          </CardContent>
-        </Card>
+          ))}
+        </Section>
       )}
     </div>
   );
 }
 
-function UserRow({
+function Section({
+  title,
+  count,
+  countColor,
+  empty,
+  children,
+}: {
+  title: string;
+  count: number;
+  countColor?: string;
+  empty: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-surface-1 overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        {count > 0 && (
+          <span className={`text-xs px-1.5 py-0.5 rounded ${countColor || "bg-surface-3 text-ink-muted"}`}>
+            {count}
+          </span>
+        )}
+      </div>
+      <div className="p-4 space-y-2">
+        {count === 0 ? (
+          <p className="text-sm text-ink-muted">{empty}</p>
+        ) : (
+          children
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Avatar({ name }: { name: string }) {
+  const initials = name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "?";
+
+  return (
+    <div className="w-9 h-9 rounded-full bg-surface-3 flex items-center justify-center text-xs font-medium text-ink-muted flex-shrink-0">
+      {initials}
+    </div>
+  );
+}
+
+function UserCard({
   user,
   assigning,
   onAssignRole,
@@ -199,33 +236,38 @@ function UserRow({
   const currentRole = user.roles[0] || "None";
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg bg-surface-2 border border-border">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium truncate">{user.full_name}</p>
-          {!user.is_approved && (
-            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Pending</span>
-          )}
-        </div>
-        <p className="text-sm text-ink-muted">{user.email}</p>
-        <div className="flex items-center gap-3 mt-1 text-xs text-ink-muted">
-          <span>{user.department}</span>
-          {user.designation && (
-            <>
-              <span>·</span>
-              <span className="text-primary">{user.designation}</span>
-            </>
-          )}
+    <div className="rounded-lg bg-surface-2 border border-border p-3 md:p-4">
+      {/* Top row: avatar + info + role badge */}
+      <div className="flex items-start gap-3">
+        <Avatar name={user.full_name} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-medium truncate text-sm">{user.full_name}</p>
+            {!user.is_approved && (
+              <span className="text-xs bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded">Pending</span>
+            )}
+            {currentRole !== "None" && <RoleBadge role={currentRole} />}
+          </div>
+          <p className="text-xs text-ink-muted truncate">{user.email}</p>
+          <div className="flex items-center gap-2 mt-1 text-xs text-ink-tertiary">
+            <span>{user.department}</span>
+            {user.designation && (
+              <>
+                <span className="text-border">|</span>
+                <span>{user.designation}</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 ml-4">
-        {/* Role selector */}
+      {/* Bottom row: controls */}
+      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50 flex-wrap">
         <select
           value={currentRole}
           onChange={(e) => onAssignRole(user.id, e.target.value)}
           disabled={assigning === user.id}
-          className="rounded-md border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring min-w-0 flex-1 sm:flex-none sm:w-auto"
         >
           <option value="None">No Role</option>
           {ROLES.map((r) => (
@@ -233,35 +275,21 @@ function UserRow({
           ))}
         </select>
 
-        {showApproval && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onApprove(user.id)}
-              className="text-green-400 border-green-400/30 hover:bg-green-400/10"
-            >
-              Approve
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onReject(user.id)}
-              className="text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/10"
-            >
-              Reject
-            </Button>
-          </>
-        )}
-
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onDelete(user.id)}
-          className="text-destructive border-destructive/30 hover:bg-destructive/10"
-        >
-          Delete
-        </Button>
+        <div className="flex items-center gap-1.5 ml-auto">
+          {showApproval && (
+            <>
+              <Button size="sm" variant="outline" onClick={() => onApprove(user.id)} className="text-green-400 border-green-400/30 hover:bg-green-400/10 h-7 text-xs px-2">
+                Approve
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => onReject(user.id)} className="text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/10 h-7 text-xs px-2">
+                Reject
+              </Button>
+            </>
+          )}
+          <Button size="sm" variant="outline" onClick={() => onDelete(user.id)} className="text-destructive border-destructive/30 hover:bg-destructive/10 h-7 text-xs px-2">
+            Delete
+          </Button>
+        </div>
       </div>
     </div>
   );
