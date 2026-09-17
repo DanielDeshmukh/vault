@@ -111,7 +111,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-4xl">
+    <div className="p-4 md:p-6 space-y-6 w-full overflow-hidden">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-bold font-display">Documents</h1>
@@ -144,9 +144,9 @@ export default function DocumentsPage() {
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="rounded-lg border border-border bg-surface-1 p-4 hover:border-border/80 transition-colors"
+              className="rounded-lg border border-border bg-surface-1 p-4 hover:border-border/80 transition-colors overflow-hidden"
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 overflow-hidden">
                 <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0">
                   {doc.can_access === false ? (
                     <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -158,27 +158,23 @@ export default function DocumentsPage() {
                     </svg>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-2">
                     <p className="font-medium text-sm truncate">{doc.title}</p>
-                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${LEVEL_COLORS[doc.access_level] || LEVEL_COLORS[0]}`}>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0 ${LEVEL_COLORS[doc.access_level] || LEVEL_COLORS[0]}`}>
                       {LEVEL_LABELS[doc.access_level] || "Unknown"}
                     </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-ink-tertiary">
-                    <span>{doc.source.toUpperCase()}</span>
-                    {doc.department && (
-                      <>
-                        <span className="text-border">|</span>
-                        <span>{doc.department}</span>
-                      </>
-                    )}
-                    {doc.account_id && doc.account_id !== "unknown" && (
-                      <>
-                        <span className="text-border">|</span>
-                        <span>{doc.account_id}</span>
-                      </>
-                    )}
+                    <div className="flex items-center gap-1.5 text-[11px] text-ink-tertiary truncate">
+                      <span>{doc.source.toUpperCase()}</span>
+                      {doc.department && (
+                        <>
+                          <span className="text-border">|</span>
+                          <span className="truncate">{doc.department}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
