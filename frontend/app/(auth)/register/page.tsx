@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+const ROLES = [
+  { value: "Public", label: "Public - Basic access" },
+  { value: "Internal", label: "Internal - Company-wide access" },
+  { value: "Confidential", label: "Confidential - Sensitive data" },
+  { value: "Restricted", label: "Restricted - Limited access" },
+];
+
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -15,6 +22,7 @@ export default function RegisterPage() {
     password: "",
     full_name: "",
     department: "",
+    role_name: "Internal",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +42,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -94,6 +102,25 @@ export default function RegisterPage() {
                 required
                 placeholder="Support, Engineering, Sales..."
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="role_name" className="text-sm font-medium text-foreground">
+                Role
+              </label>
+              <select
+                id="role_name"
+                name="role_name"
+                value={formData.role_name}
+                onChange={handleChange}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {ROLES.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">

@@ -58,7 +58,7 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async register(data: { email: string; password: string; full_name: string; department: string }) {
+  async register(data: { email: string; password: string; full_name: string; department: string; role_name: string }) {
     const response = await this.request<{ access_token: string; user: User }>("/api/auth/register", {
       method: "POST",
       body: data,

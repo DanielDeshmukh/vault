@@ -23,6 +23,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
     department: str
+    role_name: Optional[str] = "Internal"
 
 
 class UserLogin(BaseModel):
@@ -67,8 +68,9 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
     
-    # Assign default role (Internal)
-    result = await db.execute(select(Role).where(Role.name == "Internal"))
+    # Assign role
+    role_name = user_data.role_name or "Internal"
+    result = await db.execute(select(Role).where(Role.name == role_name))
     role = result.scalar_one_or_none()
     if role:
         user_role = UserRole(user_id=user.id, role_id=role.id)
