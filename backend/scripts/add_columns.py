@@ -1,8 +1,11 @@
+import os
 import psycopg2
 
-conn = psycopg2.connect(
-    'postgresql://neondb_owner:npg_vVxtn09FaNrY@ep-bold-lab-a53tkz2z.us-east-2.aws.neon.tech/neondb?sslmode=require'
-)
+db_url = os.environ.get("DATABASE_URL")
+if not db_url:
+    raise RuntimeError("DATABASE_URL not set")
+
+conn = psycopg2.connect(db_url.replace("postgresql://", "postgresql+psycopg2://"))
 cur = conn.cursor()
 
 cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='users'")
