@@ -5,6 +5,7 @@ from app.config import settings
 from app.api.router import api_router
 from app.db.sessions import engine, Base, async_session
 from sqlalchemy import select
+from pinecone import Pinecone
 
 
 app = FastAPI(
@@ -80,41 +81,46 @@ async def recreate_index():
 @app.get("/debug/pinecone")
 async def debug_pinecone():
     """Debug Pinecone connection - returns config and test query results."""
-    from app.db.pinecone import pinecone_client
+    import os
     import cohere
 
-    host = getattr(settings, "PINECONE_INDEX_HOST", None)
-    api_key_preview = settings.PINECONE_API_KEY[:15] + "..." if settings.PINECONE_API_KEY else "EMPTY"
-    index_name = settings.PINECONE_INDEX_NAME
+    raw_key = os.environ.get("PINECONE_API_KEY", "NOT_SET")
+    raw_host = os.environ.get("PINECONE_INDEX_HOST", "NOT_SET")
+    raw_index = os.environ.get("PINECONE_INDEX_NAME", "NOT_SET")
 
     info = {
-        "api_key_preview": api_key_preview,
-        "index_name": index_name,
-        "host": host,
+        "env_key_preview": raw_key[:15] + "..." if raw_key != "NOT_SET" else "NOT_SET",
+        "env_host": raw_host,
+        "env_index_name": raw_index,
+        "settings_key_preview": settings.PINECONE_API_KEY[:15] + "..." if settings.PINECONE_API_KEY else "EMPTY",
+        "settings_host": settings.PINECONE_INDEX_HOST,
     }
 
+    from app.db.pinecone import PineconeClient
     try:
-        existing = [idx.name for idx in pinecone_client.client.list_indexes()]
-        info["existing_indexes"] = existing
-    except Exception as e:
-        info["list_indexes_error"] = str(e)
+        pc = PineconeClient()
+        raw_api_key = os.environ.get("PINECONE_API_KEY", "")
+        pc_client = Pinecone(api_key=raw_api_key)
+        existing = [idx.name for idx in pc_client.list_indexes()]
+        info["direct_indexes"] = existing
 
-    try:
-        idx = pinecone_client.index
+        host = raw_host
+        if host:
+            idx = pc_client.Index(raw_index, host=host)
+        else:
+            idx = pc_client.Index(raw_index)
+
         stats = idx.describe_index_stats()
         info["vector_count"] = stats.get("total_vector_count", "unknown")
-    except Exception as e:
-        info["index_error"] = str(e)
 
-    try:
-        co = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
+        co = cohere.ClientV2(api_key=os.environ.get("COHERE_API_KEY", ""))
         resp = co.embed(texts=["test"], model="embed-english-v3.0", input_type="search_query")
         embedding = resp.embeddings.float[0]
         info["embedding_dim"] = len(embedding)
 
-        results = pinecone_client.index.query(vector=embedding, top_k=2, include_metadata=True)
+        results = idx.query(vector=embedding, top_k=2, include_metadata=True)
         info["direct_query_matches"] = len(results.get("matches", []))
     except Exception as e:
-        info["query_error"] = str(e)
+        info["error"] = str(e)
 
     return info
