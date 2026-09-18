@@ -1,46 +1,24 @@
 {
-  "name": "Vault",
+  "name": "Vault - Enterprise Knowledge System",
   "short_name": "Vault",
-  "description": "Permission-Aware Enterprise Knowledge System",
+  "description": "Permission-aware enterprise knowledge retrieval with RBAC, hybrid search, AI-powered answers, and document management.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#010102",
   "theme_color": "#5e6ad2",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["productivity", "business", "utilities"],
   "icons": [
     {
-      "src": "/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png"
+      "src": "/vault-logo-v2.png",
+      "sizes": "310x310",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-384.png",
-      "sizes": "384x384",
       "type": "image/png"
     },
     {
