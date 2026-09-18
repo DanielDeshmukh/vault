@@ -92,6 +92,8 @@ backend/.ruff_cache/
 .env
 .env.local
 .env.*.local
+.env*
+env.*
+secrets/
 
 .vercel
-.env*
