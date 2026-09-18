@@ -117,9 +117,25 @@ async def query(
             trace_id=trace.trace_id
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         trace_logger.log_error(trace, str(e))
-        raise
+        msg = str(e).lower()
+        if "429" in msg or "rate" in msg or "too many" in msg:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded. Please try again later."
+            )
+        if "pinecone" in msg or "vector" in msg:
+            raise HTTPException(
+                status_code=503,
+                detail="Search service temporarily unavailable. Please try again later."
+            )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Query failed: {str(e)[:200]}"
+        )
 
 
 @router.get("/trace/{trace_id}")
