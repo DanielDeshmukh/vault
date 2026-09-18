@@ -157,9 +157,9 @@ export default function QueryPage() {
             <div className="text-center mb-10">
               <div className="inline-flex items-center justify-center mb-5">
                 <img
-                  src="/icon-384.png"
+                  src="/tab-icon.png"
                   alt="Vault"
-                  className="w-16 h-16 rounded-2xl"
+                  className="w-20 h-20 rounded-3xl"
                 />
               </div>
               <h1 className="text-2xl font-semibold text-foreground mb-1.5 font-display">
@@ -298,10 +298,8 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
       {/* Answer */}
       <div className="flex gap-3">
         {/* Avatar */}
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5">
-          <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg overflow-hidden mt-0.5">
+          <img src="/tab-icon.png" alt="Vault" className="w-full h-full object-cover" />
         </div>
 
         <div className="flex-1 min-w-0">

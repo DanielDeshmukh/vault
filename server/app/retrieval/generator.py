@@ -62,14 +62,14 @@ Answer using ONLY the provided sources. Cite sources with [document_id] inline."
         query: str,
         results: list[SearchResult]
     ) -> AsyncGenerator[str, None]:
-        """Yield text chunks as they are generated. Citations extracted at end."""
         messages = self._build_messages(query, results)
         for event in self.client.chat_stream(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
         ):
-            if event.event_type == "content-delta":
-                yield event.delta.message.content.text
+            if hasattr(event, "type") and event.type == "content-delta":
+                if hasattr(event, "delta") and event.delta and hasattr(event.delta, "text"):
+                    yield event.delta.text
 
     def _build_context(self, results: list[SearchResult]) -> str:
         context_parts = []
