@@ -20,6 +20,8 @@ class PineconeClient:
     def index(self):
         if self._index is None:
             host = getattr(settings, "PINECONE_INDEX_HOST", None)
+            import logging
+            logging.warning(f"Pinecone init: name={settings.PINECONE_INDEX_NAME}, host={host}, api_key={settings.PINECONE_API_KEY[:10]}...")
             if host:
                 self._index = self.client.Index(settings.PINECONE_INDEX_NAME, host=host)
             else:
