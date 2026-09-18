@@ -1,4 +1,23 @@
 import os
+from dotenv import load_dotenv
+
+
+def _load_production_env():
+    """Load env.production file (bundled in deployment) to override stale Vercel env vars."""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "env.production"),
+        os.path.join(os.getcwd(), "server", "env.production"),
+        os.path.join(os.getcwd(), "env.production"),
+    ]
+    for p in candidates:
+        if os.path.isfile(p):
+            load_dotenv(p, override=True)
+            return p
+    return None
+
+
+_load_production_env()
+
 from pydantic_settings import BaseSettings
 
 

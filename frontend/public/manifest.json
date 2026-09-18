@@ -11,7 +11,7 @@
   "categories": ["productivity", "business", "utilities"],
   "icons": [
     {
-      "src": "/vault-logo-v2.png",
+      "src": "/vault-icon.png",
       "sizes": "310x310",
       "type": "image/png",
       "purpose": "any"

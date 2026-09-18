@@ -69,19 +69,8 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/vault-logo-v2.png", sizes: "310x310", type: "image/png" },
-    ],
-    apple: "/vault-logo-v2.png",
-    other: [
-      {
-        rel: "icon",
-        url: "/vault-logo-v2.png",
-        sizes: "310x310",
-        type: "image/png",
-      },
-    ],
+    icon: "/vault-icon.png",
+    apple: "/vault-icon.png",
   },
   appleWebApp: {
     capable: true,
@@ -90,10 +79,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
-  other: {
-    "msapplication-TileColor": "#5e6ad2",
-    "msapplication-TileImage": "/vault-logo-v2.png",
   },
 };
 
@@ -113,9 +98,6 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/vault-logo-v2.png" sizes="310x310" />
-        <link rel="apple-touch-icon" href="/vault-logo-v2.png" />
       </head>
       <body className={`${inter.variable} font-body antialiased`}>{children}</body>
     </html>
