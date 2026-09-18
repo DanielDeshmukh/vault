@@ -77,7 +77,7 @@ class HybridSearch:
         if use_reranker and len(search_results) > 0:
             from app.retrieval.reranker import CohereReranker
             reranker = CohereReranker()
-            search_results = await reranker.rerank(query, search_results, top_k)
+            search_results = await reranker.rerank_safe(query, search_results, top_k)
         
         return search_results[:top_k]
     
