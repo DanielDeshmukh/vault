@@ -68,8 +68,12 @@ Answer using ONLY the provided sources. Cite sources with [document_id] inline."
             messages=messages,
         ):
             if hasattr(event, "type") and event.type == "content-delta":
-                if hasattr(event, "delta") and event.delta and hasattr(event.delta, "text"):
-                    yield event.delta.text
+                try:
+                    text = event.delta.message.content.text
+                    if text:
+                        yield text
+                except (AttributeError, TypeError):
+                    pass
 
     def _build_context(self, results: list[SearchResult]) -> str:
         context_parts = []
