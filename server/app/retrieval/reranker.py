@@ -19,7 +19,7 @@ class CohereReranker:
         if not results:
             return []
 
-        documents = [r.content[:2000] for r in results]
+        documents = [r.content[:3000] for r in results]
 
         response = self.client.rerank(
             query=query,

@@ -70,7 +70,7 @@ async def query(
         results = await search.search(
             query=request.question,
             user=current_user,
-            top_k=5,
+            top_k=8,
             use_reranker=True
         )
         
@@ -162,7 +162,7 @@ async def query_stream(
             results = await search.search(
                 query=request.question,
                 user=current_user,
-                top_k=5,
+                top_k=8,
                 use_reranker=True
             )
 
