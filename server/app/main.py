@@ -79,40 +79,42 @@ async def recreate_index():
 
 @app.get("/debug/pinecone")
 async def debug_pinecone():
+    """Debug Pinecone connection - returns config and test query results."""
     from app.db.pinecone import pinecone_client
     import cohere
+
     host = getattr(settings, "PINECONE_INDEX_HOST", None)
     api_key_preview = settings.PINECONE_API_KEY[:15] + "..." if settings.PINECONE_API_KEY else "EMPTY"
     index_name = settings.PINECONE_INDEX_NAME
-    
+
     info = {
         "api_key_preview": api_key_preview,
         "index_name": index_name,
         "host": host,
     }
-    
+
     try:
         existing = [idx.name for idx in pinecone_client.client.list_indexes()]
         info["existing_indexes"] = existing
     except Exception as e:
         info["list_indexes_error"] = str(e)
-    
+
     try:
         idx = pinecone_client.index
         stats = idx.describe_index_stats()
         info["vector_count"] = stats.get("total_vector_count", "unknown")
     except Exception as e:
         info["index_error"] = str(e)
-    
+
     try:
         co = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
         resp = co.embed(texts=["test"], model="embed-english-v3.0", input_type="search_query")
         embedding = resp.embeddings.float[0]
         info["embedding_dim"] = len(embedding)
-        
+
         results = pinecone_client.index.query(vector=embedding, top_k=2, include_metadata=True)
         info["direct_query_matches"] = len(results.get("matches", []))
     except Exception as e:
         info["query_error"] = str(e)
-    
+
     return info

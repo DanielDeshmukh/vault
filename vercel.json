@@ -18,6 +18,10 @@
       "dest": "/api/index.py"
     },
     {
+      "src": "/debug/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
       "handle": "filesystem"
     },
     {
