@@ -1,25 +1,5 @@
 import os
-from dotenv import load_dotenv
-
-
-def _find_and_load_env():
-    """Load .env file from server directory BEFORE pydantic reads os.environ."""
-    candidates = [
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"),
-        os.path.join(os.getcwd(), "server", ".env"),
-        os.path.join(os.getcwd(), ".env"),
-    ]
-    for p in candidates:
-        if os.path.isfile(p):
-            load_dotenv(p, override=True)
-            return p
-    return None
-
-
-_find_and_load_env()
-
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -47,6 +27,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     class Config:
+        env_file = ".env"
         case_sensitive = True
         extra = "ignore"
 
