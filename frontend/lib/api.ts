@@ -126,6 +126,51 @@ class ApiClient {
     });
   }
 
+  async *queryStream(question: string): AsyncGenerator<StreamEvent, void, unknown> {
+    const token = this.getToken();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/query/stream`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ question }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: "An error occurred" }));
+      throw new Error(error.detail || "An error occurred");
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No response body");
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const event = JSON.parse(line.slice(6));
+            yield event as StreamEvent;
+          } catch {}
+        }
+      }
+    }
+  }
+
   // Document endpoints
   async listDocuments() {
     return this.request<Document[]>("/api/documents");
@@ -166,6 +211,13 @@ export interface Citation {
   source: string;
   score: number;
 }
+
+export type StreamEvent =
+  | { type: "sources"; sources: Citation[] }
+  | { type: "delta"; content: string }
+  | { type: "citations"; citations: Citation[] }
+  | { type: "done"; trace_id: string }
+  | { type: "error"; detail: string };
 
 export interface Document {
   id: string;

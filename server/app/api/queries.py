@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+import json
 
 from app.auth.jwt import get_current_user
 from app.db.models import User
@@ -138,7 +140,67 @@ async def query(
         )
 
 
-@router.get("/trace/{trace_id}")
+@router.post("/stream")
+async def query_stream(
+    request: QueryRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Stream query results as SSE events."""
+    trace = trace_logger.create_trace(current_user, request.question)
+
+    if not current_user.is_admin and not current_user.is_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is pending admin approval."
+        )
+
+    search = HybridSearch()
+    generator = CitationGenerator()
+
+    async def event_generator():
+        try:
+            results = await search.search(
+                query=request.question,
+                user=current_user,
+                top_k=5,
+                use_reranker=True
+            )
+
+            source_list = []
+            for r in results:
+                source_list.append({
+                    "document_id": r.metadata.get("document_id", ""),
+                    "title": r.metadata.get("title", "Untitled"),
+                    "source": r.metadata.get("source", "unknown"),
+                    "score": round(r.score, 4),
+                })
+
+            yield f"data: {json.dumps({'type': 'sources', 'sources': source_list})}\n\n"
+
+            full_answer = ""
+            async for chunk in generator.generate_stream(request.question, results):
+                full_answer += chunk
+                yield f"data: {json.dumps({'type': 'delta', 'content': chunk})}\n\n"
+
+            citations = generator.extract_citations(full_answer, results)
+            trace_logger.log_answer(trace, full_answer, citations, 0)
+
+            yield f"data: {json.dumps({'type': 'citations', 'citations': citations})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'trace_id': trace.trace_id})}\n\n"
+
+        except Exception as e:
+            trace_logger.log_error(trace, str(e))
+            yield f"data: {json.dumps({'type': 'error', 'detail': str(e)[:200]})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
 async def get_trace(
     trace_id: str,
     current_user: User = Depends(get_current_user)
