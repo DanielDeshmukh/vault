@@ -71,9 +71,9 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        display: ['Inter', 'SF Pro Display', '-apple-system', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'SF Pro Text', '-apple-system', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'monospace'],
+        display: ['var(--font-display)', 'Space Grotesk', 'sans-serif'],
+        body: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        mono: ['var(--font-mono)', 'Space Mono', 'monospace'],
       },
       keyframes: {
         "accordion-down": {
