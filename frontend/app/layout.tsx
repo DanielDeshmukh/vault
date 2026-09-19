@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     "Cohere AI",
     "vector search",
   ],
-  authors: [{ name: "Vault Team" }],
-  creator: "Vault",
+  authors: [{ name: "Daniel Deshmukh" }],
+  creator: "Daniel Deshmukh",
   publisher: "Vault",
   metadataBase: new URL(SITE_URL),
   openGraph: {
