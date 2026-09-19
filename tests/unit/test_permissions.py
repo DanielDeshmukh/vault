@@ -195,3 +195,29 @@ class TestPineconeFilterBuilding:
         # Restricted should have tight filters
         and_conditions = filter_dict["$and"]
         assert len(and_conditions) >= 2
+
+
+def test_expand_query_handles_topic_hints_without_crashing():
+    """Query expansion should turn list hints into a single string."""
+    from app.retrieval.search import expand_query
+
+    variants = expand_query("What are the paid vacation leave policies?")
+
+    assert variants
+    assert isinstance(variants[0], str)
+    assert any("vacation" in variant.lower() for variant in variants)
+
+
+def test_public_user_filter_restricts_to_public_level_only():
+    """Public users must not see internal, confidential, or restricted content."""
+    from app.auth.permissions import build_pinecone_filter
+
+    filter_dict = build_pinecone_filter(
+        max_access_level=0,
+        allowed_account_ids=[],
+        allowed_role_names=[],
+        user_id="public-user-id",
+    )
+
+    access_level_filter = filter_dict["$and"][0]
+    assert access_level_filter["access_level"]["$lte"] == 0

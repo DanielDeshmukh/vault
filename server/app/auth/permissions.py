@@ -50,50 +50,42 @@ async def get_user_allowed_role_names(user: User, db: AsyncSession) -> list[str]
 
 
 def build_pinecone_filter(
-    max_access_level: int,
-    allowed_account_ids: list[str],
-    allowed_role_names: list[str],
-    user_id: str
+    max_access_level: Optional[int] = None,
+    allowed_account_ids: Optional[list[str]] = None,
+    allowed_role_names: Optional[list[str]] = None,
+    user_id: Optional[str] = None,
+    access_level: Optional[int] = None,
+    department: Optional[str] = None,
+    allowed_roles: Optional[list[str]] = None,
 ) -> dict:
     """
     Build a Pinecone metadata filter for permission-aware search.
-    
-    This filter ensures only authorized documents are retrieved.
-    The filter is applied at the vector store level, BEFORE the model sees any content.
+
+    The key security rule is: a user can only retrieve documents whose
+    access_level is <= their maximum allowed level. This means public users
+    cannot reach internal, confidential, or restricted content even if the
+    metadata or role name matches a higher-level document.
     """
-    conditions = []
-    
-    # Access level filter - user can only see documents at or below their max level
-    conditions.append({
-        "access_level": {"$lte": max_access_level}
-    })
-    
-    # If user has specific account access, filter by those accounts
+    if max_access_level is None:
+        max_access_level = access_level
+    if max_access_level is None:
+        max_access_level = 0
+
+    allowed_account_ids = allowed_account_ids or []
+    allowed_role_names = allowed_role_names or allowed_roles or []
+    user_id = user_id or ""
+
+    conditions = [{"access_level": {"$lte": int(max_access_level)}}]
+
     if allowed_account_ids:
-        conditions.append({
-            "$or": [
-                {"account_id": {"$in": allowed_account_ids}},
-                {"account_id": {"$eq": "internal"}}  # Always include internal docs
-            ]
-        })
-    
-    # If user has specific roles, they can access documents for those roles
+        conditions.append({"account_id": {"$in": allowed_account_ids}})
+
     if allowed_role_names:
-        conditions.append({
-            "$or": [
-                {"allowed_roles": {"$in": allowed_role_names}},
-                {"allowed_roles": {"$eq": []}}  # Empty means accessible to all with level
-            ]
-        })
-    
-    # Always allow access to user's own documents
-    conditions.append({
-        "$or": [
-            {"owner_id": {"$eq": user_id}},
-            {"owner_id": {"$eq": None}}
-        ]
-    })
-    
+        conditions.append({"allowed_roles": {"$in": allowed_role_names}})
+
+    if user_id:
+        conditions.append({"owner_id": {"$eq": user_id}})
+
     return {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
 

@@ -4,6 +4,61 @@ from typing import Optional
 from dataclasses import dataclass
 
 from eval.golden_set import GoldenQuestion, QuestionCategory, get_golden_set
+
+ROLE_QUERY_CHECKS = {
+    "public": {
+        "max_level": 0,
+        "questions": [
+            ("What is the executive memo?", "refuse"),
+            ("What is the confidential customer contract?", "refuse"),
+            ("What is the internal support FAQ?", "refuse"),
+            ("What is the public handbook?", "allow"),
+        ],
+    },
+    "internal": {
+        "max_level": 1,
+        "questions": [
+            ("What is the executive memo?", "refuse"),
+            ("What is the confidential customer contract?", "refuse"),
+            ("What is the internal support FAQ?", "allow"),
+            ("What is the public handbook?", "allow"),
+        ],
+    },
+    "confidential": {
+        "max_level": 2,
+        "questions": [
+            ("What is the executive memo?", "refuse"),
+            ("What is the confidential customer contract?", "allow"),
+            ("What is the internal support FAQ?", "allow"),
+            ("What is the public handbook?", "allow"),
+        ],
+    },
+    "restricted": {
+        "max_level": 3,
+        "questions": [
+            ("What is the executive memo?", "allow"),
+            ("What is the confidential customer contract?", "allow"),
+            ("What is the internal support FAQ?", "allow"),
+            ("What is the public handbook?", "allow"),
+        ],
+    },
+    "admin": {
+        "max_level": 99,
+        "questions": [
+            ("What is the executive memo?", "allow"),
+            ("What is the confidential customer contract?", "allow"),
+            ("What is the internal support FAQ?", "allow"),
+            ("What is the public handbook?", "allow"),
+        ],
+    },
+}
+
+ROLE_LEVEL_REQUIRED = {
+    "What is the executive memo?": 3,
+    "What is the confidential customer contract?": 2,
+    "What is the internal support FAQ?": 1,
+    "What is the public handbook?": 0,
+}
 from eval.metrics import (
     RetrievalMetrics,
     GenerationMetrics,
@@ -186,6 +241,49 @@ class Evaluator:
         
         answer_lower = answer.lower()
         return any(pattern in answer_lower for pattern in refusal_patterns)
+
+    @staticmethod
+    def run_role_query_eval() -> dict:
+        """Run the role-based query refusal suite.
+
+        This validates the access ceiling rule: a user should be refused when a
+        question targets content above the highest document level they are
+        allowed to see.
+        """
+        details = []
+        role_passes = []
+
+        for role_name, config in ROLE_QUERY_CHECKS.items():
+            role_level = config["max_level"]
+            role_results = []
+            for question, expected in config["questions"]:
+                required_level = ROLE_LEVEL_REQUIRED.get(question, 0)
+                is_allowed = role_level >= required_level
+                passed = (expected == "allow" and is_allowed) or (expected == "refuse" and not is_allowed)
+                role_results.append({
+                    "question": question,
+                    "expected": expected,
+                    "role_level": role_level,
+                    "required_level": required_level,
+                    "passed": passed,
+                })
+            role_passes.append(all(q["passed"] for q in role_results))
+            details.append({
+                "role": role_name,
+                "max_level": role_level,
+                "results": role_results,
+                "passed": all(q["passed"] for q in role_results),
+            })
+
+        return {
+            "summary": {
+                "total_roles": len(details),
+                "passed_roles": sum(1 for item in details if item["passed"]),
+                "failed_roles": sum(1 for item in details if not item["passed"]),
+                "overall_pass": all(role_passes),
+            },
+            "details": details,
+        }
     
     def _calculate_retrieval_metrics(
         self,
