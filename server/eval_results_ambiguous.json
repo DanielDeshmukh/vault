@@ -6,10 +6,10 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.6799999999999999,
-    "avg_citations": 3.4,
-    "avg_score": 0.5230825325499999,
-    "avg_latency_ms": 13068.020105361938,
+    "avg_keyword_recall": 0.68,
+    "avg_citations": 3.2,
+    "avg_score": 0.52392818195,
+    "avg_latency_ms": 12932.912683486938,
     "errors": [],
     "details": [
       {
@@ -17,9 +17,9 @@
         "category": "leave",
         "keyword_ratio": 0.4,
         "num_citations": 4,
-        "avg_score": 0.5533712655,
-        "latency_ms": 9625.011920928955,
-        "answer_preview": "Yes, you can take time off after the birth of your child, with specific policies varying by employer and location. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Plaza Healthcare"
+        "avg_score": 0.553791044,
+        "latency_ms": 9165.251970291138,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, available t"
       },
       {
         "q": "What happens if I get hurt at work?",
@@ -27,25 +27,25 @@
         "keyword_ratio": 1.0,
         "num_citations": 4,
         "avg_score": 0.52260030825,
-        "latency_ms": 25550.784587860107,
-        "answer_preview": "If you get hurt at work, you should follow these steps, as outlined by the provided employee handbooks:\n\n1. **Report the Injury**: Immediately notify your supervisor about any work-related injury or i"
+        "latency_ms": 16657.227516174316,
+        "answer_preview": "If you get hurt at work, you must follow specific procedures to ensure proper reporting, treatment, and potential benefits. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Immedia"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.6,
+        "keyword_ratio": 0.8,
         "num_citations": 3,
-        "avg_score": 0.47024556,
-        "latency_ms": 10563.949584960938,
+        "avg_score": 0.471172452,
+        "latency_ms": 16449.83220100403,
         "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.6,
-        "num_citations": 3,
-        "avg_score": 0.57843105,
-        "latency_ms": 8494.470357894897,
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.5813126264999999,
+        "latency_ms": 11154.979705810547,
         "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
       },
       {
@@ -54,8 +54,8 @@
         "keyword_ratio": 0.8,
         "num_citations": 3,
         "avg_score": 0.49076447900000003,
-        "latency_ms": 11105.884075164795,
-        "answer_preview": "To quit your job, you should provide a written resignation notice to your employer, with the required notice period varying by company policy. Here\u2019s a comprehensive guide based on the provided source"
+        "latency_ms": 11237.272024154663,
+        "answer_preview": "To quit your job, you should provide written notice of your intent to resign, including the reason for leaving (though this is not always required). The notice period varies by company:\n\n- **GreenWast"
       }
     ]
   },
@@ -66,56 +66,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 2718.5253143310547,
+    "avg_keyword_recall": 0.6,
+    "avg_citations": 3.2,
+    "avg_score": 0.5241416501,
+    "avg_latency_ms": 16929.01382446289,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2346.0299968719482,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.5550289535,
+        "latency_ms": 12653.83243560791,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, available t"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2948.164224624634,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 4,
+        "avg_score": 0.5233566315,
+        "latency_ms": 19302.09517478943,
+        "answer_preview": "If you get hurt at work, you must immediately report the injury or illness to your supervisor [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0, 02ba4955-7cb5-4e84-9f44-fc54ba5cda56, 62e93aff-7785-4bb0-b300-cd2b7"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2111.1083030700684,
-        "answer_preview": "There is no information available to determine whether you are allowed to work from home."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.47024556,
+        "latency_ms": 12316.816568374634,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2438.7154579162598,
-        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.5813126264999999,
+        "latency_ms": 24340.249061584473,
+        "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 3748.6085891723633,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 16032.075881958008,
+        "answer_preview": "To quit your job, you should follow these steps based on the provided employee handbooks:\n\n1. **Provide Notice**: Most companies request advance notice as a professional courtesy. GreenWaste asks for "
       }
     ]
   },
@@ -126,56 +126,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 2866.620349884033,
+    "avg_keyword_recall": 0.6,
+    "avg_citations": 3.2,
+    "avg_score": 0.52374280355,
+    "avg_latency_ms": 14661.507272720337,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1677.812099456787,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.553791044,
+        "latency_ms": 10681.587934494019,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, available t"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2927.7565479278564,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 4,
+        "avg_score": 0.52260030825,
+        "latency_ms": 30773.869037628174,
+        "answer_preview": "If you get hurt at work, you must immediately report the injury or illness to your supervisor [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0, 02ba4955-7cb5-4e84-9f44-fc54ba5cda56, 62e93aff-7785-4bb0-b300-cd2b7"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1995.694637298584,
-        "answer_preview": "I cannot determine if you are allowed to work from home as there are no sources provided."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.47024556,
+        "latency_ms": 13269.195079803467,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2569.486141204834,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.5813126264999999,
+        "latency_ms": 7309.730529785156,
+        "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 5162.3523235321045,
-        "answer_preview": "There is no information available to answer your question."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 11273.15378189087,
+        "answer_preview": "To quit your job, you should provide a written resignation notice to your supervisor or appointing authority, with the required notice period varying by company policy. Here\u2019s a comprehensive guide ba"
       }
     ]
   },
@@ -186,56 +186,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 2114.374828338623,
+    "avg_keyword_recall": 0.64,
+    "avg_citations": 3.8,
+    "avg_score": 0.5222188842800001,
+    "avg_latency_ms": 13700.26626586914,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1942.9676532745361,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.55364386075,
+        "latency_ms": 11275.595426559448,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with specific policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, av"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2270.339012145996,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 1.0,
+        "num_citations": 4,
+        "avg_score": 0.52260030825,
+        "latency_ms": 20866.66750907898,
+        "answer_preview": "If you get hurt at work, you must follow specific procedures to ensure proper reporting, treatment, and potential benefits. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Immedia"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2014.857530593872,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.471172452,
+        "latency_ms": 13684.19599533081,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2345.7515239715576,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 5,
+        "avg_score": 0.5729133214,
+        "latency_ms": 9539.306163787842,
+        "answer_preview": "No, you cannot bring your gun to the office according to the provided employee handbooks, with some exceptions.\n\n**Prohibitions:**\n\n* GreenWaste, HF Foods Group, and West Virginia Dept of Administrati"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1997.9584217071533,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 13135.566234588623,
+        "answer_preview": "To quit your job, you should provide written notice of your resignation, ideally at least two weeks in advance [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0], though one source suggests ten working days [c356"
       }
     ]
   },
@@ -246,56 +246,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 2366.4673805236816,
+    "avg_keyword_recall": 0.6,
+    "avg_citations": 3.2,
+    "avg_score": 0.52374280355,
+    "avg_latency_ms": 11286.96002960205,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2527.48966217041,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.553791044,
+        "latency_ms": 8852.99825668335,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, available t"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2483.9372634887695,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 4,
+        "avg_score": 0.52260030825,
+        "latency_ms": 14617.111444473267,
+        "answer_preview": "If you get hurt at work, you must immediately report the injury or illness to your supervisor [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0, 02ba4955-7cb5-4e84-9f44-fc54ba5cda56, 62e93aff-7785-4bb0-b300-cd2b7"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2684.7662925720215,
-        "answer_preview": "I cannot determine if you are allowed to work from home as there are no sources provided."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.47024556,
+        "latency_ms": 9898.267030715942,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1932.952642440796,
-        "answer_preview": "There is no information available to determine whether you can bring your gun to the office."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.5813126264999999,
+        "latency_ms": 9402.199506759644,
+        "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2203.191041946411,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 13664.223909378052,
+        "answer_preview": "To quit your job, you should provide a written resignation to your employer, with the notice period varying depending on the company policy. Here\u2019s a comprehensive guide based on the provided sources:"
       }
     ]
   },
@@ -306,56 +306,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 1942.471981048584,
+    "avg_keyword_recall": 0.5599999999999999,
+    "avg_citations": 3.2,
+    "avg_score": 0.5237035834,
+    "avg_latency_ms": 11503.649950027466,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2018.8193321228027,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.553280577,
+        "latency_ms": 11338.917255401611,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with policies varying by employer and location.  \n\n**Plaza Healthcare** offers up to 12 weeks of leave for bonding with a newborn, available t"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1772.7620601654053,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 4,
+        "avg_score": 0.5229146745,
+        "latency_ms": 16860.047101974487,
+        "answer_preview": "If you get hurt at work, you must immediately report the injury or illness to your supervisor [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0, 02ba4955-7cb5-4e84-9f44-fc54ba5cda56, 62e93aff-7785-4bb0-b300-cd2b7"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1989.4256591796875,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.47024556,
+        "latency_ms": 9817.17824935913,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1960.2255821228027,
-        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.5813126264999999,
+        "latency_ms": 7122.786283493042,
+        "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1971.1272716522217,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 12379.320859909058,
+        "answer_preview": "To quit your job, you should provide written notice of your intent to resign, ideally at least two weeks in advance [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0], though one source suggests ten working days "
       }
     ]
   },
@@ -366,56 +366,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 1900.3173351287842,
+    "avg_keyword_recall": 0.64,
+    "avg_citations": 2.4,
+    "avg_score": 0.5130180497333334,
+    "avg_latency_ms": 10461.408853530884,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1842.4837589263916,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.560358703,
+        "latency_ms": 10567.626476287842,
+        "answer_preview": "Yes, both the Mississippi State Employee Handbook [c3560162-d4f6-4625-add0-d508c7ccbf8b] and the GreenWaste Employee Handbook [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0] provide provisions for time off aft"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1661.1626148223877,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.5048234263333333,
+        "latency_ms": 13077.913999557495,
+        "answer_preview": "If you get hurt at work, follow these steps based on the provided sources:\n\n1. **Report the Injury Immediately**: Notify your supervisor as soon as possible. This is required by all handbooks [556ed9a"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1659.672498703003,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 2,
+        "avg_score": 0.476875186,
+        "latency_ms": 12033.01477432251,
+        "answer_preview": "**Answer:** Whether you are allowed to work from home depends on your employer's policies and your specific circumstances. Both the Mississippi State Employee Handbook [c3560162-d4f6-4625-add0-d508c7c"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2721.775531768799,
-        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+        "keyword_ratio": 0.8,
+        "num_citations": 2,
+        "avg_score": 0.571347177,
+        "latency_ms": 7215.950489044189,
+        "answer_preview": "No, you cannot bring your gun to the office. \n\n**GreenWaste Employee Handbook (2024)** explicitly prohibits the possession or use of firearms, weapons, or dangerous devices on company-owned or control"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1616.4922714233398,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.45168575633333335,
+        "latency_ms": 9412.538528442383,
+        "answer_preview": "To quit your job, you should provide a written notice of resignation to your supervisor, with the specific notice period varying by employer:\n\n- **GreenWaste**: At least two weeks' advance notice is r"
       }
     ]
   },
@@ -426,56 +426,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 1861.5222454071045,
+    "avg_keyword_recall": 0.52,
+    "avg_citations": 2.8,
+    "avg_score": 0.5049071747833334,
+    "avg_latency_ms": 10030.151510238647,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1926.0649681091309,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.560358703,
+        "latency_ms": 9969.424486160278,
+        "answer_preview": "Yes, both the Mississippi State Employee Handbook [c3560162-d4f6-4625-add0-d508c7ccbf8b] and the GreenWaste Employee Handbook [556ed9a4-65da-4fcd-8bc5-ea110db4e1d0] provide provisions for time off aft"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 2566.301107406616,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.5048234263333333,
+        "latency_ms": 14970.924377441406,
+        "answer_preview": "If you get hurt at work, follow these steps based on the provided sources:\n\n1. **Report the Injury Immediately**: Notify your supervisor as soon as possible. This is required by all handbooks [556ed9a"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1626.417875289917,
-        "answer_preview": "There is no information available to determine whether you are allowed to work from home."
+        "keyword_ratio": 0.4,
+        "num_citations": 2,
+        "avg_score": 0.47546944,
+        "latency_ms": 9031.044483184814,
+        "answer_preview": "**Answer:** Whether you are allowed to work from home depends on your employer's policies and your specific circumstances.  \n\n**Mississippi State Employees:**  \nYes, intermittent telework is allowed d"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1551.3300895690918,
-        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.53219854825,
+        "latency_ms": 7435.381889343262,
+        "answer_preview": "No, you cannot bring your gun to the office. \n\n**GreenWaste Employee Handbook (2024)** explicitly prohibits carrying firearms or any other dangerous weapons on company premises, with exceptions for ne"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1637.4971866607666,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.45168575633333335,
+        "latency_ms": 8743.982315063477,
+        "answer_preview": "To quit your job, you should provide a written notice of resignation to your supervisor, with the specific notice period varying by employer:\n\n- **GreenWaste**: At least two weeks' advance notice is r"
       }
     ]
   },
@@ -486,56 +486,56 @@
     "queries_attempted": 5,
     "queries_success": 5,
     "queries_error": 0,
-    "avg_keyword_recall": 0.0,
-    "avg_citations": 0.0,
-    "avg_score": 0.0,
-    "avg_latency_ms": 1576.5940189361572,
+    "avg_keyword_recall": 0.64,
+    "avg_citations": 2.8,
+    "avg_score": 0.5049071747833334,
+    "avg_latency_ms": 11353.462028503418,
     "errors": [],
     "details": [
       {
         "q": "Can I take time off after my kid is born?",
         "category": "leave",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1602.1583080291748,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+        "keyword_ratio": 0.6,
+        "num_citations": 2,
+        "avg_score": 0.560358703,
+        "latency_ms": 9277.917385101318,
+        "answer_preview": "Yes, both Mississippi State and GreenWaste offer parental leave options after the birth of a child.  \n\n**Mississippi State:**\n\n* **Eligibility:** Employees are eligible for leave to care for a new chi"
       },
       {
         "q": "What happens if I get hurt at work?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1804.2678833007812,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.5048234263333333,
+        "latency_ms": 16050.755023956299,
+        "answer_preview": "If you get hurt at work, follow these steps based on the provided sources:\n\n1. **Report the Injury Immediately**: Notify your supervisor as soon as possible. This is required by all handbooks [7265111"
       },
       {
         "q": "Am I allowed to work from home?",
         "category": "remote_work",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1498.2283115386963,
-        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 2,
+        "avg_score": 0.47546944,
+        "latency_ms": 10850.151300430298,
+        "answer_preview": "**Answer:** Whether you are allowed to work from home depends on your employer's policies and your specific circumstances. Both the Mississippi State Employee Handbook [c3560162-d4f6-4625-add0-d508c7c"
       },
       {
         "q": "Can I bring my gun to the office?",
         "category": "safety",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1491.4219379425049,
-        "answer_preview": "I cannot provide an answer to this question as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 4,
+        "avg_score": 0.53219854825,
+        "latency_ms": 11253.929853439331,
+        "answer_preview": "No, you cannot bring your gun to the office. \n\n**GreenWaste Employee Handbook (2024)** explicitly prohibits carrying firearms or any other dangerous weapons on company premises, with exceptions for ne"
       },
       {
         "q": "How do I quit my job here?",
         "category": "onboarding",
-        "keyword_ratio": 0.0,
-        "num_citations": 0,
-        "avg_score": 0,
-        "latency_ms": 1486.893653869629,
-        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.45168575633333335,
+        "latency_ms": 9334.556579589844,
+        "answer_preview": "To quit your job, you should provide a written notice of resignation to your supervisor, with the specific notice period varying by employer:\n\n- **GreenWaste**: At least two weeks' advance notice is r"
       }
     ]
   }

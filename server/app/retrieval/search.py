@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 
 from app.db.pinecone import pinecone_client
@@ -48,25 +49,30 @@ class HybridSearch:
         top_k: int = 8,
         use_reranker: bool = True
     ) -> list[SearchResult]:
-        async with async_session() as db:
-            perm_filter = PermissionFilter(db)
-            filter_dict = await perm_filter.build_filter(user)
-
         query_variants = expand_query(query)
 
-        # Batch all embeddings into one call
-        all_embeddings = await self._get_embeddings(query_variants)
+        # Run permission filter + embeddings in parallel
+        filter_task = asyncio.create_task(self._get_filter(user))
+        embeddings_task = asyncio.create_task(self._get_embeddings(query_variants))
 
-        # Run all Pinecone queries in parallel-ish (sequential but fast)
-        all_candidates: dict[str, SearchResult] = {}
-        for variant, embedding in zip(query_variants, all_embeddings):
-            results = await self.pinecone.query_vectors(
+        filter_dict, all_embeddings = await asyncio.gather(filter_task, embeddings_task)
+
+        # Run all Pinecone queries in parallel
+        query_tasks = [
+            self.pinecone.query_vectors(
                 vector=embedding,
                 top_k=top_k * 2,
                 filter=filter_dict,
                 include_metadata=True
             )
-            for match in results:
+            for embedding in all_embeddings
+        ]
+        all_results = await asyncio.gather(*query_tasks)
+
+        # Deduplicate results
+        all_candidates: dict[str, SearchResult] = {}
+        for matches in all_results:
+            for match in matches:
                 rid = match.get("id", "")
                 if rid and rid not in all_candidates:
                     all_candidates[rid] = SearchResult(
@@ -87,12 +93,18 @@ class HybridSearch:
 
         return search_results[:top_k]
 
+    async def _get_filter(self, user: User) -> Optional[dict]:
+        async with async_session() as db:
+            perm_filter = PermissionFilter(db)
+            return await perm_filter.build_filter(user)
+
     async def _get_embeddings(self, texts: list[str]) -> list[list[float]]:
         """Batch embed all query variants in a single Cohere call."""
         import cohere
         from app.config import settings
         client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
-        response = client.embed(
+        response = await asyncio.to_thread(
+            client.embed,
             texts=texts,
             model=settings.COHERE_EMBED_MODEL,
             input_type="search_query",

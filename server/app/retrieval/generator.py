@@ -1,3 +1,4 @@
+import asyncio
 import cohere
 import re
 from typing import Optional, AsyncGenerator
@@ -52,7 +53,8 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         conversation_context: Optional[str] = None,
     ) -> GeneratedAnswer:
         messages = self._build_messages(query, results, conversation_context)
-        response = self.client.chat(
+        response = await asyncio.to_thread(
+            self.client.chat,
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
         )
@@ -67,17 +69,35 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         conversation_context: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         messages = self._build_messages(query, results, conversation_context)
-        for event in self.client.chat_stream(
-            model=settings.COHERE_CHAT_MODEL,
-            messages=messages,
-        ):
-            if hasattr(event, "type") and event.type == "content-delta":
-                try:
-                    text = event.delta.message.content.text
-                    if text:
-                        yield text
-                except (AttributeError, TypeError):
-                    pass
+        # chat_stream is a generator; iterate in a thread to avoid blocking
+        def _stream_events():
+            for event in self.client.chat_stream(
+                model=settings.COHERE_CHAT_MODEL,
+                messages=messages,
+            ):
+                if hasattr(event, "type") and event.type == "content-delta":
+                    try:
+                        text = event.delta.message.content.text
+                        if text:
+                            yield text
+                    except (AttributeError, TypeError):
+                        pass
+        # Run the sync generator in a thread and yield from it
+        import queue
+        import threading
+        q: queue.Queue = queue.Queue()
+        sentinel = object()
+        def _produce():
+            for chunk in _stream_events():
+                q.put(chunk)
+            q.put(sentinel)
+        t = threading.Thread(target=_produce)
+        t.start()
+        while True:
+            item = await asyncio.to_thread(q.get)
+            if item is sentinel:
+                break
+            yield item
 
     def _build_context(self, results: list[SearchResult]) -> str:
         context_parts = []

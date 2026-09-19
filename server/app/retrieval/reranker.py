@@ -1,3 +1,4 @@
+import asyncio
 import cohere
 from typing import Optional
 
@@ -21,7 +22,8 @@ class CohereReranker:
 
         documents = [r.content[:1500] for r in results]
 
-        response = self.client.rerank(
+        response = await asyncio.to_thread(
+            self.client.rerank,
             query=query,
             documents=documents,
             top_n=min(top_k, len(results)),
