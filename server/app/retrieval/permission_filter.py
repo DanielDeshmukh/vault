@@ -42,8 +42,6 @@ class PermissionFilter:
         if allowed_roles:
             conditions.append({"allowed_roles": {"$in": allowed_roles}})
 
-        conditions.append({"owner_id": {"$eq": str(user.id)}})
-
         return {"$and": conditions}
     
     async def can_access_document(self, user: User, document_id: str) -> bool:

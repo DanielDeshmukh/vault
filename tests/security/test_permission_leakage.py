@@ -160,6 +160,36 @@ def test_query_model_loads_and_classifies_high_level_question():
     assert get_question_access_level(req.question) > 0
 
 
+@pytest.mark.asyncio
+async def test_permission_filter_does_not_force_owner_only_access():
+    """Regular users must not be restricted to only their own owned documents."""
+    from app.retrieval.permission_filter import PermissionFilter
+
+    class FakeResult:
+        def __init__(self, values):
+            self._values = values
+
+        def scalars(self):
+            return self
+
+        def all(self):
+            return self._values
+
+    class FakeDB:
+        async def execute(self, _stmt):
+            return FakeResult([])
+
+    class FakeUser:
+        id = "user-123"
+        is_admin = False
+
+    perm_filter = PermissionFilter(FakeDB())
+    filter_dict = await perm_filter.build_filter(FakeUser())
+
+    assert filter_dict is not None
+    assert "owner_id" not in str(filter_dict)
+
+
 class TestPermissionBoundary:
     """Test permission boundary enforcement."""
     

@@ -127,9 +127,6 @@ def build_pinecone_filter(
     if allowed_role_names:
         conditions.append({"allowed_roles": {"$in": allowed_role_names}})
 
-    if user_id:
-        conditions.append({"owner_id": {"$eq": user_id}})
-
     return {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
 
