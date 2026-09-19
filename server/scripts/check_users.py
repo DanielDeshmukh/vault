@@ -1,10 +1,14 @@
 import asyncio
 import asyncpg
+import os
+
+DB_URL = os.environ.get("DATABASE_URL", "")
 
 async def main():
-    conn = await asyncpg.connect(
-        "postgresql://neondb_owner:npg_vVxtn09FaNrY@ep-bold-lab-a53tkz2z-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
-    )
+    if not DB_URL:
+        print("ERROR: Set DATABASE_URL environment variable")
+        return
+    conn = await asyncpg.connect(DB_URL)
 
     users = await conn.fetch("SELECT id, email, full_name, is_admin, is_approved FROM users ORDER BY id")
     print("=== ALL USERS ===")

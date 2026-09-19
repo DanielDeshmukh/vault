@@ -1,11 +1,14 @@
 import asyncio
 import asyncpg
-import json
+import os
+
+DB_URL = os.environ.get("DATABASE_URL", "")
 
 async def main():
-    conn = await asyncpg.connect(
-        "postgresql://neondb_owner:npg_vVxtn09FaNrY@ep-bold-lab-a53tkz2z-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
-    )
+    if not DB_URL:
+        print("ERROR: Set DATABASE_URL environment variable")
+        return
+    conn = await asyncpg.connect(DB_URL)
 
     docs = await conn.fetch("SELECT id, title, access_level, allowed_roles, account_id FROM documents ORDER BY access_level, title")
     print("=== DOCUMENTS ===")
@@ -16,6 +19,7 @@ async def main():
     print()
     print("=== CHUNK METADATA SAMPLE ===")
     for c in chunks:
+        import json
         print(f"  chunk {c['id'][:20]}... metadata={json.dumps(c['metadata'], indent=2)[:500]}")
 
     await conn.close()
