@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from typing import Optional
 
 from app.db.pinecone import pinecone_client
 from app.db.sessions import async_session
