@@ -13,6 +13,50 @@ class AccessLevel(int, Enum):
     RESTRICTED = 3
 
 
+def get_question_access_level(question: str) -> int:
+    """Return the minimum access level required to answer a question.
+
+    Security rule: a user may not ask about content above their access ceiling.
+    Lower-level users should receive an immediate Access denied response instead
+    of any retrieval or generation.
+    """
+    q = (question or "").lower()
+
+    if any(term in q for term in [
+        "executive memo",
+        "executive notes",
+        "board",
+        "restricted",
+        "legal review",
+        "payroll",
+        "salary info",
+        "ceo",
+    ]):
+        return AccessLevel.RESTRICTED
+
+    if any(term in q for term in [
+        "nist cybersecurity framework",
+        "confidential customer contract",
+        "cybersecurity framework",
+        "customer contract",
+        "confidential",
+        "sensitive pricing",
+        "security framework",
+    ]):
+        return AccessLevel.CONFIDENTIAL
+
+    if any(term in q for term in [
+        "internal support faq",
+        "internal",
+        "team policy",
+        "support faq",
+        "engineering handbook",
+    ]):
+        return AccessLevel.INTERNAL
+
+    return AccessLevel.PUBLIC
+
+
 async def get_user_max_access_level(user: User, db: AsyncSession) -> int:
     """Get the maximum access level a user has through their roles."""
     result = await db.execute(

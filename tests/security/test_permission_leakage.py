@@ -150,6 +150,16 @@ class TestPermissionFilter:
             assert access_level_filter["access_level"]["$lte"] <= 1
 
 
+def test_query_model_loads_and_classifies_high_level_question():
+    """The query schema should load and high-level questions should map above public access."""
+    from app.api.queries import QueryRequest
+    from app.auth.permissions import get_question_access_level
+
+    req = QueryRequest(question="What is the NIST Cybersecurity Framework?")
+    assert req.question == "What is the NIST Cybersecurity Framework?"
+    assert get_question_access_level(req.question) > 0
+
+
 class TestPermissionBoundary:
     """Test permission boundary enforcement."""
     

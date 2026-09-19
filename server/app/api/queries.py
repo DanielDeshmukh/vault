@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 import json
 
 from app.auth.jwt import get_current_user
+from app.auth.permissions import get_question_access_level, get_user_max_access_level
 from app.db.models import User
 from app.db.sessions import async_session
 from app.retrieval.search import HybridSearch
@@ -58,14 +59,28 @@ async def query(
     """
     # Create trace
     trace = trace_logger.create_trace(current_user, request.question)
-    
+
     # Check if user is approved and has a role
     if not current_user.is_admin and not current_user.is_approved:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your account is pending admin approval. You cannot query documents yet."
         )
-    
+
+    async with async_session() as db:
+        user_max_level = await get_user_max_access_level(current_user, db)
+        required_level = get_question_access_level(request.question)
+
+    if required_level > user_max_level and not current_user.is_admin:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "answer": "Access denied",
+                "citations": [],
+                "trace_id": trace.trace_id,
+            },
+        )
+
     try:
         start_time = datetime.utcnow()
         
@@ -162,10 +177,18 @@ async def query_stream(
             detail="Your account is pending admin approval."
         )
 
+    async with async_session() as db:
+        user_max_level = await get_user_max_access_level(current_user, db)
+        required_level = get_question_access_level(request.question)
+
     search = HybridSearch()
     generator = CitationGenerator()
 
     async def event_generator():
+        if required_level > user_max_level and not current_user.is_admin:
+            yield f"data: {json.dumps({'type': 'error', 'detail': 'Access denied'})}\n\n"
+            return
+
         try:
             results = await search.search(
                 query=build_retrieval_query(request.question, request.context),
@@ -213,6 +236,9 @@ async def query_stream(
             "X-Accel-Buffering": "no",
         }
     )
+
+
+@router.get("/trace/{trace_id}")
 async def get_trace(
     trace_id: str,
     current_user: User = Depends(get_current_user)
