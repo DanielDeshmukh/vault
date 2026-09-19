@@ -1,0 +1,121 @@
+[
+  {
+    "email": "admin@vaultdemo.com",
+    "role": "Admin",
+    "access_level": 99,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.9199999999999999,
+    "avg_citations": 4.4,
+    "avg_score": 0.5807101978404762,
+    "avg_latency_ms": 23351.909065246582,
+    "errors": []
+  },
+  {
+    "email": "hr@vaultdemo.com",
+    "role": "Confidential",
+    "access_level": 2,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.16,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 6376.8298625946045,
+    "errors": []
+  },
+  {
+    "email": "confidential.role.test@vault.local",
+    "role": "Confidential",
+    "access_level": 2,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.16,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 3127.730131149292,
+    "errors": []
+  },
+  {
+    "email": "engineer@vaultdemo.com",
+    "role": "Internal",
+    "access_level": 1,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.08,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 3814.5429134368896,
+    "errors": []
+  },
+  {
+    "email": "internal.role.test@vault.local",
+    "role": "Internal",
+    "access_level": 1,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.08,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 3021.1047649383545,
+    "errors": []
+  },
+  {
+    "email": "restricted.role.test@vault.local",
+    "role": "Restricted",
+    "access_level": 3,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.16,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2295.880126953125,
+    "errors": []
+  },
+  {
+    "email": "public.role.test@vault.local",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.08,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2438.6651039123535,
+    "errors": []
+  },
+  {
+    "email": "deshmukhdaniel2005@gmail.com",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 0,
+    "queries_success": 0,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 0.0,
+    "errors": [
+      "Login failed: Client error '401 Unauthorized' for url 'https://vault-rbac-rag.vercel.app/api/auth/login'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+    ]
+  },
+  {
+    "email": "intern@vaultdemo.com",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2180.925989151001,
+    "errors": []
+  }
+]

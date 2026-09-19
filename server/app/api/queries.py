@@ -89,12 +89,12 @@ async def query(
         generator = CitationGenerator()
         
         # Execute permission-aware search
-        results = await search.search(
-            query=build_retrieval_query(request.question, request.context),
-            user=current_user,
-            top_k=8,
-            use_reranker=True
-        )
+            results = await search.search(
+                query=request.question,
+                user=current_user,
+                top_k=6,
+                use_reranker=True
+            )
         
         # Log retrieved chunks
         trace_logger.log_retrieved_chunks(

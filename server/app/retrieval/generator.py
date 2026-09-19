@@ -1,4 +1,5 @@
 import cohere
+import re
 from typing import Optional, AsyncGenerator
 from dataclasses import dataclass
 
@@ -12,51 +13,33 @@ class GeneratedAnswer:
     citations: list[dict]
 
 
+MAX_CONTEXT_SOURCES = 6
+MAX_SOURCE_CHARS = 1000
+
+
 class CitationGenerator:
 
-    SYSTEM_PROMPT = """You are Vault, an enterprise knowledge assistant. You answer questions by synthesizing information from the provided source documents.
+    SYSTEM_PROMPT = """You are Vault, an enterprise knowledge assistant. Answer using ONLY the provided sources.
 
-CRITICAL RULES:
-1. You MUST use ALL relevant sources provided — do not ignore any source that contains pertinent information.
-2. For every factual claim, include an inline citation [document_id]. Multiple claims from the same source can cite it multiple times.
-3. Synthesize across sources: combine information from different documents to give comprehensive answers.
-4. When sources provide different perspectives or details on the same topic, present all of them.
-5. NEVER say "the sources don't contain sufficient information" when sources ARE provided and contain relevant content.
-6. If a source partially addresses the question, still use it and note what it covers.
-7. Be thorough and detailed — aim for comprehensive coverage, not brevity.
-8. Never fabricate information not present in the sources.
-9. If sources conflict, acknowledge the differences and cite each side.
+Rules:
+1. Cite every claim with [document_id]. Multiple claims from same source = multiple citations.
+2. Synthesize across sources. Never say sources lack info when sources are provided.
+3. Be concise but thorough. Cover all key points from each relevant source.
+4. Never fabricate. If sources conflict, note it and cite each side.
 
-FORMAT:
-- Start with a direct answer to the question
-- Then provide detailed supporting information from each relevant source
-- Use bullet points or numbered lists when covering multiple documents
-- Each bullet/paragraph must have at least one citation"""
+Format: Direct answer first, then supporting details with citations."""
 
     def __init__(self):
         self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
 
-    def _build_messages(
-        self,
-        query: str,
-        results: list[SearchResult],
-        conversation_context: Optional[str] = None,
-    ) -> list[dict]:
+    def _build_messages(self, query: str, results: list[SearchResult]) -> list[dict]:
         context = self._build_context(results)
-        conversation_section = ""
-        if conversation_context:
-            conversation_section = f"""\nCONVERSATION CONTEXT (use this only for resolving references such as \"each\" or \"that policy\"; it is not source evidence):
-{conversation_context}
-"""
-        user_message = f"""You have access to {len(results)} source documents. Use ALL of them that are relevant.
-{conversation_section}
-
-SOURCES:
+        user_message = f"""Sources ({len(results)}):
 {context}
 
-QUESTION: {query}
+Question: {query}
 
-Provide a comprehensive answer using information from ALL relevant sources above. Cite each source with [document_id]. Do NOT say sources lack information — synthesize what IS available."""
+Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         return [
             {"role": "system", "content": self.SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
@@ -65,10 +48,9 @@ Provide a comprehensive answer using information from ALL relevant sources above
     async def generate(
         self,
         query: str,
-        results: list[SearchResult],
-        conversation_context: Optional[str] = None,
+        results: list[SearchResult]
     ) -> GeneratedAnswer:
-        messages = self._build_messages(query, results, conversation_context)
+        messages = self._build_messages(query, results)
         response = self.client.chat(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
@@ -80,10 +62,9 @@ Provide a comprehensive answer using information from ALL relevant sources above
     async def generate_stream(
         self,
         query: str,
-        results: list[SearchResult],
-        conversation_context: Optional[str] = None,
+        results: list[SearchResult]
     ) -> AsyncGenerator[str, None]:
-        messages = self._build_messages(query, results, conversation_context)
+        messages = self._build_messages(query, results)
         for event in self.client.chat_stream(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
@@ -98,22 +79,21 @@ Provide a comprehensive answer using information from ALL relevant sources above
 
     def _build_context(self, results: list[SearchResult]) -> str:
         context_parts = []
-        for i, result in enumerate(results):
-            doc_id = result.metadata.get("document_id", f"doc_{i}")
+        for result in results[:MAX_CONTEXT_SOURCES]:
+            doc_id = result.metadata.get("document_id", result.id)
             source = result.metadata.get("source", "unknown")
             title = result.metadata.get("title", "Untitled")
-            keywords = result.metadata.get("keywords", "")
-            kw_str = f" | Keywords: {keywords}" if keywords else ""
+            content = result.content[:MAX_SOURCE_CHARS]
             context_parts.append(
-                f"[{doc_id}] Source: {source} | Title: {title}{kw_str}\n"
-                f"Content: {result.content}\n"
+                f"[{doc_id}] {title} ({source})\n{content}"
             )
         return "\n---\n".join(context_parts)
 
     def extract_citations(self, answer: str, results: list[SearchResult]) -> list[dict]:
-        import re
-        citation_pattern = r'\[([^\]]+)\]'
-        matches = re.findall(citation_pattern, answer)
+        return self._extract_citations(answer, results)
+
+    def _extract_citations(self, answer: str, results: list[SearchResult]) -> list[dict]:
+        matches = re.findall(r'\[([^\]]+)\]', answer)
         citations = []
         seen = set()
         for match in matches:
@@ -131,6 +111,3 @@ Provide a comprehensive answer using information from ALL relevant sources above
                     })
                     break
         return citations
-
-    def _extract_citations(self, answer: str, results: list[SearchResult]) -> list[dict]:
-        return self.extract_citations(answer, results)
