@@ -1,0 +1,542 @@
+[
+  {
+    "email": "admin@vaultdemo.com",
+    "role": "Admin",
+    "access_level": 99,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.6799999999999999,
+    "avg_citations": 3.4,
+    "avg_score": 0.5230825325499999,
+    "avg_latency_ms": 13068.020105361938,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.4,
+        "num_citations": 4,
+        "avg_score": 0.5533712655,
+        "latency_ms": 9625.011920928955,
+        "answer_preview": "Yes, you can take time off after the birth of your child, with specific policies varying by employer and location. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Plaza Healthcare"
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 1.0,
+        "num_citations": 4,
+        "avg_score": 0.52260030825,
+        "latency_ms": 25550.784587860107,
+        "answer_preview": "If you get hurt at work, you should follow these steps, as outlined by the provided employee handbooks:\n\n1. **Report the Injury**: Immediately notify your supervisor about any work-related injury or i"
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.47024556,
+        "latency_ms": 10563.949584960938,
+        "answer_preview": "Whether you are allowed to work from home depends on your employer's policies and your specific role. Here\u2019s a comprehensive overview based on the provided sources:\n\n1. **Mississippi State Employee Ha"
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.6,
+        "num_citations": 3,
+        "avg_score": 0.57843105,
+        "latency_ms": 8494.470357894897,
+        "answer_preview": "No, you cannot bring your gun to the office, with some exceptions.\n\n**General Prohibition:**\n\n* **GreenWaste, HF Foods Group, West Virginia Dept of Administration:** These companies explicitly prohibi"
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.8,
+        "num_citations": 3,
+        "avg_score": 0.49076447900000003,
+        "latency_ms": 11105.884075164795,
+        "answer_preview": "To quit your job, you should provide a written resignation notice to your employer, with the required notice period varying by company policy. Here\u2019s a comprehensive guide based on the provided source"
+      }
+    ]
+  },
+  {
+    "email": "hr@vaultdemo.com",
+    "role": "Confidential",
+    "access_level": 2,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2718.5253143310547,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2346.0299968719482,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2948.164224624634,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2111.1083030700684,
+        "answer_preview": "There is no information available to determine whether you are allowed to work from home."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2438.7154579162598,
+        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 3748.6085891723633,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      }
+    ]
+  },
+  {
+    "email": "confidential.role.test@vault.local",
+    "role": "Confidential",
+    "access_level": 2,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2866.620349884033,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1677.812099456787,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2927.7565479278564,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1995.694637298584,
+        "answer_preview": "I cannot determine if you are allowed to work from home as there are no sources provided."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2569.486141204834,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 5162.3523235321045,
+        "answer_preview": "There is no information available to answer your question."
+      }
+    ]
+  },
+  {
+    "email": "engineer@vaultdemo.com",
+    "role": "Internal",
+    "access_level": 1,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2114.374828338623,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1942.9676532745361,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2270.339012145996,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2014.857530593872,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2345.7515239715576,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1997.9584217071533,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      }
+    ]
+  },
+  {
+    "email": "internal.role.test@vault.local",
+    "role": "Internal",
+    "access_level": 1,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 2366.4673805236816,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2527.48966217041,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2483.9372634887695,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2684.7662925720215,
+        "answer_preview": "I cannot determine if you are allowed to work from home as there are no sources provided."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1932.952642440796,
+        "answer_preview": "There is no information available to determine whether you can bring your gun to the office."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2203.191041946411,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+      }
+    ]
+  },
+  {
+    "email": "restricted.role.test@vault.local",
+    "role": "Restricted",
+    "access_level": 3,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 1942.471981048584,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2018.8193321228027,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1772.7620601654053,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1989.4256591796875,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1960.2255821228027,
+        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1971.1272716522217,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      }
+    ]
+  },
+  {
+    "email": "public.role.test@vault.local",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 1900.3173351287842,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1842.4837589263916,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1661.1626148223877,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1659.672498703003,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2721.775531768799,
+        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1616.4922714233398,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      }
+    ]
+  },
+  {
+    "email": "deshmukhdaniel2005@gmail.com",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 1861.5222454071045,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1926.0649681091309,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 2566.301107406616,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1626.417875289917,
+        "answer_preview": "There is no information available to determine whether you are allowed to work from home."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1551.3300895690918,
+        "answer_preview": "There is no information available to answer the question about bringing a gun to the office."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1637.4971866607666,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      }
+    ]
+  },
+  {
+    "email": "intern@vaultdemo.com",
+    "role": "Public",
+    "access_level": 0,
+    "queries_attempted": 5,
+    "queries_success": 5,
+    "queries_error": 0,
+    "avg_keyword_recall": 0.0,
+    "avg_citations": 0.0,
+    "avg_score": 0.0,
+    "avg_latency_ms": 1576.5940189361572,
+    "errors": [],
+    "details": [
+      {
+        "q": "Can I take time off after my kid is born?",
+        "category": "leave",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1602.1583080291748,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources provided."
+      },
+      {
+        "q": "What happens if I get hurt at work?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1804.2678833007812,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      },
+      {
+        "q": "Am I allowed to work from home?",
+        "category": "remote_work",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1498.2283115386963,
+        "answer_preview": "I'm unable to provide an answer to your question as there are no sources available."
+      },
+      {
+        "q": "Can I bring my gun to the office?",
+        "category": "safety",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1491.4219379425049,
+        "answer_preview": "I cannot provide an answer to this question as there are no sources available."
+      },
+      {
+        "q": "How do I quit my job here?",
+        "category": "onboarding",
+        "keyword_ratio": 0.0,
+        "num_citations": 0,
+        "avg_score": 0,
+        "latency_ms": 1486.893653869629,
+        "answer_preview": "I'm unable to provide an answer as there are no sources available."
+      }
+    ]
+  }
+]
