@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import { api, Citation, StreamEvent } from "@/lib/api";
 import { useSidebar } from "@/components/layout/sidebar";
 
@@ -259,31 +260,47 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
 
   const renderAnswer = (text: string) => {
     if (!text) return null;
-    const parts = text.split(/(\[[^\]]+\])/g);
-    return parts.map((part, i) => {
-      const match = part.match(/^\[([^\]]+)\]$/);
-      if (match) {
-        const cit = turn.citations.find(c => c.document_id === match[1]);
-        if (cit) {
-          const idx = turn.citations.indexOf(cit) + 1;
-          return (
-            <sup
-              key={i}
-              className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary bg-primary/10 px-1 py-0.5 rounded mx-0.5 cursor-pointer hover:bg-primary/20 transition-colors"
-              title={cit.title}
-              onClick={() => setShowSources(true)}
-            >
-              <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {idx}
-            </sup>
-          );
-        }
-        return <sup key={i} className="text-[10px] text-ink-tertiary mx-0.5">{part}</sup>;
-      }
-      return <span key={i}>{part}</span>;
+    const markdown = text.replace(/\[([^\]\n]+)\]/g, (match, documentId) => {
+      const citation = turn.citations.find(c => c.document_id === documentId);
+      if (!citation) return match;
+      const index = turn.citations.indexOf(citation) + 1;
+      return `[${index}](citation:${encodeURIComponent(documentId)})`;
     });
+
+    return (
+      <ReactMarkdown
+        urlTransform={(url) => url.startsWith("citation:") ? url : defaultUrlTransform(url)}
+        components={{
+          h1: ({ children }) => <h1 className="mt-7 mb-3 text-xl font-semibold tracking-tight text-foreground first:mt-0">{children}</h1>,
+          h2: ({ children }) => <h2 className="mt-7 mb-3 text-lg font-semibold tracking-tight text-foreground first:mt-0">{children}</h2>,
+          h3: ({ children }) => <h3 className="mt-6 mb-2 text-base font-semibold text-foreground first:mt-0">{children}</h3>,
+          p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+          ul: ({ children }) => <ul className="mb-4 list-disc space-y-1.5 pl-5 marker:text-ink-muted">{children}</ul>,
+          ol: ({ children }) => <ol className="mb-4 list-decimal space-y-1.5 pl-5 marker:text-ink-muted">{children}</ol>,
+          li: ({ children }) => <li className="pl-1">{children}</li>,
+          strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+          a: ({ href, children }) => {
+            if (href?.startsWith("citation:")) {
+              const documentId = decodeURIComponent(href.slice("citation:".length));
+              const citation = turn.citations.find(c => c.document_id === documentId);
+              return (
+                <button
+                  type="button"
+                  className="mx-0.5 inline-flex align-super text-[10px] font-medium text-primary hover:text-primary-hover"
+                  title={citation?.title}
+                  onClick={() => setShowSources(true)}
+                >
+                  [{children}]
+                </button>
+              );
+            }
+            return <a href={href} className="text-primary underline underline-offset-2 hover:text-primary-hover" target="_blank" rel="noreferrer">{children}</a>;
+          },
+        }}
+      >
+        {markdown}
+      </ReactMarkdown>
+    );
   };
 
   return (
@@ -311,7 +328,7 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
             <>
               <div
                 ref={answerRef}
-                className="text-sm text-foreground/90 leading-[1.7] whitespace-pre-wrap max-h-[500px] overflow-y-auto"
+                className="text-sm text-foreground/90 leading-[1.7]"
               >
                 {renderAnswer(turn.answer)}
                 {turn.status === "streaming" && (
