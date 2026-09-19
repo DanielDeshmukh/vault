@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 import json
@@ -17,7 +17,14 @@ router = APIRouter()
 
 class QueryRequest(BaseModel):
     question: str
-    context: Optional[str] = None
+    context: Optional[str] = Field(default=None, max_length=6000)
+
+
+def build_retrieval_query(question: str, conversation_context: Optional[str]) -> str:
+    """Keep follow-up retrieval anchored to the current conversation topic."""
+    if not conversation_context:
+        return question
+    return f"{conversation_context}\n\nFollow-up question: {question}"
 
 
 class Citation(BaseModel):
@@ -68,7 +75,7 @@ async def query(
         
         # Execute permission-aware search
         results = await search.search(
-            query=request.question,
+            query=build_retrieval_query(request.question, request.context),
             user=current_user,
             top_k=8,
             use_reranker=True
@@ -91,7 +98,8 @@ async def query(
         # Generate cited answer
         generated = await generator.generate(
             query=request.question,
-            results=results
+            results=results,
+            conversation_context=request.context,
         )
         
         # Calculate latency
@@ -160,7 +168,7 @@ async def query_stream(
     async def event_generator():
         try:
             results = await search.search(
-                query=request.question,
+                query=build_retrieval_query(request.question, request.context),
                 user=current_user,
                 top_k=8,
                 use_reranker=True
@@ -178,7 +186,11 @@ async def query_stream(
             yield f"data: {json.dumps({'type': 'sources', 'sources': source_list})}\n\n"
 
             full_answer = ""
-            async for chunk in generator.generate_stream(request.question, results):
+            async for chunk in generator.generate_stream(
+                request.question,
+                results,
+                conversation_context=request.context,
+            ):
                 full_answer += chunk
                 yield f"data: {json.dumps({'type': 'delta', 'content': chunk})}\n\n"
 

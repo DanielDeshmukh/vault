@@ -16,6 +16,21 @@ interface ConversationTurn {
   error?: string;
 }
 
+const MAX_CONVERSATION_CONTEXT_CHARS = 6000;
+const TYPING_CHARS_PER_TICK = 8;
+const TYPING_TICK_MS = 32;
+
+function buildConversationContext(turns: ConversationTurn[]): string | undefined {
+  const completedTurns = turns.filter(turn => turn.status === "done").slice(-3);
+  if (completedTurns.length === 0) return undefined;
+
+  const context = completedTurns
+    .map(turn => `User: ${turn.question}\nAssistant: ${turn.answer.slice(0, 1800)}`)
+    .join("\n\n");
+
+  return context.slice(-MAX_CONVERSATION_CONTEXT_CHARS);
+}
+
 export default function QueryPage() {
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
   const [input, setInput] = useState("");
@@ -75,6 +90,8 @@ export default function QueryPage() {
     const q = question || input.trim();
     if (!q || isSearching) return;
 
+    const conversationContext = buildConversationContext(turns);
+
     setInput("");
     setIsSearching(true);
 
@@ -90,45 +107,69 @@ export default function QueryPage() {
     };
     setTurns(prev => [...prev, newTurn]);
 
+    let typingTimer: number | undefined;
     try {
       let accumulated = "";
-      for await (const event of api.queryStream(q)) {
+      let pendingText = "";
+      let streamErrored = false;
+      let traceId = "";
+
+      const flushPendingText = () => {
+        if (!pendingText) return;
+        const nextChunk = pendingText.slice(0, TYPING_CHARS_PER_TICK);
+        pendingText = pendingText.slice(TYPING_CHARS_PER_TICK);
+        accumulated += nextChunk;
+        const snapshot = accumulated;
+        setTurns(prev => prev.map(t =>
+          t.id === turnId ? { ...t, answer: snapshot } : t
+        ));
+      };
+
+      typingTimer = window.setInterval(flushPendingText, TYPING_TICK_MS);
+
+      for await (const event of api.queryStream(q, conversationContext)) {
         if (event.type === "sources") {
           setTurns(prev => prev.map(t =>
             t.id === turnId ? { ...t, sources: event.sources } : t
           ));
         } else if (event.type === "delta") {
-          accumulated += event.content;
-          const snap = accumulated;
-          setTurns(prev => prev.map(t =>
-            t.id === turnId ? { ...t, answer: snap } : t
-          ));
+          pendingText += event.content;
         } else if (event.type === "citations") {
           setTurns(prev => prev.map(t =>
             t.id === turnId ? { ...t, citations: event.citations } : t
           ));
         } else if (event.type === "done") {
-          setTurns(prev => prev.map(t =>
-            t.id === turnId ? { ...t, traceId: event.trace_id, status: "done" } : t
-          ));
+          traceId = event.trace_id;
         } else if (event.type === "error") {
+          streamErrored = true;
           setTurns(prev => prev.map(t =>
             t.id === turnId ? { ...t, status: "error", error: event.detail } : t
           ));
         }
+      }
+
+      while (pendingText) {
+        await new Promise(resolve => window.setTimeout(resolve, TYPING_TICK_MS));
+      }
+
+      if (!streamErrored) {
+        setTurns(prev => prev.map(t =>
+          t.id === turnId ? { ...t, traceId, status: "done" } : t
+        ));
       }
     } catch (err) {
       setTurns(prev => prev.map(t =>
         t.id === turnId ? { ...t, status: "error", error: err instanceof Error ? err.message : "Query failed" } : t
       ));
     } finally {
+      if (typingTimer) window.clearInterval(typingTimer);
       setIsSearching(false);
       if (inputRef.current) {
         inputRef.current.style.height = "auto";
         inputRef.current.focus();
       }
     }
-  }, [input, isSearching]);
+  }, [input, isSearching, turns]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

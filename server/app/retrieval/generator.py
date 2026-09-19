@@ -36,9 +36,20 @@ FORMAT:
     def __init__(self):
         self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
 
-    def _build_messages(self, query: str, results: list[SearchResult]) -> list[dict]:
+    def _build_messages(
+        self,
+        query: str,
+        results: list[SearchResult],
+        conversation_context: Optional[str] = None,
+    ) -> list[dict]:
         context = self._build_context(results)
+        conversation_section = ""
+        if conversation_context:
+            conversation_section = f"""\nCONVERSATION CONTEXT (use this only for resolving references such as \"each\" or \"that policy\"; it is not source evidence):
+{conversation_context}
+"""
         user_message = f"""You have access to {len(results)} source documents. Use ALL of them that are relevant.
+{conversation_section}
 
 SOURCES:
 {context}
@@ -54,9 +65,10 @@ Provide a comprehensive answer using information from ALL relevant sources above
     async def generate(
         self,
         query: str,
-        results: list[SearchResult]
+        results: list[SearchResult],
+        conversation_context: Optional[str] = None,
     ) -> GeneratedAnswer:
-        messages = self._build_messages(query, results)
+        messages = self._build_messages(query, results, conversation_context)
         response = self.client.chat(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
@@ -68,9 +80,10 @@ Provide a comprehensive answer using information from ALL relevant sources above
     async def generate_stream(
         self,
         query: str,
-        results: list[SearchResult]
+        results: list[SearchResult],
+        conversation_context: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
-        messages = self._build_messages(query, results)
+        messages = self._build_messages(query, results, conversation_context)
         for event in self.client.chat_stream(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,

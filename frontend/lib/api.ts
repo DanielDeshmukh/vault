@@ -126,7 +126,7 @@ class ApiClient {
     });
   }
 
-  async *queryStream(question: string): AsyncGenerator<StreamEvent, void, unknown> {
+  async *queryStream(question: string, context?: string): AsyncGenerator<StreamEvent, void, unknown> {
     const token = this.getToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -138,7 +138,7 @@ class ApiClient {
     const response = await fetch(`${this.baseUrl}/api/query/stream`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, context }),
     });
 
     if (!response.ok) {
