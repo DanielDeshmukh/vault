@@ -25,7 +25,7 @@ USERS = [
     {"email": "internal.role.test@vault.local",    "password": "InternalPass@123",   "role": "Internal",     "access_level": 1,  "is_admin": False},
     {"email": "restricted.role.test@vault.local",  "password": "RestrictedPass@123", "role": "Restricted",    "access_level": 3,  "is_admin": False},
     {"email": "public.role.test@vault.local",      "password": "PublicPass@123",     "role": "Public",        "access_level": 0,  "is_admin": False},
-    {"email": "deshmukhdaniel2005@gmail.com",      "password": "demo1234",           "role": "Public",        "access_level": 0,  "is_admin": False},
+    {"email": "deshmukhdaniel2005@gmail.com",      "password": "Daniel#2005",       "role": "Public",        "access_level": 0,  "is_admin": False},
     {"email": "intern@vaultdemo.com",              "password": "demo1234",           "role": "Public",        "access_level": 0,  "is_admin": False},
 ]
 

@@ -32,7 +32,7 @@ Format: Direct answer first, then supporting details with citations."""
     def __init__(self):
         self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
 
-    def _build_messages(self, query: str, results: list[SearchResult]) -> list[dict]:
+    def _build_messages(self, query: str, results: list[SearchResult], conversation_context: Optional[str] = None) -> list[dict]:
         context = self._build_context(results)
         user_message = f"""Sources ({len(results)}):
 {context}
@@ -48,9 +48,10 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
     async def generate(
         self,
         query: str,
-        results: list[SearchResult]
+        results: list[SearchResult],
+        conversation_context: Optional[str] = None,
     ) -> GeneratedAnswer:
-        messages = self._build_messages(query, results)
+        messages = self._build_messages(query, results, conversation_context)
         response = self.client.chat(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
@@ -62,9 +63,10 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
     async def generate_stream(
         self,
         query: str,
-        results: list[SearchResult]
+        results: list[SearchResult],
+        conversation_context: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
-        messages = self._build_messages(query, results)
+        messages = self._build_messages(query, results, conversation_context)
         for event in self.client.chat_stream(
             model=settings.COHERE_CHAT_MODEL,
             messages=messages,
