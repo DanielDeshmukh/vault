@@ -1,9 +1,7 @@
-from typing import Optional
 from dataclasses import dataclass
 
 from app.db.pinecone import pinecone_client
 from app.db.sessions import async_session
-from app.auth.permissions import get_user_max_access_level, get_user_allowed_account_ids
 from app.db.models import User
 from app.retrieval.permission_filter import PermissionFilter
 
