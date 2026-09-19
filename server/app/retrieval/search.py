@@ -83,7 +83,7 @@ def expand_query(query: str) -> list[str]:
 
     for keyword, hints in topic_hints.items():
         if keyword in q_lower:
-            expansions.append(query + " " + hints)
+            expansions.append(query + " " + " ".join(hints))
             break
 
     return [query] + expansions[:2]
