@@ -13,9 +13,9 @@ import sys
 import os
 from dataclasses import dataclass, field, asdict
 
-BASE = "https://vault-rbac-rag.vercel.app"
-EMAIL = "admin@vaultdemo.com"
-PASSWORD = "demo1234"
+BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
+EMAIL = os.environ.get("VAULT_ADMIN_EMAIL", "admin@vaultdemo.com")
+PASSWORD = os.environ.get("VAULT_DEMO_PASSWORD", "")
 
 # ---- Golden questions with expected keywords/topics ----
 

@@ -1,10 +1,10 @@
 """
 Vault Multi-User Golden-50 Evaluation
 Tests all 50 questions across every user role.
-Iterates users, logs in, runs queries, checks permission filtering.
 
 Usage:
   cd server
+  Set env vars: VAULT_DEMO_PASSWORD, VAULT_DANIEL_PASSWORD
   python -m scripts.evaluate_users          # run all
   python -m scripts.evaluate_users 0 10     # start at 0, run 10 questions per user
 """
@@ -12,21 +12,23 @@ import json
 import time
 import httpx
 import sys
+import os
 from dataclasses import dataclass, field, asdict
 
-BASE = "https://vault-rbac-rag.vercel.app"
+BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
+DEMO_PASS = os.environ.get("VAULT_DEMO_PASSWORD", "")
+DANIEL_PASS = os.environ.get("VAULT_DANIEL_PASSWORD", "")
 
-# All users with their passwords
 USERS = [
-    {"email": "admin@vaultdemo.com",               "password": "demo1234",           "role": "Admin",        "access_level": 99, "is_admin": True},
-    {"email": "hr@vaultdemo.com",                  "password": "demo1234",           "role": "Confidential", "access_level": 2,  "is_admin": False},
-    {"email": "confidential.role.test@vault.local","password": "ConfidentialPass@123","role": "Confidential","access_level": 2,  "is_admin": False},
-    {"email": "engineer@vaultdemo.com",            "password": "demo1234",           "role": "Internal",     "access_level": 1,  "is_admin": False},
-    {"email": "internal.role.test@vault.local",    "password": "InternalPass@123",   "role": "Internal",     "access_level": 1,  "is_admin": False},
-    {"email": "restricted.role.test@vault.local",  "password": "RestrictedPass@123", "role": "Restricted",    "access_level": 3,  "is_admin": False},
-    {"email": "public.role.test@vault.local",      "password": "PublicPass@123",     "role": "Public",        "access_level": 0,  "is_admin": False},
-    {"email": "deshmukhdaniel2005@gmail.com",      "password": "Daniel#2005",       "role": "Public",        "access_level": 0,  "is_admin": False},
-    {"email": "intern@vaultdemo.com",              "password": "demo1234",           "role": "Public",        "access_level": 0,  "is_admin": False},
+    {"email": "admin@vaultdemo.com",               "password": DEMO_PASS,   "role": "Admin",        "access_level": 99, "is_admin": True},
+    {"email": "hr@vaultdemo.com",                  "password": DEMO_PASS,   "role": "Confidential", "access_level": 2,  "is_admin": False},
+    {"email": "confidential.role.test@vault.local","password": "ConfidentialPass@123", "role": "Confidential", "access_level": 2, "is_admin": False},
+    {"email": "engineer@vaultdemo.com",            "password": DEMO_PASS,   "role": "Internal",     "access_level": 1,  "is_admin": False},
+    {"email": "internal.role.test@vault.local",    "password": "InternalPass@123",     "role": "Internal",     "access_level": 1, "is_admin": False},
+    {"email": "restricted.role.test@vault.local",  "password": "RestrictedPass@123",   "role": "Restricted",   "access_level": 3, "is_admin": False},
+    {"email": "public.role.test@vault.local",      "password": "PublicPass@123",       "role": "Public",       "access_level": 0, "is_admin": False},
+    {"email": "deshmukhdaniel2005@gmail.com",      "password": DANIEL_PASS, "role": "Public",       "access_level": 0,  "is_admin": False},
+    {"email": "intern@vaultdemo.com",              "password": DEMO_PASS,   "role": "Public",       "access_level": 0,  "is_admin": False},
 ]
 
 GOLDEN_50 = [
@@ -219,7 +221,6 @@ def main():
 
         all_user_results.append(ur)
 
-    # ---- Summary Table ----
     print("\n\n" + "=" * 100)
     print("  MULTI-USER EVALUATION SUMMARY")
     print("=" * 100)
@@ -234,41 +235,8 @@ def main():
             f"{ur.avg_score:>7.3f} {ur.avg_latency_ms:>8.0f}ms"
         )
 
-    # Per-role averages
-    print(f"\n{'='*100}")
-    print("  PER-ROLE AVERAGES")
-    print(f"{'='*100}")
-    role_groups = {}
-    for ur in all_user_results:
-        role_groups.setdefault(ur.role, []).append(ur)
-
-    print(f"\n{'Role':<14} {'Users':>6} {'KW Recall':>10} {'Cites':>7} {'Score':>7}")
-    print("-" * 50)
-    for role, users in sorted(role_groups.items()):
-        kw = sum(u.avg_keyword_recall for u in users) / len(users)
-        cites = sum(u.avg_citations for u in users) / len(users)
-        score = sum(u.avg_score for u in users) / len(users)
-        print(f"{role:<14} {len(users):>6} {kw:>9.0%} {cites:>7.1f} {score:>7.3f}")
-
-    # Users with errors
-    error_users = [ur for ur in all_user_results if ur.errors]
-    if error_users:
-        print(f"\n{'='*100}")
-        print("  USERS WITH ERRORS")
-        print(f"{'='*100}")
-        for ur in error_users:
-            print(f"\n  {ur.email} ({ur.role}):")
-            for err in ur.errors[:5]:
-                print(f"    - {err}")
-
-    # Save results
-    out = []
-    for ur in all_user_results:
-        d = asdict(ur)
-        out.append(d)
-
     with open("eval_results_users.json", "w") as f:
-        json.dump(out, f, indent=2)
+        json.dump([asdict(ur) for ur in all_user_results], f, indent=2)
     print(f"\nResults saved to eval_results_users.json")
 
 

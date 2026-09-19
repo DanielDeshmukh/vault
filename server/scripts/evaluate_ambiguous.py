@@ -1,30 +1,33 @@
 """
 Vault Ambiguous Questions Evaluation
 Natural, real-world questions that test retrieval quality.
-Run 5 ambiguous questions across all users.
 
 Usage:
   cd server
+  Set env vars: VAULT_DEMO_PASSWORD, VAULT_DANIEL_PASSWORD
   python -m scripts.evaluate_ambiguous
 """
 import json
 import time
 import httpx
 import sys
+import os
 from dataclasses import dataclass, field, asdict
 
-BASE = "https://vault-rbac-rag.vercel.app"
+BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
+DEMO_PASS = os.environ.get("VAULT_DEMO_PASSWORD", "")
+DANIEL_PASS = os.environ.get("VAULT_DANIEL_PASSWORD", "")
 
 USERS = [
-    {"email": "admin@vaultdemo.com",               "password": "demo1234",           "role": "Admin",        "access_level": 99, "is_admin": True},
-    {"email": "hr@vaultdemo.com",                  "password": "demo1234",           "role": "Confidential", "access_level": 2,  "is_admin": False},
-    {"email": "confidential.role.test@vault.local","password": "ConfidentialPass@123","role": "Confidential","access_level": 2,  "is_admin": False},
-    {"email": "engineer@vaultdemo.com",            "password": "demo1234",           "role": "Internal",     "access_level": 1,  "is_admin": False},
-    {"email": "internal.role.test@vault.local",    "password": "InternalPass@123",   "role": "Internal",     "access_level": 1,  "is_admin": False},
-    {"email": "restricted.role.test@vault.local",  "password": "RestrictedPass@123", "role": "Restricted",    "access_level": 3,  "is_admin": False},
-    {"email": "public.role.test@vault.local",      "password": "PublicPass@123",     "role": "Public",        "access_level": 0,  "is_admin": False},
-    {"email": "deshmukhdaniel2005@gmail.com",      "password": "Daniel#2005",       "role": "Public",        "access_level": 0,  "is_admin": False},
-    {"email": "intern@vaultdemo.com",              "password": "demo1234",           "role": "Public",        "access_level": 0,  "is_admin": False},
+    {"email": "admin@vaultdemo.com",               "password": DEMO_PASS,   "role": "Admin",        "access_level": 99, "is_admin": True},
+    {"email": "hr@vaultdemo.com",                  "password": DEMO_PASS,   "role": "Confidential", "access_level": 2,  "is_admin": False},
+    {"email": "confidential.role.test@vault.local","password": "ConfidentialPass@123", "role": "Confidential", "access_level": 2, "is_admin": False},
+    {"email": "engineer@vaultdemo.com",            "password": DEMO_PASS,   "role": "Internal",     "access_level": 1,  "is_admin": False},
+    {"email": "internal.role.test@vault.local",    "password": "InternalPass@123",     "role": "Internal",     "access_level": 1, "is_admin": False},
+    {"email": "restricted.role.test@vault.local",  "password": "RestrictedPass@123",   "role": "Restricted",   "access_level": 3, "is_admin": False},
+    {"email": "public.role.test@vault.local",      "password": "PublicPass@123",       "role": "Public",       "access_level": 0, "is_admin": False},
+    {"email": "deshmukhdaniel2005@gmail.com",      "password": DANIEL_PASS, "role": "Public",       "access_level": 0,  "is_admin": False},
+    {"email": "intern@vaultdemo.com",              "password": DEMO_PASS,   "role": "Public",       "access_level": 0,  "is_admin": False},
 ]
 
 AMBIGUOUS_QUESTIONS = [

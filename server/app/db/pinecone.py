@@ -2,10 +2,6 @@ import os
 from pinecone import Pinecone, ServerlessSpec
 from typing import Optional
 
-CORRECT_API_KEY = "pcsk_51kowd_4vknyxyhZbVj3mucgEqNDouayNhMSnbWWzdsy4cNtU4jH1DXGAmz6wewEPsG7jV"
-CORRECT_INDEX_NAME = "vault"
-CORRECT_INDEX_HOST = "vault-i2m1jrk.svc.aped-4627-b74a.pinecone.io"
-
 
 class PineconeClient:
     def __init__(self):
@@ -15,13 +11,16 @@ class PineconeClient:
     @property
     def client(self) -> Pinecone:
         if self._client is None:
-            self._client = Pinecone(api_key=CORRECT_API_KEY)
+            api_key = os.environ.get("PINECONE_API_KEY", "")
+            self._client = Pinecone(api_key=api_key)
         return self._client
 
     @property
     def index(self):
         if self._index is None:
-            self._index = self.client.Index(CORRECT_INDEX_NAME, host=CORRECT_INDEX_HOST)
+            index_name = os.environ.get("PINECONE_INDEX_NAME", "vault")
+            index_host = os.environ.get("PINECONE_INDEX_HOST", "")
+            self._index = self.client.Index(index_name, host=index_host)
         return self._index
 
     def reset(self):
@@ -29,10 +28,11 @@ class PineconeClient:
         self._index = None
 
     async def create_index(self, dimension: int = 1024):
+        index_name = os.environ.get("PINECONE_INDEX_NAME", "vault")
         existing_indexes = [idx.name for idx in self.client.list_indexes()]
-        if CORRECT_INDEX_NAME not in existing_indexes:
+        if index_name not in existing_indexes:
             self.client.create_index(
-                name=CORRECT_INDEX_NAME,
+                name=index_name,
                 dimension=dimension,
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1")

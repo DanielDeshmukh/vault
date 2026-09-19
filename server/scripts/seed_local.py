@@ -31,10 +31,10 @@ ROLES = [
 ]
 
 USERS = [
-    {"email": "admin@vaultdemo.com", "password": "demo1234", "full_name": "Sarah Chen", "department": "engineering", "is_admin": True, "roles": ["Confidential"]},
-    {"email": "engineer@vaultdemo.com", "password": "demo1234", "full_name": "Marcus Johnson", "department": "engineering", "is_admin": False, "roles": ["Internal"]},
-    {"email": "hr@vaultdemo.com", "password": "demo1234", "full_name": "Priya Sharma", "department": "human_resources", "is_admin": False, "roles": ["Confidential"]},
-    {"email": "intern@vaultdemo.com", "password": "demo1234", "full_name": "Alex Kim", "department": "marketing", "is_admin": False, "roles": ["Public"]},
+    {"email": "admin@vaultdemo.com", "password": os.environ.get("VAULT_DEMO_PASSWORD", ""), "full_name": "Sarah Chen", "department": "engineering", "is_admin": True, "roles": ["Confidential"]},
+    {"email": "engineer@vaultdemo.com", "password": os.environ.get("VAULT_DEMO_PASSWORD", ""), "full_name": "Marcus Johnson", "department": "engineering", "is_admin": False, "roles": ["Internal"]},
+    {"email": "hr@vaultdemo.com", "password": os.environ.get("VAULT_DEMO_PASSWORD", ""), "full_name": "Priya Sharma", "department": "human_resources", "is_admin": False, "roles": ["Confidential"]},
+    {"email": "intern@vaultdemo.com", "password": os.environ.get("VAULT_DEMO_PASSWORD", ""), "full_name": "Alex Kim", "department": "marketing", "is_admin": False, "roles": ["Public"]},
 ]
 
 REAL_DOCUMENTS = [
