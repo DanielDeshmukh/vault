@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Terminal, Pipeline, PermissionSim } from "@/components/Interactive";
+import { SiGithub, SiX, SiLinkedin } from "react-icons/si";
 
 const SOURCES = [
   { n: "Zendesk", d: "Tickets, comments, attachments, agent notes" },
@@ -365,10 +366,10 @@ export default function Home() {
               <span className="font-bold tracking-tight text-lg">VAULT</span>
             </div>
             <p className="text-ink-subtle text-sm max-w-sm">Permission-aware enterprise knowledge system. Permission filtering happens before retrieval, not after generation.</p>
-            <div className="flex gap-2 mt-6">
-              <a href="https://github.com/DanielDeshmukh" target="_blank" rel="noreferrer" className="b-social mono text-[10px]">GH</a>
-              <a href="https://x.com/DeshmukhDa71837" target="_blank" rel="noreferrer" className="b-social mono text-[10px]">X</a>
-              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social mono text-[10px]">IN</a>
+            <div className="flex gap-3 mt-6">
+              <a href="https://github.com/DanielDeshmukh" target="_blank" rel="noreferrer" className="b-social"><SiGithub size={16} /></a>
+              <a href="https://x.com/DeshmukhDa71837" target="_blank" rel="noreferrer" className="b-social"><SiX size={16} /></a>
+              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social"><SiLinkedin size={16} /></a>
             </div>
           </div>
           <div className="b-footer-col md:col-span-2">
