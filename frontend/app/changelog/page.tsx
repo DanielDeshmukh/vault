@@ -45,7 +45,7 @@ export default function ChangelogPage() {
       <header className="sticky top-0 z-50 bg-background border-b-2 border-foreground">
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <span className="w-8 h-8 bg-foreground flex items-center justify-center text-background font-bold text-lg">V</span>
+            <img src="/tab-icon.png" alt="Vault" className="w-8 h-8 rounded" />
             <span className="font-bold tracking-tight text-lg">VAULT</span>
           </Link>
           <Link href="/" className="b-btn !py-2 !px-4 text-[11px]">Back to Home</Link>
