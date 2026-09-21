@@ -204,7 +204,7 @@ export function PermissionSim() {
         </div>
         <div className="border-2 border-border p-4 space-y-2">
           <div className="mono text-[10px] text-ink-tertiary pb-2 border-b border-border">
-            pinecone.search(filter: access_level \u2264 {role}, account \u2208 scope)
+            pinecone.search(filter: access_level {"\u2264"} {role}, account {"\u2208"} scope)
           </div>
           {CHUNKS.map((c) => {
             const ok = c.lvl <= role;

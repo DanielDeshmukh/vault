@@ -22,7 +22,7 @@ const FEATURES = [
   {
     k: "02",
     t: "Hybrid search",
-    d: "Vector similarity catches meaning (\u201cbilling complaint\u201d \u2248 \u201cinvoice discrepancy\u201d). BM25 catches exact strings: ticket IDs, error codes, proper nouns.",
+    d: "Vector similarity catches meaning (\u201Cbilling complaint\u201D \u2248 \u201Cinvoice discrepancy\u201D). BM25 catches exact strings: ticket IDs, error codes, proper nouns.",
   },
   {
     k: "03",
@@ -98,8 +98,8 @@ export default function Home() {
 
       {/* HERO */}
       <section className="b-grid relative px-6 md:px-12 pt-20 pb-24 noise">
-        <span className="b-corner top-4 left-6">000 \u2014 HERO</span>
-        <span className="b-corner top-4 right-6">52.5200\u00b0 N, 13.4050\u00b0 E</span>
+        <span className="b-corner top-4 left-6">000 &mdash; HERO</span>
+        <span className="b-corner top-4 right-6">52.5200&deg; N, 13.4050&deg; E</span>
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
             <div className="flex items-center gap-3 mb-8">
@@ -114,11 +114,11 @@ export default function Home() {
               you&apos;re <span className="accent">allowed</span> to.
             </h1>
             <p className="mt-8 max-w-xl text-lg md:text-xl text-ink-muted leading-relaxed">
-              Vault answers natural-language questions across Zendesk, Jira, Slack, Confluence, call transcripts and policy docs \u2014 with citations \u2014 while enforcing permission boundaries{" "}
+              Vault answers natural-language questions across Zendesk, Jira, Slack, Confluence, call transcripts and policy docs &mdash; with citations &mdash; while enforcing permission boundaries{" "}
               <span className="text-foreground font-bold underline decoration-primary decoration-2 underline-offset-4">before</span> anything reaches the language model.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/register" className="b-btn b-btn-accent">Deploy Vault \u2192</Link>
+              <Link href="/register" className="b-btn b-btn-accent">Deploy Vault &rarr;</Link>
               <a href="#how" className="b-btn b-btn-outline">Read the architecture</a>
             </div>
             <div className="mt-12 grid grid-cols-3 max-w-md border-2 border-border-strong divide-x-2 divide-border-strong">
@@ -141,14 +141,14 @@ export default function Home() {
         <div className="b-marquee-track mono text-[12px] font-bold tracking-[0.2em]">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
             <span key={i} className="px-8">
-              {m} <span className="ml-8">\u25a0</span>
+              {m} <span className="ml-8">&bull;</span>
             </span>
           ))}
         </div>
       </div>
 
       {/* PROBLEM */}
-      <Section label="001 \u2014 THE PROBLEM">
+      <Section label="001 &mdash; THE PROBLEM">
         <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5">
             <div className="b-label mb-4">The problem</div>
@@ -177,7 +177,7 @@ export default function Home() {
       </Section>
 
       {/* HOW IT WORKS */}
-      <Section id="how" label="002 \u2014 PIPELINE">
+      <Section id="how" label="002 &mdash; PIPELINE">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="b-label mb-4">How it works</div>
@@ -191,21 +191,21 @@ export default function Home() {
       </Section>
 
       {/* PERMISSIONS */}
-      <Section id="permissions" label="003 \u2014 ACCESS CONTROL" className="bg-surface-1">
+      <Section id="permissions" label="003 &mdash; ACCESS CONTROL" className="bg-surface-1">
         <div className="mb-12">
           <div className="b-label mb-4">Security model</div>
           <h2 className="b-h2">
             Four tiers. <span className="accent">Zero</span> leaks.
           </h2>
           <p className="mt-4 text-ink-muted text-lg max-w-2xl">
-            Select a role and watch the retrieval set change. The blocked rows aren&apos;t hidden from a result list \u2014 they were never retrieved.
+            Select a role and watch the retrieval set change. The blocked rows aren&apos;t hidden from a result list &mdash; they were never retrieved.
           </p>
         </div>
         <PermissionSim />
       </Section>
 
       {/* FEATURES */}
-      <Section id="features" label="004 \u2014 FEATURES">
+      <Section id="features" label="004 &mdash; FEATURES">
         <div className="b-label mb-4">Key features</div>
         <h2 className="b-h2 mb-12">Built like infrastructure, not a chatbot.</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 border-t-2 border-l-2 border-border-strong">
@@ -220,7 +220,7 @@ export default function Home() {
       </Section>
 
       {/* USE CASES */}
-      <Section label="005 \u2014 USE CASES">
+      <Section label="005 &mdash; USE CASES">
         <div className="b-label mb-4">Use cases</div>
         <h2 className="b-h2 mb-12">Real questions. Cited answers.</h2>
         <div>
@@ -240,7 +240,7 @@ export default function Home() {
       </Section>
 
       {/* EVAL */}
-      <Section id="eval" label="006 \u2014 EVALUATION" className="bg-surface-1">
+      <Section id="eval" label="006 &mdash; EVALUATION" className="bg-surface-1">
         <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-4">
             <div className="b-label mb-4">Evaluation framework</div>
@@ -274,7 +274,7 @@ export default function Home() {
       </Section>
 
       {/* API + TECH */}
-      <Section id="api" label="007 \u2014 API / STACK">
+      <Section id="api" label="007 &mdash; API / STACK">
         <div className="grid lg:grid-cols-2 gap-12">
           <div>
             <div className="b-label mb-4">API reference</div>
@@ -282,7 +282,7 @@ export default function Home() {
             <div className="b-terminal !shadow-none">
               <div className="b-terminal-bar">
                 <span>POST /api/query</span>
-                <span>Authorization: Bearer \u2039token\u203a</span>
+                <span>Authorization: Bearer &lt;token&gt;</span>
               </div>
               <pre className="p-4 text-[12px] leading-relaxed text-ink-muted overflow-x-auto">{`// request
 { "question": "string", "context": "optional" }
@@ -298,9 +298,9 @@ export default function Home() {
               {[
                 "POST /api/auth/register",
                 "POST /api/auth/login",
-                "POST /api/documents/ingest",
+                "POST /api/ingest",
+                "GET  /api/documents",
                 "GET  /api/documents/{id}",
-                "DELETE /api/documents/{id}",
                 "GET  /health",
               ].map((e) => (
                 <div key={e} className="border border-border px-3 py-2 text-ink-muted hover:border-primary whitespace-pre">
@@ -338,7 +338,7 @@ export default function Home() {
 
       {/* CTA */}
       <section className="b-divider relative bg-primary text-primary-foreground px-6 md:px-12 py-24">
-        <span className="b-corner top-3 left-6 !text-primary-foreground/50">008 \u2014 CTA</span>
+        <span className="b-corner top-3 left-6 !text-primary-foreground/50">008 &mdash; CTA</span>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-10">
           <h2 className="b-headline !text-primary-foreground">
             Stop leaking.
@@ -381,20 +381,20 @@ export default function Home() {
           <div className="b-footer-col md:col-span-2">
             <h4>Developers</h4>
             <a href="#api">API reference</a>
-            <a href="#">Connectors</a>
-            <a href="#">Golden set</a>
-            <a href="#">Changelog</a>
+            <Link href="/connectors">Connectors</Link>
+            <Link href="/golden-set">Golden set</Link>
+            <Link href="/changelog">Changelog</Link>
           </div>
           <div className="b-footer-col md:col-span-3">
             <h4>Compliance</h4>
-            <a href="#">SOC 2</a>
-            <a href="#">HIPAA</a>
-            <a href="#">Audit logging</a>
-            <a href="#">MIT License</a>
+            <Link href="/compliance/soc2">SOC 2</Link>
+            <Link href="/compliance/hipaa">HIPAA</Link>
+            <Link href="/compliance/audit">Audit logging</Link>
+            <a href="https://github.com/DanielDeshmukh/vault/blob/master/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-16 pt-6 border-t border-border flex flex-col md:flex-row justify-between gap-2 mono text-[10px] tracking-widest uppercase text-ink-tertiary">
-          <span>\u00a9 2026 Vault. MIT License.</span>
+          <span>&copy; 2026 Vault. MIT License.</span>
           <span>unauthorized_leakage_rate = 0.0</span>
         </div>
       </footer>
