@@ -55,9 +55,13 @@ async def list_documents(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Document).order_by(Document.created_at.desc()))
-    docs = result.scalars().all()
     user_level = await user_access_level(current_user, db)
+    result = await db.execute(
+        select(Document)
+        .where(Document.access_level <= user_level)
+        .order_by(Document.created_at.desc())
+    )
+    docs = result.scalars().all()
     return [
         DocumentResponse(
             id=str(d.id),
@@ -68,7 +72,7 @@ async def list_documents(
             access_level=d.access_level,
             owner_id=str(d.owner_id) if d.owner_id else None,
             created_at=d.created_at.isoformat() if d.created_at else None,
-            can_access=user_level >= d.access_level,
+            can_access=True,
         )
         for d in docs
     ]
@@ -89,7 +93,6 @@ async def get_document(
     if user_level < doc.access_level:
         raise HTTPException(status_code=403, detail="Insufficient access level for this document")
 
-    content = doc.content if user_level >= doc.access_level else None
     return DocumentResponse(
         id=str(doc.id),
         title=doc.title,
@@ -99,7 +102,7 @@ async def get_document(
         access_level=doc.access_level,
         owner_id=str(doc.owner_id) if doc.owner_id else None,
         created_at=doc.created_at.isoformat() if doc.created_at else None,
-        content=content,
+        content=doc.content,
     )
 
 
