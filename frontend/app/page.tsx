@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Terminal, Pipeline, PermissionSim } from "@/components/Interactive";
 import { SiGithub, SiX } from "react-icons/si";
@@ -66,6 +67,163 @@ const TECH = ["Cohere Command", "Cohere Embeddings", "Cohere Rerank", "Pinecone"
 
 const MARQUEE = ["PERMISSION BEFORE RETRIEVAL", "CITED OR REFUSED", "LEAKAGE = 0.0", "HYBRID SEARCH", "FULL AUDIT TRAIL", "PRE-RETRIEVAL FILTERING"];
 
+const API_ENDPOINTS = [
+  {
+    method: "POST",
+    path: "/api/query",
+    auth: true,
+    request: `{
+  "question": "What did we promise Acme Corp in the last renewal call?",
+  "context": "optional conversation history"
+}`,
+    response: `{
+  "answer": "On the Mar 14 renewal call, we committed to (1) a 99.95% uptime SLA upgrade at no cost [1], (2) dedicated Slack Connect channel by Q2 [2], and (3) a 12-month price lock confirmed in Amendment #3 [3].",
+  "citations": [
+    {
+      "document_id": "doc_8f2a9c1e",
+      "title": "acme_renewal_call_0314",
+      "source": "gong",
+      "score": 0.94
+    },
+    {
+      "document_id": "doc_3b7d4e2f",
+      "title": "Acme Amendment #3",
+      "source": "confluence",
+      "score": 0.91
+    }
+  ],
+  "trace_id": "7f3a-c21e-9b4d"
+}`,
+  },
+  {
+    method: "POST",
+    path: "/api/auth/register",
+    auth: false,
+    request: `{
+  "email": "j.rivera@globex.com",
+  "password": "s3cureP@ss",
+  "full_name": "Juan Rivera",
+  "department": "Customer Success",
+  "designation": "Account Manager"
+}`,
+    response: `{
+  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "usr_a1b2c3d4",
+    "email": "j.rivera@globex.com",
+    "full_name": "Juan Rivera",
+    "department": "Customer Success",
+    "designation": "Account Manager",
+    "is_admin": false,
+    "is_approved": false,
+    "approval_screen_started_at": "2026-09-21T14:30:00Z"
+  }
+}`,
+  },
+  {
+    method: "POST",
+    path: "/api/auth/login",
+    auth: false,
+    request: `{
+  "email": "j.rivera@globex.com",
+  "password": "s3cureP@ss"
+}`,
+    response: `{
+  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "usr_a1b2c3d4",
+    "email": "j.rivera@globex.com",
+    "full_name": "Juan Rivera",
+    "department": "Customer Success",
+    "designation": "Account Manager",
+    "is_admin": false,
+    "is_approved": true,
+    "approval_screen_started_at": null
+  }
+}`,
+  },
+  {
+    method: "POST",
+    path: "/api/ingest",
+    auth: true,
+    request: `// multipart/form-data
+file: "renewal_policy_q1.pdf"
+source: "confluence"
+account_id: "acme-corp"
+department: "customer-success"
+access_level: 2`,
+    response: `{
+  "documents_processed": 1,
+  "chunks_created": 14,
+  "errors": []
+}`,
+  },
+  {
+    method: "GET",
+    path: "/api/documents",
+    auth: true,
+    request: `// no body required
+// Authorization: Bearer <token>`,
+    response: `[
+  {
+    "id": "doc_8f2a9c1e",
+    "title": "acme_renewal_call_0314",
+    "source": "gong",
+    "account_id": "acme-corp",
+    "department": "customer-success",
+    "access_level": 2,
+    "owner_id": "usr_a1b2c3d4",
+    "created_at": "2026-03-15T10:00:00Z",
+    "can_access": true
+  },
+  {
+    "id": "doc_3b7d4e2f",
+    "title": "Data Retention Policy v2.1",
+    "source": "confluence",
+    "account_id": null,
+    "department": "compliance",
+    "access_level": 0,
+    "owner_id": "usr_sarah_chen",
+    "created_at": "2026-01-10T08:30:00Z",
+    "can_access": true
+  }
+]`,
+  },
+  {
+    method: "GET",
+    path: "/api/documents/{id}",
+    auth: true,
+    request: `// no body required
+// Authorization: Bearer <token>`,
+    response: `{
+  "id": "doc_8f2a9c1e",
+  "title": "acme_renewal_call_0314",
+  "source": "gong",
+  "account_id": "acme-corp",
+  "department": "customer-success",
+  "access_level": 2,
+  "owner_id": "usr_a1b2c3d4",
+  "created_at": "2026-03-15T10:00:00Z",
+  "content": "On the Mar 14 renewal call with Acme Corp, the following commitments were made: 1) 99.95% uptime SLA upgrade at no additional cost...",
+  "can_access": true
+}`,
+  },
+  {
+    method: "GET",
+    path: "/health",
+    auth: false,
+    request: `// no body required`,
+    response: `{
+  "status": "healthy",
+  "version": "1.0.0",
+  "database": "connected",
+  "pinecone": "connected"
+}`,
+  },
+];
+
 function Section({ id, label, children, className = "" }: { id?: string; label: string; children: React.ReactNode; className?: string }) {
   return (
     <section id={id} className={`b-divider relative px-6 md:px-12 py-20 md:py-28 ${className}`}>
@@ -77,6 +235,8 @@ function Section({ id, label, children, className = "" }: { id?: string; label: 
 }
 
 export default function Home() {
+  const [activeEndpoint, setActiveEndpoint] = useState(0);
+  const ep = API_ENDPOINTS[activeEndpoint];
   return (
     <div className="brutalist min-h-screen">
       {/* NAV */}
@@ -283,30 +443,23 @@ export default function Home() {
             <h2 className="b-h2 mb-8">One endpoint that matters.</h2>
             <div className="b-terminal !shadow-none">
               <div className="b-terminal-bar">
-                <span>POST /api/query</span>
-                <span>Authorization: Bearer &lt;token&gt;</span>
+                <span>{ep.method} {ep.path}</span>
+                {ep.auth && <span>Authorization: Bearer &lt;token&gt;</span>}
               </div>
-              <pre className="p-4 text-[12px] leading-relaxed text-ink-muted overflow-x-auto">{`// request
-{ "question": "string", "context": "optional" }
-
-// response
-{
-  "answer":    "string",
-  "citations": [ { "source": "...", "chunk_id": "...", "score": 0.94 } ],
-  "trace_id":  "string"
-}`}</pre>
+              <pre className="p-4 text-[12px] leading-relaxed text-ink-muted overflow-x-auto">{`// request\n${ep.request}\n\n// response\n${ep.response}`}</pre>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 mono text-[11px]">
-              {[
-                "POST /api/auth/register",
-                "POST /api/auth/login",
-                "POST /api/ingest",
-                "GET  /api/documents",
-                "GET  /api/documents/{id}",
-                "GET  /health",
-              ].map((e) => (
-                <div key={e} className="border border-border px-3 py-2 text-ink-muted hover:border-primary whitespace-pre">
-                  {e}
+              {API_ENDPOINTS.map((e, i) => (
+                <div
+                  key={e.path}
+                  onClick={() => setActiveEndpoint(i)}
+                  className={`border px-3 py-2 whitespace-pre cursor-pointer transition-colors ${
+                    i === activeEndpoint
+                      ? "border-primary text-foreground bg-surface-1"
+                      : "border-border text-ink-muted hover:border-primary"
+                  }`}
+                >
+                  {e.method} {e.path.replace("/api/", "/")}
                 </div>
               ))}
             </div>
