@@ -25,7 +25,7 @@
     --success: 142 72% 41%;
     --ring: 235 56% 65%;
     --radius: 0px;
-    --accent: 235 56% 65%;
+    --accent: 0 0% 74%;
   }
 
   .dark {
@@ -35,13 +35,13 @@
     --card-foreground: 220 5% 96%;
     --popover: 220 5% 7%;
     --popover-foreground: 220 5% 96%;
-    --primary: 235 56% 65%;
+    --primary: 0 0% 74%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 5% 7%;
     --secondary-foreground: 220 5% 96%;
     --muted: 220 5% 7%;
     --muted-foreground: 220 5% 55%;
-    --accent: 235 56% 65%;
+    --accent: 0 0% 74%;
     --accent-foreground: 220 5% 96%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -65,8 +65,8 @@
 }
 
 ::selection {
-  background: #5e6ad2;
-  color: #fff;
+  background: #bdbdbd;
+  color: #010102;
 }
 
 /* ============================================
@@ -90,11 +90,11 @@
 }
 
 .accent {
-  color: #5e6ad2;
+  color: #bdbdbd;
 }
 
 .bg-accent {
-  background: #5e6ad2;
+  background: #bdbdbd;
 }
 
 .b-divider {
@@ -114,7 +114,7 @@
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
   line-height: 1;
-  color: #5e6ad2;
+  color: #bdbdbd;
   letter-spacing: -0.03em;
 }
 
@@ -127,7 +127,7 @@
 }
 
 .b-card:hover {
-  border-color: #5e6ad2;
+  border-color: #bdbdbd;
 }
 
 .b-step {
@@ -141,15 +141,15 @@
 }
 
 .b-step.active {
-  border-color: #5e6ad2;
-  background: rgba(94, 106, 210, 0.05);
-  box-shadow: 6px 6px 0 #5e6ad2;
+  border-color: #bdbdbd;
+  background: rgba(189, 189, 189, 0.05);
+  box-shadow: 6px 6px 0 #bdbdbd;
 }
 
 .b-step-num {
   font-family: 'Space Mono', monospace;
   font-size: 11px;
-  color: #5e6ad2;
+  color: #bdbdbd;
   margin-bottom: 0.5rem;
 }
 
@@ -200,8 +200,8 @@
 }
 
 .b-role.selected {
-  border-color: #5e6ad2;
-  background: rgba(94, 106, 210, 0.05);
+  border-color: #bdbdbd;
+  background: rgba(189, 189, 189, 0.05);
 }
 
 .b-tag {
@@ -214,8 +214,8 @@
 }
 
 .b-tag:hover {
-  border-color: #5e6ad2;
-  color: #5e6ad2;
+  border-color: #bdbdbd;
+  color: #bdbdbd;
 }
 
 .b-btn {
@@ -235,9 +235,9 @@
 }
 
 .b-btn:hover {
-  background: #5e6ad2;
-  border-color: #5e6ad2;
-  color: #fff;
+  background: #bdbdbd;
+  border-color: #bdbdbd;
+  color: #010102;
 }
 
 .b-btn:active {
@@ -250,21 +250,21 @@
 }
 
 .b-btn-outline:hover {
-  background: #f7f8f8;
-  border-color: #f7f8f8;
+  background: #bdbdbd;
+  border-color: #bdbdbd;
   color: #010102;
 }
 
 .b-btn-accent {
-  background: #5e6ad2;
-  border-color: #5e6ad2;
+  background: #bdbdbd;
+  border-color: #bdbdbd;
   box-shadow: 6px 6px 0 #f7f8f8;
 }
 
 .b-btn-accent:hover {
   background: #f7f8f8;
   border-color: #f7f8f8;
-  box-shadow: 6px 6px 0 #5e6ad2;
+  box-shadow: 6px 6px 0 #bdbdbd;
   color: #010102;
 }
 
@@ -285,7 +285,7 @@
 }
 
 .b-footer-col a:hover {
-  color: #5e6ad2;
+  color: #bdbdbd;
 }
 
 .b-social {
@@ -300,8 +300,8 @@
 }
 
 .b-social:hover {
-  border-color: #5e6ad2;
-  color: #5e6ad2;
+  border-color: #bdbdbd;
+  color: #bdbdbd;
 }
 
 .b-headline {
@@ -379,7 +379,7 @@
   background: #010102;
   font-family: 'Space Mono', monospace;
   font-size: 12px;
-  box-shadow: 8px 8px 0 #5e6ad2;
+  box-shadow: 8px 8px 0 #bdbdbd;
 }
 
 .b-terminal-bar {
@@ -415,7 +415,7 @@
 }
 
 .chunk.allowed {
-  border-color: #5e6ad2;
+  border-color: #bdbdbd;
   color: #f7f8f8;
 }
 

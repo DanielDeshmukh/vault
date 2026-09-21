@@ -57,7 +57,7 @@ export function Terminal() {
   }, [typed, step]);
 
   const color = (t: string) =>
-    t === "blocked" ? "#ef4444" : t === "filter" ? "#5e6ad2" : "#8a8f98";
+    t === "blocked" ? "#ef4444" : t === "filter" ? "#bdbdbd" : "#8a8f98";
 
   return (
     <div className="b-terminal relative">
@@ -81,7 +81,7 @@ export function Terminal() {
         ))}
         {answer && (
           <div className="fade-up border-t-2 border-border pt-3 mt-3">
-            <div className="b-label mb-2" style={{ color: "#5e6ad2" }}>
+            <div className="b-label mb-2" style={{ color: "#bdbdbd" }}>
               answer
             </div>
             <p className="text-[13px] leading-relaxed text-foreground">{answer}</p>
@@ -140,7 +140,7 @@ export function Pipeline() {
           <p className="text-ink-muted text-base md:text-lg">{STEPS[active].d}</p>
         </div>
         {active === 1 && (
-          <div className="md:ml-auto b-tag" style={{ borderColor: "#5e6ad2", color: "#5e6ad2" }}>
+          <div className="md:ml-auto b-tag" style={{ borderColor: "#bdbdbd", color: "#bdbdbd" }}>
             THE CRITICAL STEP
           </div>
         )}
