@@ -64,6 +64,9 @@ class ApiClient {
       body: data,
     });
     this.setToken(response.access_token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vault_user", JSON.stringify(response.user));
+    }
     return response;
   }
 

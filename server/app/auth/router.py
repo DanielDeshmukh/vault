@@ -76,7 +76,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     
     # Create token
     access_token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user.id), "email": user.email},
         expires_delta=timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     )
     
@@ -118,7 +118,7 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             await db.commit()
     
     access_token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user.id), "email": user.email},
         expires_delta=timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     )
     

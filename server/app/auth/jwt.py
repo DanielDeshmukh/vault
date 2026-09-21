@@ -46,7 +46,8 @@ async def get_current_user(
     try:
         payload = jwt.decode(credentials.credentials, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         user_id: str = payload.get("sub")
-        if user_id is None:
+        token_email: str = payload.get("email")
+        if user_id is None or token_email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
@@ -57,4 +58,8 @@ async def get_current_user(
         raise credentials_exception
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    if user.email != token_email:
+        raise credentials_exception
+    if not user.is_approved:
+        raise HTTPException(status_code=403, detail="Account pending admin approval")
     return user
