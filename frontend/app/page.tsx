@@ -139,7 +139,7 @@ export default function Home() {
       </section>
 
       {/* MARQUEE */}
-      <div className="b-marquee py-3 bg-accent text-background">
+      <div className="b-marquee py-3 bg-accent text-background" aria-hidden="true">
         <div className="b-marquee-track mono text-[12px] font-bold tracking-[0.2em]">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
             <span key={i} className="px-8">
@@ -368,9 +368,9 @@ export default function Home() {
             </div>
             <p className="text-ink-subtle text-sm max-w-sm">Permission-aware enterprise knowledge system. Permission filtering happens before retrieval, not after generation.</p>
             <div className="flex gap-3 mt-6">
-              <a href="https://github.com/DanielDeshmukh" target="_blank" rel="noreferrer" className="b-social"><SiGithub size={16} /></a>
-              <a href="https://x.com/DeshmukhDa71837" target="_blank" rel="noreferrer" className="b-social"><SiX size={16} /></a>
-              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social"><FaLinkedinIn size={16} /></a>
+              <a href="https://github.com/DanielDeshmukh" target="_blank" rel="noreferrer" className="b-social" aria-label="GitHub"><SiGithub size={16} /></a>
+              <a href="https://x.com/DeshmukhDa71837" target="_blank" rel="noreferrer" className="b-social" aria-label="X (Twitter)"><SiX size={16} /></a>
+              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social" aria-label="LinkedIn"><FaLinkedinIn size={16} /></a>
             </div>
           </div>
           <div className="b-footer-col md:col-span-2">

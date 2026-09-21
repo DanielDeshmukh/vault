@@ -447,3 +447,9 @@
   pointer-events: none;
   background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(255, 255, 255, 0.015) 2px 4px);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .b-marquee-track { animation: none !important; }
+  .blink { animation: none !important; visibility: visible !important; }
+  .fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
