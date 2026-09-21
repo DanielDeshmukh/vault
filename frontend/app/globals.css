@@ -25,7 +25,7 @@
     --success: 142 72% 41%;
     --ring: 235 56% 65%;
     --radius: 0px;
-    --accent: 220 5% 55%;
+    --accent: 235 40% 45%;
   }
 
   .dark {
@@ -35,13 +35,13 @@
     --card-foreground: 220 5% 96%;
     --popover: 220 5% 7%;
     --popover-foreground: 220 5% 96%;
-    --primary: 220 5% 55%;
+    --primary: 235 40% 45%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 5% 7%;
     --secondary-foreground: 220 5% 96%;
     --muted: 220 5% 7%;
     --muted-foreground: 220 5% 55%;
-    --accent: 220 5% 55%;
+    --accent: 235 40% 45%;
     --accent-foreground: 220 5% 96%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -65,8 +65,8 @@
 }
 
 ::selection {
-  background: #8a8f98;
-  color: #010102;
+  background: #4a55a0;
+  color: #fff;
 }
 
 /* ============================================
@@ -90,11 +90,11 @@
 }
 
 .accent {
-  color: #8a8f98;
+  color: #4a55a0;
 }
 
 .bg-accent {
-  background: #8a8f98;
+  background: #4a55a0;
 }
 
 .b-divider {
@@ -114,7 +114,7 @@
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
   line-height: 1;
-  color: #8a8f98;
+  color: #4a55a0;
   letter-spacing: -0.03em;
 }
 
@@ -127,7 +127,7 @@
 }
 
 .b-card:hover {
-  border-color: #8a8f98;
+  border-color: #4a55a0;
 }
 
 .b-step {
@@ -141,15 +141,15 @@
 }
 
 .b-step.active {
-  border-color: #8a8f98;
-  background: rgba(138, 143, 152, 0.05);
-  box-shadow: 6px 6px 0 #8a8f98;
+  border-color: #4a55a0;
+  background: rgba(74, 85, 160, 0.05);
+  box-shadow: 6px 6px 0 #0a0a0c;
 }
 
 .b-step-num {
   font-family: 'Space Mono', monospace;
   font-size: 11px;
-  color: #8a8f98;
+  color: #4a55a0;
   margin-bottom: 0.5rem;
 }
 
@@ -200,8 +200,8 @@
 }
 
 .b-role.selected {
-  border-color: #8a8f98;
-  background: rgba(138, 143, 152, 0.05);
+  border-color: #4a55a0;
+  background: rgba(74, 85, 160, 0.05);
 }
 
 .b-tag {
@@ -214,8 +214,8 @@
 }
 
 .b-tag:hover {
-  border-color: #8a8f98;
-  color: #8a8f98;
+  border-color: #4a55a0;
+  color: #4a55a0;
 }
 
 .b-btn {
@@ -235,9 +235,9 @@
 }
 
 .b-btn:hover {
-  background: #8a8f98;
-  border-color: #8a8f98;
-  color: #010102;
+  background: #4a55a0;
+  border-color: #4a55a0;
+  color: #fff;
 }
 
 .b-btn:active {
@@ -250,22 +250,22 @@
 }
 
 .b-btn-outline:hover {
-  background: #8a8f98;
-  border-color: #8a8f98;
-  color: #010102;
+  background: #4a55a0;
+  border-color: #4a55a0;
+  color: #fff;
 }
 
 .b-btn-accent {
-  background: #8a8f98;
-  border-color: #8a8f98;
-  box-shadow: 6px 6px 0 #f7f8f8;
+  background: #4a55a0;
+  border-color: #4a55a0;
+  box-shadow: 6px 6px 0 #0a0a0c;
 }
 
 .b-btn-accent:hover {
-  background: #f7f8f8;
-  border-color: #f7f8f8;
-  box-shadow: 6px 6px 0 #8a8f98;
-  color: #010102;
+  background: #5e6ad2;
+  border-color: #5e6ad2;
+  box-shadow: 6px 6px 0 #4a55a0;
+  color: #fff;
 }
 
 .b-footer-col h4 {
@@ -285,7 +285,7 @@
 }
 
 .b-footer-col a:hover {
-  color: #8a8f98;
+  color: #4a55a0;
 }
 
 .b-social {
@@ -300,8 +300,8 @@
 }
 
 .b-social:hover {
-  border-color: #8a8f98;
-  color: #8a8f98;
+  border-color: #4a55a0;
+  color: #4a55a0;
 }
 
 .b-headline {
@@ -379,7 +379,7 @@
   background: #010102;
   font-family: 'Space Mono', monospace;
   font-size: 12px;
-  box-shadow: 8px 8px 0 #8a8f98;
+  box-shadow: 8px 8px 0 #0a0a0c;
 }
 
 .b-terminal-bar {
@@ -415,7 +415,7 @@
 }
 
 .chunk.allowed {
-  border-color: #8a8f98;
+  border-color: #4a55a0;
   color: #f7f8f8;
 }
 

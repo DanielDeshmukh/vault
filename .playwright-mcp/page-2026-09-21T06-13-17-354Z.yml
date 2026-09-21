@@ -1,0 +1,418 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - banner [ref=f2e3]:
+      - generic [ref=f2e4]:
+        - link "V VAULT / v1.0" [ref=f2e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f2e6]: V
+          - generic [ref=f2e7]: VAULT
+          - generic [ref=f2e8]: / v1.0
+        - navigation [ref=f2e9]:
+          - link "How" [ref=f2e10] [cursor=pointer]:
+            - /url: "#how"
+          - link "Permissions" [ref=f2e11] [cursor=pointer]:
+            - /url: "#permissions"
+          - link "Features" [ref=f2e12] [cursor=pointer]:
+            - /url: "#features"
+          - link "Eval" [ref=f2e13] [cursor=pointer]:
+            - /url: "#eval"
+          - link "API" [ref=f2e14] [cursor=pointer]:
+            - /url: "#api"
+        - link "Get Started" [ref=f2e15] [cursor=pointer]:
+          - /url: /login
+    - generic [ref=f2e16]:
+      - generic [ref=f2e17]: 000 \u2014 HERO
+      - generic [ref=f2e18]: 52.5200\u00b0 N, 13.4050\u00b0 E
+      - generic [ref=f2e19]:
+        - generic [ref=f2e20]:
+          - generic [ref=f2e21]: Permission-aware enterprise knowledge system
+          - heading "Ask anything. See only what you're allowed to." [level=1] [ref=f2e24]: Ask anything.See only whatyou're allowed to.
+          - paragraph [ref=f2e25]: Vault answers natural-language questions across Zendesk, Jira, Slack, Confluence, call transcripts and policy docs \u2014 with citations \u2014 while enforcing permission boundaries before anything reaches the language model.
+          - generic [ref=f2e26]:
+            - link "Deploy Vault \\u2192" [ref=f2e27] [cursor=pointer]:
+              - /url: /register
+            - link "Read the architecture" [ref=f2e28] [cursor=pointer]:
+              - /url: "#how"
+          - generic [ref=f2e29]:
+            - generic [ref=f2e30]:
+              - generic [ref=f2e31]: "0.0"
+              - generic [ref=f2e32]: leakage
+            - generic [ref=f2e33]:
+              - generic [ref=f2e34]: "7"
+              - generic [ref=f2e35]: sources
+            - generic [ref=f2e36]:
+              - generic [ref=f2e37]: MIT
+              - generic [ref=f2e38]: license
+        - generic [ref=f2e40]:
+          - generic [ref=f2e41]:
+            - generic [ref=f2e42]: vault \u00b7 query trace
+            - generic [ref=f2e43]: "trace_id: 7f3a-c21e"
+          - generic [ref=f2e44]: \u276f \u258c
+    - generic [ref=f2e47]:
+      - generic [ref=f2e48]: PERMISSION BEFORE RETRIEVAL \u25a0
+      - generic [ref=f2e49]: CITED OR REFUSED \u25a0
+      - generic [ref=f2e50]: LEAKAGE = 0.0 \u25a0
+      - generic [ref=f2e51]: HYBRID SEARCH \u25a0
+      - generic [ref=f2e52]: FULL AUDIT TRAIL \u25a0
+      - generic [ref=f2e53]: PRE-RETRIEVAL FILTERING \u25a0
+      - generic [ref=f2e54]: PERMISSION BEFORE RETRIEVAL \u25a0
+      - generic [ref=f2e55]: CITED OR REFUSED \u25a0
+      - generic [ref=f2e56]: LEAKAGE = 0.0 \u25a0
+      - generic [ref=f2e57]: HYBRID SEARCH \u25a0
+      - generic [ref=f2e58]: FULL AUDIT TRAIL \u25a0
+      - generic [ref=f2e59]: PRE-RETRIEVAL FILTERING \u25a0
+    - generic [ref=f2e60]:
+      - generic [ref=f2e61]: 001 \u2014 THE PROBLEM
+      - generic [ref=f2e62]: \u00a7
+      - generic [ref=f2e64]:
+        - generic [ref=f2e65]:
+          - generic [ref=f2e66]: The problem
+          - heading "The answer exists. It's in three tools, and one of them you shouldn't open." [level=2] [ref=f2e67]
+          - paragraph [ref=f2e68]: “What did we promise this customer?” lives in a ticket from last quarter, a Slack thread, and a signed amendment. Next to it sits an HR note, an executive escalation, and another account's pricing.
+          - paragraph [ref=f2e69]: Vault solves both problems simultaneously.
+        - generic [ref=f2e70]:
+          - generic [ref=f2e71]:
+            - generic [ref=f2e72]: "01"
+            - generic [ref=f2e73]: Zendesk
+            - generic [ref=f2e74]: Tickets, comments, attachments, agent notes
+          - generic [ref=f2e75]:
+            - generic [ref=f2e76]: "02"
+            - generic [ref=f2e77]: Jira
+            - generic [ref=f2e78]: Issues, comments, linked docs
+          - generic [ref=f2e79]:
+            - generic [ref=f2e80]: "03"
+            - generic [ref=f2e81]: Slack
+            - generic [ref=f2e82]: Channel exports, threads, reactions
+          - generic [ref=f2e83]:
+            - generic [ref=f2e84]: "04"
+            - generic [ref=f2e85]: Confluence
+            - generic [ref=f2e86]: Pages, spaces, embedded documents
+          - generic [ref=f2e87]:
+            - generic [ref=f2e88]: "05"
+            - generic [ref=f2e89]: Transcripts
+            - generic [ref=f2e90]: Gong / Chorus calls, meeting notes
+          - generic [ref=f2e91]:
+            - generic [ref=f2e92]: "06"
+            - generic [ref=f2e93]: Policies
+            - generic [ref=f2e94]: Company docs, SOPs, compliance
+          - generic [ref=f2e95]:
+            - generic [ref=f2e96]: "07"
+            - generic [ref=f2e97]: CSV Upload
+            - generic [ref=f2e98]: CRM exports, spreadsheets, datasets
+          - generic [ref=f2e99]:
+            - generic [ref=f2e100]: Unified into
+            - generic [ref=f2e101]: ONE PERMISSION MODEL
+    - generic [ref=f2e102]:
+      - generic [ref=f2e103]: 002 \u2014 PIPELINE
+      - generic [ref=f2e104]: \u00a7
+      - generic [ref=f2e105]:
+        - generic [ref=f2e106]:
+          - generic [ref=f2e107]:
+            - generic [ref=f2e108]: How it works
+            - heading "Six steps. Filtering is step two, not step seven." [level=2] [ref=f2e109]
+          - paragraph [ref=f2e110]: Unauthorized content never enters the context window. It is never loaded into memory, never sent to the model, never in the logs.
+        - generic [ref=f2e111]:
+          - generic [ref=f2e112]:
+            - generic [ref=f2e113] [cursor=pointer]:
+              - generic [ref=f2e114]: "01"
+              - generic [ref=f2e115]: Authenticate
+            - generic [ref=f2e116] [cursor=pointer]:
+              - generic [ref=f2e117]: "02"
+              - generic [ref=f2e118]: Filter
+            - generic [ref=f2e119] [cursor=pointer]:
+              - generic [ref=f2e120]: "03"
+              - generic [ref=f2e121]: Search
+            - generic [ref=f2e122] [cursor=pointer]:
+              - generic [ref=f2e123]: "04"
+              - generic [ref=f2e124]: Rerank
+            - generic [ref=f2e125] [cursor=pointer]:
+              - generic [ref=f2e126]: "05"
+              - generic [ref=f2e127]: Generate
+            - generic [ref=f2e128] [cursor=pointer]:
+              - generic [ref=f2e129]: "06"
+              - generic [ref=f2e130]: Log
+          - generic [ref=f2e131]:
+            - generic [ref=f2e132]: "02"
+            - generic [ref=f2e133]:
+              - generic [ref=f2e134]: Filter
+              - paragraph [ref=f2e135]: Permission predicate pushed down to the Pinecone query. Before anything is read.
+            - generic [ref=f2e136]: THE CRITICAL STEP
+    - generic [ref=f2e137]:
+      - generic [ref=f2e138]: 003 \u2014 ACCESS CONTROL
+      - generic [ref=f2e139]: \u00a7
+      - generic [ref=f2e140]:
+        - generic [ref=f2e141]:
+          - generic [ref=f2e142]: Security model
+          - heading "Four tiers. Zero leaks." [level=2] [ref=f2e143]
+          - paragraph [ref=f2e144]: Select a role and watch the retrieval set change. The blocked rows aren't hidden from a result list \u2014 they were never retrieved.
+        - generic [ref=f2e145]:
+          - generic [ref=f2e146]:
+            - generic [ref=f2e147]: 01 \u2014 select a caller
+            - generic [ref=f2e148]:
+              - generic [ref=f2e149] [cursor=pointer]:
+                - generic [ref=f2e150]:
+                  - generic [ref=f2e151]:
+                    - generic [ref=f2e152]: L0
+                    - text: Public
+                  - generic [ref=f2e153]: All authenticated users
+                - generic [ref=f2e154]: Policies, onboarding docs
+              - generic [ref=f2e155] [cursor=pointer]:
+                - generic [ref=f2e156]:
+                  - generic [ref=f2e157]:
+                    - generic [ref=f2e158]: L1
+                    - text: Internal
+                  - generic [ref=f2e159]: Department-scoped
+                - generic [ref=f2e160]: Team procedures
+              - generic [ref=f2e161] [cursor=pointer]:
+                - generic [ref=f2e162]:
+                  - generic [ref=f2e163]:
+                    - generic [ref=f2e164]: L2
+                    - text: Confidential
+                  - generic [ref=f2e165]: Account-scoped
+                - generic [ref=f2e166]: Contracts, support history
+              - generic [ref=f2e167] [cursor=pointer]:
+                - generic [ref=f2e168]:
+                  - generic [ref=f2e169]:
+                    - generic [ref=f2e170]: L3
+                    - text: Restricted
+                  - generic [ref=f2e171]: Named-user only
+                - generic [ref=f2e172]: Executive notes, legal
+          - generic [ref=f2e173]:
+            - generic [ref=f2e174]:
+              - generic [ref=f2e175]: 02 \u2014 what the model context receives
+              - generic [ref=f2e176]: 7/9 chunks
+            - generic [ref=f2e177]:
+              - generic [ref=f2e178]: "pinecone.search(filter: access_level \\u2264 2, account \\u2208 scope)"
+              - generic [ref=f2e179]:
+                - generic [ref=f2e180]: ✓ onboarding_handbook.pdf
+                - generic [ref=f2e181]: notion \u00b7 L0
+              - generic [ref=f2e182]:
+                - generic [ref=f2e183]: ✓ data_retention_policy.md
+                - generic [ref=f2e184]: confluence \u00b7 L0
+              - generic [ref=f2e185]:
+                - generic [ref=f2e186]: ✓ cs_escalation_runbook.md
+                - generic [ref=f2e187]: confluence \u00b7 L1
+              - generic [ref=f2e188]:
+                - generic [ref=f2e189]: "✓ #eng-incidents thread"
+                - generic [ref=f2e190]: slack \u00b7 L1
+              - generic [ref=f2e191]:
+                - generic [ref=f2e192]: ✓ acme_contract_amendment_3.pdf
+                - generic [ref=f2e193]: gdrive \u00b7 L2
+              - generic [ref=f2e194]:
+                - generic [ref=f2e195]: "✓ ticket #48213 agent notes"
+                - generic [ref=f2e196]: zendesk \u00b7 L2
+              - generic [ref=f2e197]:
+                - generic [ref=f2e198]: ✓ acme_renewal_call_0314
+                - generic [ref=f2e199]: gong \u00b7 L2
+              - generic [ref=f2e200]:
+                - generic [ref=f2e201]: ✕ exec_escalation_acme.md
+                - generic [ref=f2e202]: notion \u00b7 L3
+              - generic [ref=f2e203]:
+                - generic [ref=f2e204]: ✕ legal_hold_2024Q1.doc
+                - generic [ref=f2e205]: gdrive \u00b7 L3
+              - generic [ref=f2e206]: 2 chunk(s) never loaded. Never embedded in a prompt. Never logged.
+    - generic [ref=f2e207]:
+      - generic [ref=f2e208]: 004 \u2014 FEATURES
+      - generic [ref=f2e209]: \u00a7
+      - generic [ref=f2e210]:
+        - generic [ref=f2e211]: Key features
+        - heading "Built like infrastructure, not a chatbot." [level=2] [ref=f2e212]
+        - generic [ref=f2e213]:
+          - generic [ref=f2e214]:
+            - generic [ref=f2e215]: "01"
+            - heading "Permission-first architecture" [level=3] [ref=f2e216]
+            - paragraph [ref=f2e217]: Not a post-processing filter. RBAC is enforced at the vector store query. The model only ever sees what the caller is authorized to see.
+          - generic [ref=f2e218]:
+            - generic [ref=f2e219]: "02"
+            - heading "Hybrid search" [level=3] [ref=f2e220]
+            - paragraph [ref=f2e221]: "Vector similarity catches meaning (“billing complaint” ≈ “invoice discrepancy”). BM25 catches exact strings: ticket IDs, error codes, proper nouns."
+          - generic [ref=f2e222]:
+            - generic [ref=f2e223]: "03"
+            - heading "Cross-encoder rerank" [level=3] [ref=f2e224]
+            - paragraph [ref=f2e225]: Merged candidates are re-scored by Cohere Rerank so the top-5 is actually the top-5.
+          - generic [ref=f2e226]:
+            - generic [ref=f2e227]: "04"
+            - heading "Cited generation" [level=3] [ref=f2e228]
+            - paragraph [ref=f2e229]: Every claim links to its source. If authorized evidence is insufficient, Vault refuses instead of hallucinating.
+          - generic [ref=f2e230]:
+            - generic [ref=f2e231]: "05"
+            - heading "Full trace logging" [level=3] [ref=f2e232]
+            - paragraph [ref=f2e233]: User, scope, chunks with scores, answer, latency. SOC 2 and HIPAA auditors get the whole story.
+          - generic [ref=f2e234]:
+            - generic [ref=f2e235]: "06"
+            - heading "Account-scoped access" [level=3] [ref=f2e236]
+            - paragraph [ref=f2e237]: Support agents see their assigned customers. Document-level overrides handle the exceptions.
+    - generic [ref=f2e238]:
+      - generic [ref=f2e239]: 005 \u2014 USE CASES
+      - generic [ref=f2e240]: \u00a7
+      - generic [ref=f2e241]:
+        - generic [ref=f2e242]: Use cases
+        - heading "Real questions. Cited answers." [level=2] [ref=f2e243]
+        - generic [ref=f2e244]:
+          - generic [ref=f2e245]:
+            - generic [ref=f2e246]: Team
+            - generic [ref=f2e247]: Question
+            - generic [ref=f2e248]: Synthesized from
+          - generic [ref=f2e249]:
+            - generic [ref=f2e250]: Customer Support
+            - generic [ref=f2e251]: “What’s the SLA for this customer’s enterprise tier?”
+            - generic [ref=f2e252]: contract · support history · SLA policy
+          - generic [ref=f2e253]:
+            - generic [ref=f2e254]: Account Management
+            - generic [ref=f2e255]: “What did we promise in the last renewal call?”
+            - generic [ref=f2e256]: call transcript · follow-up email · amendment
+          - generic [ref=f2e257]:
+            - generic [ref=f2e258]: Engineering Handoff
+            - generic [ref=f2e259]: “What was the root cause of the outage affecting Acme Corp?”
+            - generic [ref=f2e260]: incident report · slack thread · post-mortem
+          - generic [ref=f2e261]:
+            - generic [ref=f2e262]: Compliance Audit
+            - generic [ref=f2e263]: “Show me all references to data retention policies.”
+            - generic [ref=f2e264]: policy docs · support scripts · training material
+    - generic [ref=f2e265]:
+      - generic [ref=f2e266]: 006 \u2014 EVALUATION
+      - generic [ref=f2e267]: \u00a7
+      - generic [ref=f2e269]:
+        - generic [ref=f2e270]:
+          - generic [ref=f2e271]: Evaluation framework
+          - heading "Measured. Not vibes." [level=2] [ref=f2e272]
+          - paragraph [ref=f2e273]: Retrieval quality is scored independently of generation. Security metrics are pass/fail.
+          - generic [ref=f2e274]:
+            - generic [ref=f2e275]:
+              - generic [ref=f2e276]: Retrieval
+              - generic [ref=f2e277]: Precision@5 · Recall@k · MRR
+            - generic [ref=f2e278]:
+              - generic [ref=f2e279]: Generation
+              - generic [ref=f2e280]: Faithfulness · Relevance · Citation accuracy
+            - generic [ref=f2e281]:
+              - generic [ref=f2e282]: Security
+              - generic [ref=f2e283]: Leakage rate · Boundary accuracy
+        - generic [ref=f2e284]:
+          - generic [ref=f2e285]:
+            - generic [ref=f2e286]: "0.0"
+            - generic [ref=f2e287]:
+              - generic [ref=f2e288]: Unauthorized leakage rate
+              - generic [ref=f2e289]: Non-negotiable. Exactly zero.
+          - generic [ref=f2e290]:
+            - generic [ref=f2e291]: "50"
+            - generic [ref=f2e292]:
+              - generic [ref=f2e293]: Golden-set questions
+              - generic [ref=f2e294]: Lookups, synthesis, conflicts, stale data, refusals, adversarial.
+          - generic [ref=f2e295]:
+            - generic [ref=f2e296]: "7"
+            - generic [ref=f2e297]:
+              - generic [ref=f2e298]: Source connectors
+              - generic [ref=f2e299]: One unified permission model.
+          - generic [ref=f2e300]:
+            - generic [ref=f2e301]: "4"
+            - generic [ref=f2e302]:
+              - generic [ref=f2e303]: Access tiers
+              - generic [ref=f2e304]: Public → Internal → Confidential → Restricted.
+    - generic [ref=f2e305]:
+      - generic [ref=f2e306]: 007 \u2014 API / STACK
+      - generic [ref=f2e307]: \u00a7
+      - generic [ref=f2e309]:
+        - generic [ref=f2e310]:
+          - generic [ref=f2e311]: API reference
+          - heading "One endpoint that matters." [level=2] [ref=f2e312]
+          - generic [ref=f2e313]:
+            - generic [ref=f2e314]:
+              - generic [ref=f2e315]: POST /api/query
+              - generic [ref=f2e316]: "Authorization: Bearer \\u2039token\\u203a"
+            - generic [ref=f2e317]: "// request { \"question\": \"string\", \"context\": \"optional\" } // response { \"answer\": \"string\", \"citations\": [ { \"source\": \"...\", \"chunk_id\": \"...\", \"score\": 0.94 } ], \"trace_id\": \"string\" }"
+          - generic [ref=f2e318]:
+            - generic [ref=f2e319]: POST /api/auth/register
+            - generic [ref=f2e320]: POST /api/auth/login
+            - generic [ref=f2e321]: POST /api/documents/ingest
+            - generic [ref=f2e322]: "GET /api/documents/{id}"
+            - generic [ref=f2e323]: "DELETE /api/documents/{id}"
+            - generic [ref=f2e324]: GET /health
+        - generic [ref=f2e325]:
+          - generic [ref=f2e326]: Technology
+          - heading "Fast, filterable, boring in the right places." [level=2] [ref=f2e327]
+          - generic [ref=f2e328]:
+            - generic [ref=f2e329]: Cohere Command
+            - generic [ref=f2e330]: Cohere Embeddings
+            - generic [ref=f2e331]: Cohere Rerank
+            - generic [ref=f2e332]: Pinecone
+            - generic [ref=f2e333]: PostgreSQL
+            - generic [ref=f2e334]: FastAPI
+            - generic [ref=f2e335]: BM25
+            - generic [ref=f2e336]: Python 3.12
+            - generic [ref=f2e337]: MIT License
+          - generic [ref=f2e338]:
+            - generic [ref=f2e339]:
+              - generic [ref=f2e340]: Cohere Command
+              - generic [ref=f2e341]: Language model inference
+            - generic [ref=f2e342]:
+              - generic [ref=f2e343]: Cohere Embeddings
+              - generic [ref=f2e344]: Vector representations
+            - generic [ref=f2e345]:
+              - generic [ref=f2e346]: Cohere Rerank
+              - generic [ref=f2e347]: Cross-encoder relevance
+            - generic [ref=f2e348]:
+              - generic [ref=f2e349]: Pinecone
+              - generic [ref=f2e350]: Vector DB with metadata filtering
+            - generic [ref=f2e351]:
+              - generic [ref=f2e352]: PostgreSQL
+              - generic [ref=f2e353]: Users, roles, permissions
+            - generic [ref=f2e354]:
+              - generic [ref=f2e355]: FastAPI
+              - generic [ref=f2e356]: Async API layer
+    - generic [ref=f2e357]:
+      - generic [ref=f2e358]: 008 \u2014 CTA
+      - generic [ref=f2e359]:
+        - heading "Stop leaking. Start answering." [level=2] [ref=f2e360]: Stop leaking.Start answering.
+        - generic [ref=f2e361]:
+          - link "Create Account" [ref=f2e362] [cursor=pointer]:
+            - /url: /register
+          - link "Read the docs" [ref=f2e363] [cursor=pointer]:
+            - /url: "#how"
+    - contentinfo [ref=f2e364]:
+      - generic [ref=f2e365]:
+        - generic [ref=f2e366]:
+          - generic [ref=f2e367]:
+            - generic [ref=f2e368]: V
+            - generic [ref=f2e369]: VAULT
+          - paragraph [ref=f2e370]: Permission-aware enterprise knowledge system. Permission filtering happens before retrieval, not after generation.
+          - generic [ref=f2e371]:
+            - link "GH" [ref=f2e372] [cursor=pointer]:
+              - /url: https://github.com/DanielDeshmukh
+            - link "X" [ref=f2e373] [cursor=pointer]:
+              - /url: https://x.com/DeshmukhDa71837
+            - link "IN" [ref=f2e374] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/daniel-deshmukh-7b08602b2
+        - generic [ref=f2e375]:
+          - heading "Product" [level=4] [ref=f2e376]
+          - link "Pipeline" [ref=f2e377] [cursor=pointer]:
+            - /url: "#how"
+          - link "Permissions" [ref=f2e378] [cursor=pointer]:
+            - /url: "#permissions"
+          - link "Features" [ref=f2e379] [cursor=pointer]:
+            - /url: "#features"
+          - link "Evaluation" [ref=f2e380] [cursor=pointer]:
+            - /url: "#eval"
+        - generic [ref=f2e381]:
+          - heading "Developers" [level=4] [ref=f2e382]
+          - link "API reference" [ref=f2e383] [cursor=pointer]:
+            - /url: "#api"
+          - link "Connectors" [ref=f2e384] [cursor=pointer]:
+            - /url: "#"
+          - link "Golden set" [ref=f2e385] [cursor=pointer]:
+            - /url: "#"
+          - link "Changelog" [ref=f2e386] [cursor=pointer]:
+            - /url: "#"
+        - generic [ref=f2e387]:
+          - heading "Compliance" [level=4] [ref=f2e388]
+          - link "SOC 2" [ref=f2e389] [cursor=pointer]:
+            - /url: "#"
+          - link "HIPAA" [ref=f2e390] [cursor=pointer]:
+            - /url: "#"
+          - link "Audit logging" [ref=f2e391] [cursor=pointer]:
+            - /url: "#"
+          - link "MIT License" [ref=f2e392] [cursor=pointer]:
+            - /url: "#"
+      - generic [ref=f2e393]:
+        - generic [ref=f2e394]: \u00a9 2026 Vault. MIT License.
+        - generic [ref=f2e395]: unauthorized_leakage_rate = 0.0
+  - alert [ref=f2e396]
