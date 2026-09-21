@@ -193,6 +193,7 @@ export interface User {
   designation?: string;
   is_admin: boolean;
   is_approved?: boolean;
+  approval_screen_started_at?: string;
 }
 
 export interface AdminUser extends User {

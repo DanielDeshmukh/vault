@@ -19,6 +19,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     is_approved = Column(Boolean, default=False)  # Admin must approve
+    approval_screen_started_at = Column(DateTime, nullable=True)  # Timestamp when unapproved user first logged in
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

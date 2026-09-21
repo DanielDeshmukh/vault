@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from app.db.sessions import get_db
 from app.db.models import User, Role, UserRole
@@ -39,6 +39,7 @@ class UserResponse(BaseModel):
     designation: Optional[str] = None
     is_admin: bool
     is_approved: bool = True
+    approval_screen_started_at: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -89,6 +90,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             designation=user.designation,
             is_admin=user.is_admin,
             is_approved=user.is_approved,
+            approval_screen_started_at=None,
         )
     )
 
@@ -110,6 +112,11 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             detail="Inactive user"
         )
     
+    if not user.is_approved:
+        if user.approval_screen_started_at is None:
+            user.approval_screen_started_at = datetime.utcnow()
+            await db.commit()
+    
     access_token = create_access_token(
         data={"sub": str(user.id)},
         expires_delta=timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
@@ -125,6 +132,7 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             designation=user.designation,
             is_admin=user.is_admin,
             is_approved=user.is_approved,
+            approval_screen_started_at=user.approval_screen_started_at.isoformat() if user.approval_screen_started_at else None,
         )
     )
 
@@ -139,4 +147,5 @@ async def get_me(current_user: User = Depends(get_current_user)):
         designation=current_user.designation,
         is_admin=current_user.is_admin,
         is_approved=current_user.is_approved,
+        approval_screen_started_at=current_user.approval_screen_started_at.isoformat() if current_user.approval_screen_started_at else None,
     )
