@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Terminal, Pipeline, PermissionSim } from "@/components/Interactive";
-import { SiGithub, SiX, SiLinkedin } from "react-icons/si";
+import { SiGithub, SiX } from "react-icons/si";
+import { FaLinkedinIn } from "react-icons/fa";
 
 const SOURCES = [
   { n: "Zendesk", d: "Tickets, comments, attachments, agent notes" },
@@ -369,7 +370,7 @@ export default function Home() {
             <div className="flex gap-3 mt-6">
               <a href="https://github.com/DanielDeshmukh" target="_blank" rel="noreferrer" className="b-social"><SiGithub size={16} /></a>
               <a href="https://x.com/DeshmukhDa71837" target="_blank" rel="noreferrer" className="b-social"><SiX size={16} /></a>
-              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social"><SiLinkedin size={16} /></a>
+              <a href="https://www.linkedin.com/in/daniel-deshmukh-7b08602b2" target="_blank" rel="noreferrer" className="b-social"><FaLinkedinIn size={16} /></a>
             </div>
           </div>
           <div className="b-footer-col md:col-span-2">
