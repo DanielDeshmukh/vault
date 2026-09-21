@@ -35,10 +35,11 @@ Format: Direct answer first, then supporting details with citations."""
 
     def _build_messages(self, query: str, results: list[SearchResult], conversation_context: Optional[str] = None) -> list[dict]:
         context = self._build_context(results)
+        context_block = f"Previous conversation context:\n{conversation_context}\n\n" if conversation_context else ""
         user_message = f"""Sources ({len(results)}):
 {context}
 
-Question: {query}
+{context_block}Question: {query}
 
 Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         return [
