@@ -62,14 +62,14 @@ export function Terminal() {
   return (
     <div className="b-terminal relative">
       <div className="b-terminal-bar">
-        <span>vault \u00b7 query trace</span>
+        <span>vault &middot; query trace</span>
         <span className="accent">trace_id: 7f3a-c21e</span>
       </div>
       <div className="p-4 space-y-2 min-h-[340px]">
         <div className="text-foreground">
-          <span className="accent">\u276f </span>
+          <span className="accent">&rsaquo; </span>
           {typed}
-          {typed.length < QUERY.length && <span className="blink">\u258c</span>}
+          {typed.length < QUERY.length && <span className="blink">&#9612;</span>}
         </div>
         {LINES.slice(0, step).map((l) => (
           <div key={l.t} className="fade-up flex gap-3">
@@ -95,7 +95,7 @@ export function Terminal() {
               </div>
             ))}
             <div className="pt-2 text-[10px] tracking-widest uppercase text-ink-tertiary">
-              leakage: <span className="accent">0.0</span> \u00b7 latency: 1.21s \u00b7 logged \u2713
+              leakage: <span className="accent">0.0</span> &middot; latency: 1.21s &middot; logged &#10003;
             </div>
           </div>
         )}
@@ -174,7 +174,7 @@ export function PermissionSim() {
   return (
     <div className="grid lg:grid-cols-2 gap-8">
       <div>
-        <div className="b-label mb-4">01 \u2014 select a caller</div>
+        <div className="b-label mb-4">01 &mdash; select a caller</div>
         <div className="grid gap-3">
           {ROLES.map((r) => (
             <div
@@ -197,14 +197,14 @@ export function PermissionSim() {
       </div>
       <div>
         <div className="b-label mb-4 flex justify-between">
-          <span>02 \u2014 what the model context receives</span>
+          <span>02 &mdash; what the model context receives</span>
           <span>
             <span className="accent">{allowed}</span>/{CHUNKS.length} chunks
           </span>
         </div>
         <div className="border-2 border-border p-4 space-y-2">
           <div className="mono text-[10px] text-ink-tertiary pb-2 border-b border-border">
-            pinecone.search(filter: access_level {"\u2264"} {role}, account {"\u2208"} scope)
+            pinecone.search(filter: access_level &le; {role}, account &isin; scope)
           </div>
           {CHUNKS.map((c) => {
             const ok = c.lvl <= role;
@@ -214,7 +214,7 @@ export function PermissionSim() {
                   {ok ? "\u2713" : "\u2715"} {c.name}
                 </span>
                 <span>
-                  {c.src} \u00b7 L{c.lvl}
+                  {c.src} &middot; L{c.lvl}
                 </span>
               </div>
             );
