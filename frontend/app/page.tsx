@@ -68,7 +68,7 @@ function Section({ id, label, children, className = "" }: { id?: string; label: 
   return (
     <section id={id} className={`b-divider relative px-6 md:px-12 py-20 md:py-28 ${className}`}>
       <span className="b-corner top-3 left-6">{label}</span>
-      <span className="b-corner top-3 right-6">\u00a7</span>
+      <span className="b-corner top-3 right-6">&sect;</span>
       <div className="max-w-7xl mx-auto">{children}</div>
     </section>
   );
@@ -137,7 +137,7 @@ export default function Home() {
       </section>
 
       {/* MARQUEE */}
-      <div className="b-marquee py-3 bg-foreground text-background">
+      <div className="b-marquee py-3 bg-accent text-background">
         <div className="b-marquee-track mono text-[12px] font-bold tracking-[0.2em]">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
             <span key={i} className="px-8">
@@ -361,7 +361,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-12 gap-10">
           <div className="md:col-span-5">
             <div className="flex items-center gap-3 mb-4">
-              <span className="w-8 h-8 bg-foreground flex items-center justify-center text-background font-bold text-lg">V</span>
+            <img src="/tab-icon.png" alt="Vault" className="w-8 h-8 rounded" />
               <span className="font-bold tracking-tight text-lg">VAULT</span>
             </div>
             <p className="text-ink-subtle text-sm max-w-sm">Permission-aware enterprise knowledge system. Permission filtering happens before retrieval, not after generation.</p>
