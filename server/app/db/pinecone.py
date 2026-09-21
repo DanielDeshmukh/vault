@@ -1,6 +1,7 @@
-import os
 from pinecone import Pinecone, ServerlessSpec
 from typing import Optional
+
+from app.config import settings
 
 
 class PineconeClient:
@@ -11,16 +12,13 @@ class PineconeClient:
     @property
     def client(self) -> Pinecone:
         if self._client is None:
-            api_key = os.environ.get("PINECONE_API_KEY", "")
-            self._client = Pinecone(api_key=api_key)
+            self._client = Pinecone(api_key=settings.PINECONE_API_KEY)
         return self._client
 
     @property
     def index(self):
         if self._index is None:
-            index_name = os.environ.get("PINECONE_INDEX_NAME", "vault")
-            index_host = os.environ.get("PINECONE_INDEX_HOST", "")
-            self._index = self.client.Index(index_name, host=index_host)
+            self._index = self.client.Index(settings.PINECONE_INDEX_NAME, host=settings.PINECONE_INDEX_HOST)
         return self._index
 
     def reset(self):
@@ -28,14 +26,13 @@ class PineconeClient:
         self._index = None
 
     async def create_index(self, dimension: int = 1024):
-        index_name = os.environ.get("PINECONE_INDEX_NAME", "vault")
         existing_indexes = [idx.name for idx in self.client.list_indexes()]
-        if index_name not in existing_indexes:
+        if settings.PINECONE_INDEX_NAME not in existing_indexes:
             self.client.create_index(
-                name=index_name,
+                name=settings.PINECONE_INDEX_NAME,
                 dimension=dimension,
                 metric="cosine",
-                spec=ServerlessSpec(cloud="aws", region="us-east-1")
+                spec=ServerlessSpec(cloud="aws", region=settings.PINECONE_ENVIRONMENT)
             )
 
     async def upsert_vectors(self, vectors: list[dict]):
