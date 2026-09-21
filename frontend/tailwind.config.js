@@ -64,6 +64,7 @@ module.exports = {
           subtle: "hsl(var(--ink-subtle))",
           tertiary: "hsl(var(--ink-tertiary))",
         },
+        "border-strong": "hsl(var(--border-strong))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -71,9 +72,9 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        display: ['Inter', 'SF Pro Display', '-apple-system', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'SF Pro Text', '-apple-system', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'monospace'],
+        display: ["var(--font-display)", "Space Grotesk", "sans-serif"],
+        body: ["var(--font-display)", "Space Grotesk", "sans-serif"],
+        mono: ["var(--font-mono)", "Space Mono", "monospace"],
       },
       keyframes: {
         "accordion-down": {

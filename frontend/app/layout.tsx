@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "700"],
 });
 
 const SITE_URL = "https://vault-rbac-rag.vercel.app";
@@ -83,7 +90,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5e6ad2",
+  themeColor: "#010102",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -99,7 +106,7 @@ export default function RootLayout({
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${inter.variable} font-body antialiased`}>{children}</body>
+      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} font-body antialiased`}>{children}</body>
     </html>
   );
 }

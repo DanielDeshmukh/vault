@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --b-accent: #BAFF29;
+  --b-white: #FFFFFF;
+  --b-black: #000000;
+  --b-gray: #888888;
+}
+
+html { overflow-x: hidden; scroll-behavior: smooth; }
+body { background: #000; color: #fff; overflow-x: hidden; margin: 0; }
+
+::selection { background: #BAFF29; color: #000; }
+
+/* ============================================
+   BRUTALIST SYSTEM
+   ============================================ */
+.brutalist {
+  background: #000;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.brutalist * { border-radius: 0 !important; }
+
+.mono { font-family: 'Space Mono', monospace; }
+.grotesk { font-family: 'Space Grotesk', sans-serif; }
+.accent { color: #BAFF29; }
+.bg-accent { background: #BAFF29; }
+
+.b-divider { border-top: 2px solid #333; }
+
+.b-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.b-stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #BAFF29;
+  letter-spacing: -0.03em;
+}
+
+.b-card {
+  border: 2px solid #333;
+  padding: 1.5rem;
+  position: relative;
+  background: #000;
+}
+.b-card:hover { border-color: #BAFF29; }
+
+.b-step {
+  border: 2px solid #fff;
+  padding: 1.25rem;
+  text-align: center;
+  background: #000;
+  position: relative;
+  cursor: pointer;
+}
+.b-step.active {
+  border-color: #BAFF29;
+  background: rgba(186, 255, 41, 0.05);
+  box-shadow: 6px 6px 0 #BAFF29;
+}
+.b-step-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #BAFF29;
+  margin-bottom: 0.5rem;
+}
+
+.b-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+}
+
+.b-role {
+  border: 2px solid #333;
+  padding: 1rem 1rem 1rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: #000;
+}
+.b-role::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+}
+.b-role[data-level="0"]::before { background: #3b82f6; }
+.b-role[data-level="1"]::before { background: #22c55e; }
+.b-role[data-level="2"]::before { background: #eab308; }
+.b-role[data-level="3"]::before { background: #ef4444; }
+.b-role:hover { border-color: #fff; }
+.b-role.selected { border-color: #BAFF29; background: rgba(186, 255, 41, 0.05); }
+
+.b-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  border: 1px solid #333;
+  padding: 0.375rem 0.75rem;
+  color: #ccc;
+  display: inline-block;
+}
+.b-tag:hover { border-color: #BAFF29; color: #BAFF29; }
+
+.b-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 2px solid #fff;
+  padding: 0.75rem 1.5rem;
+  color: #000;
+  background: #fff;
+  cursor: pointer;
+  transition: none;
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 700;
+}
+.b-btn:hover { background: #BAFF29; border-color: #BAFF29; color: #000; }
+.b-btn:active { transform: translate(2px, 2px); }
+.b-btn-outline { background: transparent; color: #fff; }
+.b-btn-outline:hover { background: #fff; border-color: #fff; color: #000; }
+.b-btn-accent { background: #BAFF29; border-color: #BAFF29; box-shadow: 6px 6px 0 #fff; }
+.b-btn-accent:hover { background: #fff; border-color: #fff; box-shadow: 6px 6px 0 #BAFF29; }
+
+.b-footer-col h4 {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 1rem;
+}
+.b-footer-col a { color: #888; font-size: 14px; display: block; margin-bottom: 0.5rem; }
+.b-footer-col a:hover { color: #BAFF29; }
+
+.b-social {
+  width: 36px; height: 36px;
+  border: 1px solid #333;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  transition: none;
+}
+.b-social:hover { border-color: #BAFF29; color: #BAFF29; }
+
+.b-headline {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.b-h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.b-hr { border: none; border-top: 2px solid #222; margin: 0; }
+
+.b-corner {
+  position: absolute;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #444;
+  letter-spacing: 0.1em;
+}
+
+/* Grid background */
+.b-grid {
+  background-image:
+    linear-gradient(to right, #161616 1px, transparent 1px),
+    linear-gradient(to bottom, #161616 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Marquee */
+.b-marquee { overflow: hidden; white-space: nowrap; border-top: 2px solid #fff; border-bottom: 2px solid #fff; }
+.b-marquee-track { display: inline-flex; animation: marquee 30s linear infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Blink */
+.blink { animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+
+/* Terminal */
+.b-terminal {
+  border: 2px solid #fff;
+  background: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  box-shadow: 8px 8px 0 #BAFF29;
+}
+.b-terminal-bar {
+  border-bottom: 2px solid #fff;
+  padding: 0.5rem 0.75rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #888;
+}
+
+/* Table rows */
+.b-row { display: grid; border-bottom: 1px solid #333; padding: 1rem 0; }
+.b-row:hover { background: #0a0a0a; }
+
+/* Chunk states */
+.chunk { border: 1px solid #333; padding: 0.5rem 0.75rem; font-family: 'Space Mono', monospace; font-size: 11px; display: flex; justify-content: space-between; gap: 1rem; }
+.chunk.allowed { border-color: #BAFF29; color: #fff; }
+.chunk.blocked { border-color: #222; color: #444; text-decoration: line-through; }
+
+/* Reveal */
+.fade-up { animation: fadeUp 0.6s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.noise::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.015) 2px 4px);
+}
