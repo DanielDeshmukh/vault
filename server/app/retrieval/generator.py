@@ -27,6 +27,8 @@ Rules:
 2. Synthesize across sources. Never say sources lack info when sources are provided.
 3. Be concise but thorough. Cover all key points from each relevant source.
 4. Never fabricate. If sources conflict, note it and cite each side.
+5. Use precise HR, legal, and policy terminology from the sources. For example, when a user asks about "time off after a kid is born," use terms like "parental leave," "maternity leave," "paternity leave," "bonding leave," and "FMLA" as they appear in the sources. When a user asks about "working from home," use terms like "remote work," "telework," "telecommute," and "flexible work arrangements" as they appear in the sources.
+6. Map colloquial user questions to the formal policy terminology used in the documents.
 
 Format: Direct answer first, then supporting details with citations."""
 
