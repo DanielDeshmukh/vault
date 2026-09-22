@@ -236,6 +236,7 @@ function Section({ id, label, children, className = "" }: { id?: string; label: 
 
 export default function Home() {
   const [activeEndpoint, setActiveEndpoint] = useState(0);
+  const [mobileNav, setMobileNav] = useState(false);
   const ep = API_ENDPOINTS[activeEndpoint];
   return (
     <div className="brutalist min-h-screen">
@@ -254,8 +255,26 @@ export default function Home() {
             <a href="#eval" className="hover:text-foreground">Eval</a>
             <a href="#api" className="hover:text-foreground">API</a>
           </nav>
-          <Link href="/login" className="b-btn !py-2 !px-4 text-[11px]">Get Started</Link>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden p-2 -mr-2 text-ink-subtle hover:text-foreground">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {mobileNav
+                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />}
+              </svg>
+            </button>
+            <Link href="/login" className="b-btn !py-2 !px-4 text-[11px]">Get Started</Link>
+          </div>
         </div>
+        {mobileNav && (
+          <div className="md:hidden border-t-2 border-border bg-background px-6 py-4 space-y-3 mono text-[11px] uppercase tracking-widest text-ink-subtle">
+            <a href="#how" onClick={() => setMobileNav(false)} className="block hover:text-foreground">How</a>
+            <a href="#permissions" onClick={() => setMobileNav(false)} className="block hover:text-foreground">Permissions</a>
+            <a href="#features" onClick={() => setMobileNav(false)} className="block hover:text-foreground">Features</a>
+            <a href="#eval" onClick={() => setMobileNav(false)} className="block hover:text-foreground">Eval</a>
+            <a href="#api" onClick={() => setMobileNav(false)} className="block hover:text-foreground">API</a>
+          </div>
+        )}
       </header>
 
       {/* HERO */}
