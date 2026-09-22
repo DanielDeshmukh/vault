@@ -25,17 +25,57 @@ QUERY_EXPANSIONS = {
     "ppe": "personal protective equipment safety",
     "osha": "occupational safety health administration",
     "ada": "american disabilities act reasonable accommodation",
+    "quit": "resignation resign terminate resignation letter notice",
+    "fired": "termination terminated terminated for cause",
+    "hurt": "injury workplace injury workers compensation accident",
+    "gun": "firearms weapons prohibited prohibited items",
+    "home": "remote work telecommute telework flexible work arrangement",
+    "time off": "leave vacation PTO personal days sick leave",
+    "born": "parental leave maternity paternity birth adoption newborn",
+    "kid": "parental leave maternity paternity family",
+    "pregnant": "pregnancy maternity parental leave",
+    "pay": "compensation salary wages paycheck",
+    "raise": "promotion pay increase merit increase",
+    "harassment": "sexual harassment hostile work environment bullying",
+    "discrimination": "discrimination equal opportunity protected class",
+    "safety": "workplace safety OSHA injury prevention hazard",
+    "training": "onboarding orientation training program",
+    "benefits": "health insurance dental vision 401k retirement",
+    "overtime": "overtime hours time and a half",
+    "break": "meal break rest break lunch period",
+    "dress": "dress code professional appearance attire",
+    "social media": "social media policy internet usage personal device",
+    "travel": "travel policy reimbursement mileage expense",
 }
 
 
 def expand_query(query: str) -> list[str]:
     q_lower = query.lower()
     expansions = []
-    for acronym, expansion in QUERY_EXPANSIONS.items():
-        if acronym in q_lower:
+    for keyword, expansion in QUERY_EXPANSIONS.items():
+        if keyword in q_lower:
             expansions.append(query + " " + expansion)
-            break
-    return [query] + expansions[:1]
+    # Generate keyword-focused variant by stripping filler words
+    STOP_WORDS = {
+        "i", "me", "my", "we", "our", "you", "your", "he", "she", "it",
+        "they", "them", "the", "a", "an", "is", "am", "are", "was", "were",
+        "be", "been", "being", "have", "has", "had", "do", "does", "did",
+        "will", "would", "could", "should", "may", "might", "can", "shall",
+        "to", "of", "in", "for", "on", "with", "at", "by", "from", "as",
+        "into", "about", "between", "through", "during", "before", "after",
+        "and", "but", "or", "not", "no", "if", "then", "else", "when",
+        "this", "that", "these", "those", "what", "which", "who", "whom",
+        "how", "all", "each", "every", "both", "few", "more", "most",
+        "other", "some", "such", "than", "too", "very", "just", "also",
+        "now", "here", "there", "up", "out", "so", "only", "own", "same",
+    }
+    words = [w for w in q_lower.split() if w.isalnum() and w not in STOP_WORDS]
+    if words:
+        keyword_query = " ".join(words)
+        expansions.append(keyword_query)
+    if expansions:
+        return [query] + expansions[:3]
+    return [query]
 
 
 class HybridSearch:
@@ -47,7 +87,7 @@ class HybridSearch:
         self,
         query: str,
         user: User,
-        top_k: int = 8,
+        top_k: int = 12,
         use_reranker: bool = True
     ) -> list[SearchResult]:
         query_variants = expand_query(query)
