@@ -99,7 +99,6 @@ FROM query_traces
 GROUP BY access_level;`}</pre>
           </div>
         </div>
-      </main>
     </SubPageLayout>
   );
 }

@@ -65,7 +65,6 @@ export default function ChangelogPage() {
             </div>
           ))}
         </div>
-      </main>
     </SubPageLayout>
   );
 }

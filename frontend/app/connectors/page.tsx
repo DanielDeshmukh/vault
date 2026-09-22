@@ -102,7 +102,6 @@ export default function ConnectorsPage() {
         return DocumentMetadata(...)`}</pre>
           </div>
         </div>
-      </main>
     </SubPageLayout>
   );
 }

@@ -72,7 +72,6 @@ export default function SOC2Page() {
 }`}</pre>
           </div>
         </div>
-      </main>
     </SubPageLayout>
   );
 }

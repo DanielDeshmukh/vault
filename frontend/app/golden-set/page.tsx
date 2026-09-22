@@ -92,7 +92,6 @@ export VAULT_DANIEL_PASSWORD="your_password"
 python -m scripts.evaluate_ambiguous`}</pre>
           </div>
         </div>
-      </main>
     </SubPageLayout>
   );
 }

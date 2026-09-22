@@ -75,7 +75,6 @@ Answer generated
   -> Full trace logged for audit`}</pre>
           </div>
         </div>
-      </main>
     </SubPageLayout>
   );
 }
