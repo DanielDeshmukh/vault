@@ -1,21 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { SubPageLayout } from "@/components/SubPageLayout";
 
 export default function SOC2Page() {
   return (
-    <div className="brutalist min-h-screen">
-      <header className="sticky top-0 z-50 bg-background border-b-2 border-foreground">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/tab-icon.png" alt="Vault" className="w-8 h-8 rounded" />
-            <span className="font-bold tracking-tight text-lg">VAULT</span>
-          </Link>
-          <Link href="/" className="b-btn !py-2 !px-4 text-[11px]">Back to Home</Link>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 md:px-12 py-20">
+    <SubPageLayout>
         <div className="b-label mb-4">Compliance / SOC 2</div>
         <h1 className="b-h2 mb-6">SOC 2 Type II</h1>
         <p className="text-ink-muted text-lg max-w-2xl mb-16">
@@ -84,6 +73,6 @@ export default function SOC2Page() {
           </div>
         </div>
       </main>
-    </div>
+    </SubPageLayout>
   );
 }
