@@ -150,7 +150,7 @@ async def query(
         if "429" in msg or "rate" in msg or "too many" in msg:
             raise HTTPException(
                 status_code=429,
-                detail="Rate limit exceeded. Please try again later."
+                detail=f"Rate limit exceeded: {str(e)[:300]}"
             )
         if "pinecone" in msg or "vector" in msg:
             raise HTTPException(
