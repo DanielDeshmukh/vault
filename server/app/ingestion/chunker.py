@@ -74,7 +74,7 @@ class SemanticChunker:
                     content=chunk_content,
                     index=chunk_index,
                     start_char=start,
-                    end_char=end
+                    end_char=min(end, len(content))
                 ))
                 chunk_index += 1
             

@@ -62,7 +62,7 @@ async def restricted_document(test_user):
             department="executive",
             access_level=3,  # Restricted
             owner_id=None,
-            metadata={"allowed_roles": ["executive", "board"]},
+            doc_metadata={"allowed_roles": ["executive", "board"]},
         )
         db.add(doc)
         await db.commit()
@@ -88,7 +88,7 @@ async def accessible_document(test_user):
             department="support",
             access_level=1,  # Internal
             owner_id=test_user.id,
-            metadata={"allowed_roles": ["support"]},
+            doc_metadata={"allowed_roles": ["support"]},
         )
         db.add(doc)
         await db.commit()
@@ -123,7 +123,9 @@ class TestPermissionFilter:
             filter_dict = await perm_filter.build_filter(test_user)
             
             assert filter_dict is not None
-            assert "$and" in filter_dict
+            # A non-admin must always be capped by an access_level ceiling
+            ceiling = filter_dict.get("$and", [filter_dict])
+            assert any("access_level" in cond for cond in ceiling)
     
     @pytest.mark.asyncio
     async def test_filter_enforces_access_level(self, test_user):
@@ -137,10 +139,10 @@ class TestPermissionFilter:
             
             # User has access_level 1 (Internal)
             # So filter should include access_level <= 1
-            and_conditions = filter_dict.get("$and", [])
+            conditions = filter_dict.get("$and", [filter_dict])
             access_level_filter = None
-            
-            for condition in and_conditions:
+
+            for condition in conditions:
                 if "access_level" in condition:
                     access_level_filter = condition
                     break
@@ -209,13 +211,19 @@ class TestPermissionBoundary:
         for question in pb_questions:
             result = await evaluator.evaluate_question(test_user, question)
             
+            # An infrastructure failure (e.g. LLM rate limit) is NOT a pass:
+            # we must actually exercise retrieval + generation to verify security.
+            assert not result.error, (
+                f"evaluation of {question.id} failed infrastructure check: {result.error[:200]}"
+            )
+            
             # For permission boundary questions, the system should either:
             # 1. Refuse to answer, or
             # 2. Only cite authorized sources
             
             if question.should_refuse:
                 # Check that the answer is a refusal or only authorized
-                assert result.did_refuse or self._only_authorized_sources(
+                assert result.did_refuse or await self._only_authorized_sources(
                     result.citations, test_user
                 ), f"Question {question.id} leaked unauthorized content"
     
@@ -242,20 +250,36 @@ class TestPermissionBoundary:
         
         result = await evaluator.evaluate_question(test_user, test_question)
         
+        # Fail loudly on infrastructure errors instead of passing vacuously
+        assert not result.error, (
+            f"evaluation failed infrastructure check (no retrieval exercised): {result.error[:200]}"
+        )
+        
         # Verify the restricted document was not retrieved
         restricted_id = str(restricted_document.id)
         
         for citation in result.citations:
             assert citation.get("document_id") != restricted_id, \
                 f"Restricted document {restricted_id} was retrieved!"
-        
-        for source in result.retrieved_sources:
-            # Check that no restricted content was in the search results
-            pass  # Additional checks can be added here
     
-    def _only_authorized_sources(self, citations: list[dict], user: User) -> bool:
-        """Check if all citations are from authorized sources."""
-        # In a real implementation, this would check against the user's permissions
+    async def _only_authorized_sources(self, citations: list[dict], user: User) -> bool:
+        """Check every citation against the user's effective access ceiling."""
+        from sqlalchemy import select
+
+        from app.auth.permissions import get_user_max_access_level
+        from app.db.models import Document
+        from app.db.sessions import async_session
+
+        async with async_session() as db:
+            max_level = await get_user_max_access_level(user, db)
+            for citation in citations:
+                doc_id = citation.get("document_id")
+                if not doc_id:
+                    continue
+                result = await db.execute(select(Document).where(Document.id == doc_id))
+                document = result.scalar_one_or_none()
+                if document is not None and document.access_level > max_level:
+                    return False
         return True
 
 
@@ -286,6 +310,7 @@ class TestZeroLeakage:
         
         total_queries = 0
         total_leaks = 0
+        infra_errors = []
         
         for category in categories_to_test:
             questions = get_golden_set_by_category(category)[:3]  # Test 3 per category
@@ -294,9 +319,18 @@ class TestZeroLeakage:
                 result = await evaluator.evaluate_question(test_user, question)
                 total_queries += 1
                 
+                # Infrastructure failures must fail the test, not count as "no leak"
+                if result.error:
+                    infra_errors.append(f"{question.id}: {result.error[:120]}")
+                
                 # Check for leaks
                 if result.security_metrics.total_leaks > 0:
                     total_leaks += result.security_metrics.total_leaks
+        
+        assert not infra_errors, (
+            f"{len(infra_errors)}/{total_queries} evaluations hit infrastructure errors "
+            f"(leakage NOT verified): {infra_errors[:3]}"
+        )
         
         # ZERO TOLERANCE: No leaks allowed
         assert total_leaks == 0, \

@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, timedelta
+
+# Syntax-only email format check: accepts internal domains (e.g. @vault.local)
+# and performs no DNS deliverability lookups.
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 from app.db.sessions import get_db
 from app.db.models import User, Role, UserRole
@@ -19,15 +23,15 @@ router = APIRouter()
 
 
 class UserCreate(BaseModel):
-    email: str
-    password: str
+    email: str = Field(pattern=EMAIL_PATTERN)
+    password: str = Field(min_length=8)
     full_name: str
     department: str
     designation: Optional[str] = None
 
 
 class UserLogin(BaseModel):
-    email: str
+    email: str = Field(pattern=EMAIL_PATTERN)
     password: str
 
 
