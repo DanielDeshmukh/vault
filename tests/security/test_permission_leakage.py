@@ -123,33 +123,23 @@ class TestPermissionFilter:
             filter_dict = await perm_filter.build_filter(test_user)
             
             assert filter_dict is not None
-            # A non-admin must always be capped by an access_level ceiling
-            ceiling = filter_dict.get("$and", [filter_dict])
-            assert any("access_level" in cond for cond in ceiling)
+            # A non-admin must always be constrained by an allowed_roles list
+            assert "allowed_roles" in filter_dict
+            assert "$in" in filter_dict["allowed_roles"]
     
     @pytest.mark.asyncio
-    async def test_filter_enforces_access_level(self, test_user):
-        """Filter should enforce access level restrictions."""
+    async def test_filter_enforces_allowed_roles(self, test_user):
+        """Filter should constrain retrieval to the caller's own roles."""
         async with async_session() as db:
             perm_filter = PermissionFilter(db)
             filter_dict = await perm_filter.build_filter(test_user)
             
-            # Check that access_level filter exists
             assert filter_dict is not None
             
-            # User has access_level 1 (Internal)
-            # So filter should include access_level <= 1
-            conditions = filter_dict.get("$and", [filter_dict])
-            access_level_filter = None
-
-            for condition in conditions:
-                if "access_level" in condition:
-                    access_level_filter = condition
-                    break
-            
-            assert access_level_filter is not None
-            assert "$lte" in access_level_filter["access_level"]
-            assert access_level_filter["access_level"]["$lte"] <= 1
+            # test_user holds only the "Support Agent" role
+            roles = filter_dict["allowed_roles"]["$in"]
+            assert isinstance(roles, list)
+            assert roles == ["support agent"]
 
 
 def test_query_model_loads_and_classifies_high_level_question():

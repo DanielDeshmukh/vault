@@ -116,11 +116,12 @@ class HybridSearch:
             for match in matches:
                 rid = match.get("id", "")
                 if rid and rid not in all_candidates:
+                    md = match.get("metadata", {}) or {}
                     all_candidates[rid] = SearchResult(
                         id=rid,
-                        content=match.get("metadata", {}).get("content", ""),
+                        content=md.get("text", ""),
                         score=match.get("score", 0.0),
-                        metadata=match.get("metadata", {})
+                        metadata=md,
                     )
 
         search_results = list(all_candidates.values())

@@ -61,11 +61,21 @@ class Document(Base):
     content = Column(Text, nullable=False)
     source = Column(String(100), nullable=False)  # zendesk, jira, slack, etc.
     source_id = Column(String(255))  # Original ID from source system
+    source_file = Column(Text)  # Path of the originating file in the corpus
     account_id = Column(String(255), index=True)
     department = Column(String(100), index=True)
     access_level = Column(Integer, default=0, index=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     doc_metadata = Column("metadata", JSON, default=dict)
+
+    # Corpus identity + the authorization ACL that retrieval filters on.
+    # These columns exist in the schema written by scripts/ingest_corpus.py;
+    # they were previously unmapped, so document.allowed_roles raised
+    # AttributeError and could never be evaluated.
+    doc_id = Column(String(255), index=True)
+    classification = Column(String(50))
+    allowed_roles = Column(JSON, default=list)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

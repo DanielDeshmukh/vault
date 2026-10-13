@@ -87,9 +87,9 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
     def _build_context(self, results: list[SearchResult]) -> str:
         context_parts = []
         for result in results[:MAX_CONTEXT_SOURCES]:
-            doc_id = result.metadata.get("document_id", result.id)
-            source = result.metadata.get("source", "unknown")
-            title = result.metadata.get("title", "Untitled")
+            doc_id = result.metadata.get("doc_id", result.id)
+            source = result.metadata.get("department", "unknown")
+            title = result.metadata.get("source_title", "Untitled")
             content = result.content[:MAX_SOURCE_CHARS]
             context_parts.append(
                 f"[{doc_id}] {title} ({source})\n{content}"
@@ -108,12 +108,12 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
                 continue
             seen.add(match)
             for result in results:
-                doc_id = result.metadata.get("document_id", "")
+                doc_id = result.metadata.get("doc_id", "")
                 if doc_id == match or result.id == match:
                     citations.append({
                         "document_id": doc_id or result.id,
-                        "title": result.metadata.get("title", "Untitled"),
-                        "source": result.metadata.get("source", "unknown"),
+                        "title": result.metadata.get("source_title", "Untitled"),
+                        "source": result.metadata.get("department", "unknown"),
                         "score": result.score
                     })
                     break

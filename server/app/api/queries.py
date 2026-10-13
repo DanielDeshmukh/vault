@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 import json
 
 from app.auth.jwt import get_current_user
-from app.auth.permissions import get_question_access_level, get_user_max_access_level
 from app.db.models import User
-from app.db.sessions import async_session
 from app.retrieval.search import HybridSearch
 from app.retrieval.generator import CitationGenerator
 from app.tracing.logger import trace_logger
@@ -54,7 +52,7 @@ async def query(
     2. Builds permission filter (pre-retrieval)
     3. Searches with hybrid vector + keyword
     4. Reranks with Cohere
-    5. Generates cited answer with Groq
+    5. Generates cited answer with Cohere
     6. Logs full trace for audit
     """
     # Create trace
@@ -67,20 +65,12 @@ async def query(
             detail="Your account is pending admin approval. You cannot query documents yet."
         )
 
-    async with async_session() as db:
-        user_max_level = await get_user_max_access_level(current_user, db)
-        required_level = get_question_access_level(request.question)
-
-    if required_level > user_max_level and not current_user.is_admin:
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content={
-                "answer": "Access denied",
-                "citations": [],
-                "trace_id": trace.trace_id,
-            },
-        )
-
+    # Access is enforced by the role filter applied inside retrieval
+    # (PermissionFilter.build_filter -> {"allowed_roles": {"$in": [...]}}),
+    # which runs before any chunk is fetched. There is deliberately no
+    # keyword or clearance-tier pre-gate here: gating on question wording
+    # both leaks that restricted topics exist and denies legitimate
+    # questions whose words happen to overlap a restricted term.
     try:
         start_time = datetime.utcnow()
         
@@ -177,18 +167,13 @@ async def query_stream(
             detail="Your account is pending admin approval."
         )
 
-    async with async_session() as db:
-        user_max_level = await get_user_max_access_level(current_user, db)
-        required_level = get_question_access_level(request.question)
-
     search = HybridSearch()
     generator = CitationGenerator()
 
     async def event_generator():
-        if required_level > user_max_level and not current_user.is_admin:
-            yield f"data: {json.dumps({'type': 'error', 'detail': 'Access denied'})}\n\n"
-            return
-
+        # Same as the non-streaming path: enforcement lives in the role
+        # filter applied by search, so a user with no matching roles simply
+        # streams back no sources rather than being rejected up front.
         try:
             results = await search.search(
                 query=build_retrieval_query(request.question, request.context),
@@ -200,9 +185,10 @@ async def query_stream(
             source_list = []
             for r in results:
                 source_list.append({
-                    "document_id": r.metadata.get("document_id", ""),
-                    "title": r.metadata.get("title", "Untitled"),
-                    "source": r.metadata.get("source", "unknown"),
+                    "document_id": r.metadata.get("doc_id", r.id),
+                    "title": r.metadata.get("source_title", "Untitled"),
+                    "source": r.metadata.get("citation",
+                                             r.metadata.get("source_file", "unknown")),
                     "score": round(r.score, 4),
                 })
 

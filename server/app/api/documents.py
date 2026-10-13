@@ -2,12 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from uuid import UUID
-from sqlalchemy import select
+from sqlalchemy import bindparam, select
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, TEXT
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.auth.jwt import get_current_user
-from app.db.models import User, UserRole, Role, Document, DocumentChunk
+from app.auth.permissions import document_role_names, get_user_allowed_role_names
+from app.db.models import User, Document, DocumentChunk
 from app.db.sessions import get_db
 
 router = APIRouter()
@@ -29,25 +31,16 @@ class DocumentResponse(BaseModel):
         from_attributes = True
 
 
-ACCESS_LEVEL_MAP = {
-    "public": 0,
-    "internal": 1,
-    "confidential": 2,
-    "restricted": 3,
-}
+async def user_role_names(user: User, db: AsyncSession) -> Optional[list[str]]:
+    """Role names granting document access, lowercased to match the ACL.
 
-async def user_access_level(user: User, db: AsyncSession) -> int:
+    Returns ``None`` for admins (no restriction) and an empty list for a user
+    holding no roles, so callers can express deny-by-default.
+    """
     if user.is_admin:
-        return 3
-    result = await db.execute(
-        select(Role.name)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .where(UserRole.user_id == user.id)
-    )
-    role_names = [r[0].lower() for r in result.all()]
-    if role_names:
-        return max(ACCESS_LEVEL_MAP.get(r, 0) for r in role_names)
-    return 0
+        return None
+    roles = await get_user_allowed_role_names(user, db)
+    return [r.lower() for r in roles]
 
 
 @router.get("", response_model=list[DocumentResponse])
@@ -55,12 +48,24 @@ async def list_documents(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    user_level = await user_access_level(current_user, db)
-    result = await db.execute(
-        select(Document)
-        .where(Document.access_level <= user_level)
-        .order_by(Document.created_at.desc())
-    )
+    roles = await user_role_names(current_user, db)
+    query = select(Document)
+    if roles is None:
+        pass  # admin: no ACL predicate
+    elif not roles:
+        return []  # no roles -> nothing is visible
+    else:
+        # ``?|`` on the jsonb array is overlap: the document's allowed_roles
+        # must contain at least one of the caller's roles. The explicit
+        # ARRAY(TEXT) binding is required -- without it SQLAlchemy infers the
+        # parameter type from the left operand and Postgres rejects
+        # ``jsonb ?| jsonb``.
+        query = query.where(
+            Document.allowed_roles.cast(JSONB).op("?|")(
+                bindparam("_role_names", roles, type_=ARRAY(TEXT))
+            )
+        )
+    result = await db.execute(query.order_by(Document.created_at.desc()))
     docs = result.scalars().all()
     return [
         DocumentResponse(
@@ -89,9 +94,13 @@ async def get_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    user_level = await user_access_level(current_user, db)
-    if user_level < doc.access_level:
-        raise HTTPException(status_code=403, detail="Insufficient access level for this document")
+    roles = await user_role_names(current_user, db)
+    if roles is not None:  # admin sees everything
+        allowed = document_role_names(doc)
+        if not roles or not (set(roles) & allowed):
+            raise HTTPException(
+                status_code=403, detail="Not authorized to view this document"
+            )
 
     return DocumentResponse(
         id=str(doc.id),

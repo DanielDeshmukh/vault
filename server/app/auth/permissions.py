@@ -93,6 +93,18 @@ async def get_user_allowed_role_names(user: User, db: AsyncSession) -> list[str]
     return result.scalars().all()
 
 
+def document_role_names(document: Document) -> set[str]:
+    """Lowercased role names on a document's ACL.
+
+    Returns an empty set when the column is NULL or malformed, so callers can
+    treat "no ACL" as "nobody is allowed" rather than "everyone is allowed".
+    """
+    raw = document.allowed_roles
+    if not isinstance(raw, list):
+        return set()
+    return {str(r).lower() for r in raw}
+
+
 def build_pinecone_filter(
     max_access_level: Optional[int] = None,
     allowed_account_ids: Optional[list[str]] = None,

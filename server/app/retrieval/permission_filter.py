@@ -2,8 +2,12 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.db.models import User, DocumentAccess, Document
-from app.auth.permissions import get_user_max_access_level, get_user_allowed_account_ids
+from app.db.models import User, Document
+from app.auth.permissions import document_role_names, get_user_allowed_role_names
+
+# Matches no legitimate corpus role. Used as the filter value for a user who
+# holds zero roles so the vector store returns nothing instead of everything.
+DENY_ALL_ROLE = "__vault_deny_all__"
 
 
 class PermissionFilter:
@@ -13,6 +17,13 @@ class PermissionFilter:
     CRITICAL: This filter is applied at the vector store level,
     BEFORE the language model sees any content. Unauthorized chunks
     are never loaded into memory or sent to the model.
+
+    Enforcement is by role, not by clearance tier. Every chunk carries an
+    explicit ``allowed_roles`` list; a chunk is retrievable only when it
+    intersects the roles held by the authenticated user. Tiers remain in the
+    schema for legacy UI gating but are never used to gate retrieval, because
+    a single ladder cannot express that legal and finance share a tier while
+    needing to stay mutually invisible.
     """
 
     def __init__(self, db: AsyncSession):
@@ -20,20 +31,27 @@ class PermissionFilter:
 
     async def build_filter(self, user: User) -> Optional[dict]:
         """
-        Build a Pinecone filter based on the user's maximum access level.
+        Build a Pinecone filter from the user's role names.
 
-        Security rule: a user may only retrieve documents whose access level is
-        at or below their effective permission ceiling.
+        Returns ``None`` only for admins (unfiltered). Everyone else gets a
+        mandatory ``allowed_roles`` constraint; a user with no roles is given
+        a sentinel that cannot match any stored chunk, so access is denied by
+        default rather than by accident.
         """
         if user.is_admin:
             return None
 
-        max_level = await get_user_max_access_level(user, self.db)
+        roles = await get_user_allowed_role_names(user, self.db)
+        # Corpus ACL entries are lowercase; a legacy tier role such as
+        # "Internal" would otherwise never match and silently deny.
+        roles = [r.lower() for r in roles]
+        if not roles:
+            return {"allowed_roles": {"$in": [DENY_ALL_ROLE]}}
 
-        return {"access_level": {"$lte": int(max_level)}}
+        return {"allowed_roles": {"$in": list(roles)}}
 
     async def can_access_document(self, user: User, document_id: str) -> bool:
-        """Check if a user can access a specific document."""
+        """Check if a user can access a specific document by role."""
         if user.is_admin:
             return True
 
@@ -41,22 +59,12 @@ class PermissionFilter:
             select(Document).where(Document.id == document_id)
         )
         document = result.scalar_one_or_none()
-
         if not document:
             return False
 
-        max_level = await get_user_max_access_level(user, self.db)
-        if document.access_level > max_level:
-            return False
+        allowed = document_role_names(document)
+        if not allowed:
+            return False  # deny by default
 
-        result = await self.db.execute(
-            select(DocumentAccess)
-            .where(
-                DocumentAccess.document_id == document_id,
-                DocumentAccess.user_id == user.id
-            )
-        )
-        if result.scalar_one_or_none():
-            return True
-
-        return False
+        user_roles = {r.lower() for r in await get_user_allowed_role_names(user, self.db)}
+        return bool(allowed & user_roles)

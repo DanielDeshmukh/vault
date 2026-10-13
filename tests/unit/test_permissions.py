@@ -121,7 +121,7 @@ class TestPermissionFilterWithFakeDB:
         assert await pf.build_filter(FakeUser()) is None
 
     @pytest.mark.asyncio
-    async def test_regular_user_gets_access_level_filter(self):
+    async def test_regular_user_gets_role_filter(self):
         from app.retrieval.permission_filter import PermissionFilter
 
         class FakeResult:
@@ -136,7 +136,7 @@ class TestPermissionFilterWithFakeDB:
 
         class FakeDB:
             async def execute(self, _stmt):
-                return FakeResult([1])
+                return FakeResult(["engineer"])
 
         class FakeUser:
             id = "user-1"
@@ -145,11 +145,11 @@ class TestPermissionFilterWithFakeDB:
         pf = PermissionFilter(FakeDB())
         f = await pf.build_filter(FakeUser())
 
-        assert f == {"access_level": {"$lte": 1}}
+        assert f == {"allowed_roles": {"$in": ["engineer"]}}
 
     @pytest.mark.asyncio
-    async def test_no_roles_falls_back_to_public(self):
-        """A user with no roles must fall back to the public ceiling."""
+    async def test_no_roles_denies_all(self):
+        """A user with no roles must match nothing, not fall back to public."""
         from app.retrieval.permission_filter import PermissionFilter
 
         class FakeResult:
@@ -170,7 +170,7 @@ class TestPermissionFilterWithFakeDB:
         pf = PermissionFilter(FakeDB())
         f = await pf.build_filter(FakeUser())
 
-        assert f == {"access_level": {"$lte": 0}}
+        assert f == {"allowed_roles": {"$in": ["__vault_deny_all__"]}}
 
     @pytest.mark.asyncio
     async def test_filter_does_not_force_owner_only_access(self):
@@ -182,7 +182,7 @@ class TestPermissionFilterWithFakeDB:
                 return self
 
             def all(self):
-                return [2]
+                return ["employee"]
 
         class FakeDB:
             async def execute(self, _stmt):
@@ -197,6 +197,29 @@ class TestPermissionFilterWithFakeDB:
 
         assert f is not None
         assert "owner_id" not in str(f)
+
+    @pytest.mark.asyncio
+    async def test_role_names_are_lowercased(self):
+        """A legacy tier role like 'Internal' must still match a corpus ACL."""
+        from app.retrieval.permission_filter import PermissionFilter
+
+        class FakeResult:
+            def scalars(self):
+                return self
+
+            def all(self):
+                return ["Internal"]
+
+        class FakeDB:
+            async def execute(self, _stmt):
+                return FakeResult()
+
+        class FakeUser:
+            id = "user-124"
+            is_admin = False
+
+        pf = PermissionFilter(FakeDB())
+        assert await pf.build_filter(FakeUser()) == {"allowed_roles": {"$in": ["internal"]}}
 
 
 def test_expand_query_handles_topic_hints_without_crashing():
