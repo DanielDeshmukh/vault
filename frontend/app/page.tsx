@@ -24,13 +24,13 @@ const FEATURES = [
   },
   {
     k: "02",
-    t: "Hybrid search",
-    d: "Vector similarity catches meaning (\u201Cbilling complaint\u201D \u2248 \u201Cinvoice discrepancy\u201D). BM25 catches exact strings: ticket IDs, error codes, proper nouns.",
+    t: "Vector similarity search",
+    d: "Queries are embedded and matched by meaning (\u201Cbilling complaint\u201D \u2248 \u201Cinvoice discrepancy\u201D) over a 2048-dimension index.",
   },
   {
     k: "03",
     t: "Cross-encoder rerank",
-    d: "Merged candidates are re-scored by Cohere Rerank so the top-5 is actually the top-5.",
+    d: "Candidates are re-scored by Cohere Rerank so the top-5 is actually the top-5.",
   },
   {
     k: "04",
@@ -60,12 +60,12 @@ const METRICS = [
   { v: "0.0", l: "Unauthorized leakage rate", s: "Non-negotiable. Exactly zero." },
   { v: "50", l: "Golden-set questions", s: "Lookups, synthesis, conflicts, stale data, refusals, adversarial." },
   { v: "7", l: "Source connectors", s: "One unified permission model." },
-  { v: "4", l: "Access tiers", s: "Public \u2192 Internal \u2192 Confidential \u2192 Restricted." },
+  { v: "8", l: "Corpus roles", s: "Intern \u2192 admin. Deny by default; each role sees only its departments." },
 ];
 
-const TECH = ["Cohere Command", "Cohere Embeddings", "Cohere Rerank", "Pinecone", "PostgreSQL", "FastAPI", "BM25", "Python 3.12", "MIT License"];
+const TECH = ["Cohere Command", "NVIDIA NIM Embeddings", "Cohere Rerank", "Pinecone", "PostgreSQL", "FastAPI", "Python 3.12", "MIT License"];
 
-const MARQUEE = ["PERMISSION BEFORE RETRIEVAL", "CITED OR REFUSED", "LEAKAGE = 0.0", "HYBRID SEARCH", "FULL AUDIT TRAIL", "PRE-RETRIEVAL FILTERING"];
+const MARQUEE = ["PERMISSION BEFORE RETRIEVAL", "CITED OR REFUSED", "LEAKAGE = 0.0", "ROLE-BASED ACCESS", "FULL AUDIT TRAIL", "PRE-RETRIEVAL FILTERING"];
 
 const API_ENDPOINTS = [
   {
@@ -174,6 +174,7 @@ access_level: 2`,
     "account_id": "acme-corp",
     "department": "customer-success",
     "access_level": 2,
+    "allowed_roles": ["manager", "legal", "finance", "admin"],
     "owner_id": "usr_a1b2c3d4",
     "created_at": "2026-03-15T10:00:00Z",
     "can_access": true
@@ -185,6 +186,7 @@ access_level: 2`,
     "account_id": null,
     "department": "compliance",
     "access_level": 0,
+    "allowed_roles": ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"],
     "owner_id": "usr_sarah_chen",
     "created_at": "2026-01-10T08:30:00Z",
     "can_access": true
@@ -204,6 +206,7 @@ access_level: 2`,
   "account_id": "acme-corp",
   "department": "customer-success",
   "access_level": 2,
+  "allowed_roles": ["manager", "legal", "finance", "admin"],
   "owner_id": "usr_a1b2c3d4",
   "created_at": "2026-03-15T10:00:00Z",
   "content": "On the Mar 14 renewal call with Acme Corp, the following commitments were made: 1) 99.95% uptime SLA upgrade at no additional cost...",
@@ -217,9 +220,7 @@ access_level: 2`,
     request: `// no body required`,
     response: `{
   "status": "healthy",
-  "version": "1.0.0",
-  "database": "connected",
-  "pinecone": "connected"
+  "app": "Vault"
 }`,
   },
 ];
@@ -246,7 +247,7 @@ export default function Home() {
           <Link href="/" className="flex items-center gap-3">
             <img src="/tab-icon.png" alt="Vault" className="w-8 h-8 rounded" />
             <span className="font-bold tracking-tight text-lg">VAULT</span>
-            <span className="b-label hidden md:inline ml-2">/ v1.0</span>
+            <span className="b-label hidden md:inline ml-2">/ v1.1</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 mono text-[11px] uppercase tracking-widest text-ink-subtle">
             <a href="#how" className="hover:text-foreground">How</a>
@@ -376,7 +377,7 @@ export default function Home() {
         <div className="mb-12">
           <div className="b-label mb-4">Security model</div>
           <h2 className="b-h2">
-            Four tiers. <span className="accent">Zero</span> leaks.
+            Eight roles. <span className="accent">Zero</span> leaks.
           </h2>
           <p className="mt-4 text-ink-muted text-lg max-w-2xl">
             Select a role and watch the retrieval set change. The blocked rows aren&apos;t hidden from a result list &mdash; they were never retrieved.
@@ -494,7 +495,7 @@ export default function Home() {
             <div className="space-y-0 border-t-2 border-border-strong">
               {[
                 ["Cohere Command", "Language model inference"],
-                ["Cohere Embeddings", "Vector representations"],
+                ["NVIDIA NIM", "Embeddings (nemotron-3-embed-1b, 2048d)"],
                 ["Cohere Rerank", "Cross-encoder relevance"],
                 ["Pinecone", "Vector DB with metadata filtering"],
                 ["PostgreSQL", "Users, roles, permissions"],
