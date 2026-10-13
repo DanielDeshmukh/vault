@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional
-from app.auth.jwt import get_current_user
+from app.auth.jwt import require_admin
 from app.db.models import User
 from app.db.sessions import get_db
 from app.ingestion.pipeline import IngestionPipeline
@@ -32,10 +32,14 @@ async def ingest_document(
     account_id: str = Form("unknown"),
     department: str = Form("general"),
     access_level: int = Form(0),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_admin),
     db=Depends(get_db)
 ):
-    """Ingest a document from file upload."""
+    """Ingest a document from file upload.
+
+    Admin only: ingestion writes into the shared, role-protected corpus that
+    every other tenant's retrieval depends on.
+    """
     # Read file content
     content = await file.read()
     
@@ -80,10 +84,13 @@ async def ingest_document(
 @router.post("/direct", response_model=IngestionResponse)
 async def ingest_direct(
     request: DirectIngestRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_admin),
     db=Depends(get_db)
 ):
-    """Ingest content directly without file upload."""
+    """Ingest content directly without file upload.
+
+    Admin only: same reason as POST /api/ingest.
+    """
     # Create raw document
     source_type_map = {
         "csv": SourceType.CSV,
@@ -131,9 +138,13 @@ async def ingest_direct(
 async def test_connector(
     source: str,
     config: dict,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_admin)
 ):
-    """Test a source connector connection."""
+    """Test a source connector connection.
+
+    Admin only: the config carries third-party credentials and the probe
+    makes outbound calls, so it must not be reachable by ordinary users.
+    """
     from app.ingestion.connectors import (
         ZendeskConnector, JiraConnector, SlackConnector, ConfluenceConnector
     )

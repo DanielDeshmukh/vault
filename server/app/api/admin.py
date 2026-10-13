@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
@@ -6,7 +6,7 @@ from typing import Optional
 
 from app.db.sessions import get_db
 from app.db.models import User, Role, UserRole
-from app.auth.jwt import get_current_user
+from app.auth.jwt import require_admin
 
 router = APIRouter()
 
@@ -31,15 +31,6 @@ class AdminUserResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
-    return current_user
 
 
 @router.get("/users", response_model=list[AdminUserResponse])

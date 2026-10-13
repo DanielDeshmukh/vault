@@ -229,9 +229,16 @@ async def get_trace(
     trace_id: str,
     current_user: User = Depends(get_current_user)
 ):
-    """Get trace details for debugging."""
+    """Return a trace the caller owns. Admins may read any trace.
+
+    A trace records the caller's question, the retrieved chunks and the
+    generated answer, so it is user data. A non-owner receives the same 404
+    as a missing id, otherwise the response would confirm which trace ids
+    exist and let an attacker enumerate other people's activity.
+    """
     trace = trace_logger.get_trace(trace_id)
     if not trace:
-        return {"error": "Trace not found"}
-    
+        raise HTTPException(status_code=404, detail="Trace not found")
+    if trace.user_id != str(current_user.id) and not current_user.is_admin:
+        raise HTTPException(status_code=404, detail="Trace not found")
     return trace_logger.to_dict(trace)

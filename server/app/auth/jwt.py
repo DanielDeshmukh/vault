@@ -63,3 +63,18 @@ async def get_current_user(
     if not user.is_approved:
         raise HTTPException(status_code=403, detail="Account pending admin approval")
     return user
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Route guard rejecting any caller who is not an admin.
+
+    Chains on get_current_user, so token validity, active status and admin
+    approval are all enforced before the role check runs. Use this for any
+    route that writes to shared state or exposes other users' data.
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
