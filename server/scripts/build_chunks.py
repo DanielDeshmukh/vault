@@ -178,6 +178,7 @@ def build(limit: int | None = None, dry_run: bool = False) -> dict:
                     "section_title": chunk.section_title or "",
                     "section_index": chunk.section_index,
                     "section_parts": chunk.parts,
+                    "part": chunk.part,
                     "section_span_start": chunk.section_char_start,
                     "section_span_end": chunk.section_char_end,
                 },
