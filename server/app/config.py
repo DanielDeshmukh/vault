@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     COHERE_EMBED_MODEL: str = os.environ.get("COHERE_EMBED_MODEL", "embed-english-v3.0")
     COHERE_CHAT_MODEL: str = os.environ.get("COHERE_CHAT_MODEL", "command-a-03-2025")
 
+    # Embeddings moved off Cohere (trial quota exhausted) onto NVIDIA NIM.
+    # app.embeddings is the only module that may use these keys.
+    GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
+    NVIDIA_API_KEY: str = os.environ.get("NVIDIA_API_KEY", "")
+
     JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY", "")
     JWT_ALGORITHM: str = os.environ.get("JWT_ALGORITHM", "HS256")
     JWT_EXPIRATION_MINUTES: int = int(os.environ.get("JWT_EXPIRATION_MINUTES", "60"))

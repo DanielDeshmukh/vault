@@ -140,17 +140,15 @@ class HybridSearch:
             return await perm_filter.build_filter(user)
 
     async def _get_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """Batch embed all query variants in a single Cohere call."""
-        import cohere
-        from app.config import settings
-        client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
-        response = await asyncio.to_thread(
-            client.embed,
-            texts=texts,
-            model=settings.COHERE_EMBED_MODEL,
-            input_type="search_query",
-        )
-        return response.embeddings.float
+        """Batch embed all query variants.
+
+        Delegates to app.embeddings so query vectors come from the same model
+        and dimensionality as the corpus vectors in Pinecone. Mixing providers
+        here silently breaks retrieval.
+        """
+        from app.embeddings import embed_texts
+
+        return await asyncio.to_thread(embed_texts, texts)
 
     async def _get_embedding(self, text: str) -> list[float]:
         embeddings = await self._get_embeddings([text])

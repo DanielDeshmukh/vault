@@ -1,0 +1,34 @@
+{
+  "_comment": [
+    "HARD TRUTH: role access matrix. Every consumer (seeder, ingest, tests,",
+    "permission filter) must treat this file as authoritative.",
+    "role -> { departments it may read, tier label, access_level }",
+    "Departments not listed are denied. Deny-by-default."
+  ],
+  "departments": [
+    "general",
+    "sales",
+    "engineering",
+    "it_security",
+    "hr",
+    "legal",
+    "finance"
+  ],
+  "tiers": {
+    "public": 0,
+    "internal": 1,
+    "confidential": 2,
+    "restricted": 3,
+    "admin": 99
+  },
+  "roles": {
+    "intern":    {"tier": "public",      "access_level": 0,  "departments": ["general"]},
+    "employee":  {"tier": "internal",    "access_level": 1,  "departments": ["general", "sales"]},
+    "engineer":  {"tier": "internal",    "access_level": 1,  "departments": ["general", "engineering", "it_security"]},
+    "manager":   {"tier": "confidential", "access_level": 2,  "departments": ["general", "sales", "engineering", "hr"]},
+    "hr":        {"tier": "confidential", "access_level": 2,  "departments": ["general", "hr"]},
+    "legal":     {"tier": "restricted",   "access_level": 3,  "departments": ["general", "legal"]},
+    "finance":   {"tier": "restricted",   "access_level": 3,  "departments": ["general", "finance"]},
+    "admin":     {"tier": "admin",        "access_level": 99, "departments": ["general", "sales", "engineering", "it_security", "hr", "legal", "finance"]}
+  }
+}

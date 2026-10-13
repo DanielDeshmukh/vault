@@ -16,6 +16,7 @@ Idempotent.
 
 import asyncio
 import os
+from pathlib import Path
 
 import asyncpg
 
@@ -39,8 +40,8 @@ GRANTS = {
     "engineer@vaultdemo.com": ["engineer", "manager"],
     "intern@vaultdemo.com": ["intern", "employee"],
     # owner accounts
-    "deshmukhdaniel2005@gmail.com": ["intern"],
-    "danieldeshmukh59@gmail.com": ["employee"],
+    "owner1@vaultdemo.com": ["intern"],
+    "owner2@vaultdemo.com": ["employee"],
     # tier test accounts, mapped onto the nearest corpus roles so the
     # security evals still get rows back under role-based retrieval
     "public.role.test@vault.local": ["intern"],
@@ -52,7 +53,21 @@ GRANTS = {
 }
 
 
+def _load_env() -> None:
+    """Pull server/.env into the environment without adding a dependency."""
+    env_path = Path(__file__).resolve().parents[1] / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
+
+
 async def main() -> int:
+    _load_env()
     db_url = os.environ.get("DATABASE_URL", "")
     if not db_url:
         print("ERROR: Set DATABASE_URL")
