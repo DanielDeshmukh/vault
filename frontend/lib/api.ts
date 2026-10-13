@@ -230,8 +230,8 @@ export interface Document {
   account_id?: string;
   department?: string;
   access_level: number;
+  allowed_roles?: string[];
   content?: string;
-  can_access?: boolean;
 }
 
 export const api = new ApiClient(API_URL);

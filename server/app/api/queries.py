@@ -50,7 +50,7 @@ async def query(
     This endpoint:
     1. Authenticates the user
     2. Builds permission filter (pre-retrieval)
-    3. Searches with hybrid vector + keyword
+    3. Searches with vector similarity
     4. Reranks with Cohere
     5. Generates cited answer with Cohere
     6. Logs full trace for audit

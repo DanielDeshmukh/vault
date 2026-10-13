@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from uuid import UUID
 from sqlalchemy import bindparam, select
@@ -22,6 +22,7 @@ class DocumentResponse(BaseModel):
     account_id: Optional[str] = None
     department: Optional[str] = None
     access_level: int
+    allowed_roles: list[str] = Field(default_factory=list)
     owner_id: Optional[str] = None
     created_at: Optional[str] = None
     content: Optional[str] = None
@@ -75,6 +76,7 @@ async def list_documents(
             account_id=d.account_id,
             department=d.department,
             access_level=d.access_level,
+            allowed_roles=sorted(document_role_names(d)),
             owner_id=str(d.owner_id) if d.owner_id else None,
             created_at=d.created_at.isoformat() if d.created_at else None,
             can_access=True,
@@ -109,6 +111,7 @@ async def get_document(
         account_id=doc.account_id,
         department=doc.department,
         access_level=doc.access_level,
+        allowed_roles=sorted(document_role_names(doc)),
         owner_id=str(doc.owner_id) if doc.owner_id else None,
         created_at=doc.created_at.isoformat() if doc.created_at else None,
         content=doc.content,

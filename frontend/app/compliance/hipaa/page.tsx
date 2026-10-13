@@ -61,13 +61,13 @@ export default function HIPAAPage() {
             </div>
             <pre className="p-4 text-[12px] leading-relaxed text-ink-muted overflow-x-auto">{`User authenticates
   -> JWT token issued with user_id
-  -> Role resolved from PostgreSQL
-  -> Access level determined (0-3)
+  -> Roles resolved from PostgreSQL
 
 Query arrives
   -> Permission filter applied to Pinecone query
-  -> Only chunks with access_level <= user_level returned
-  -> Restricted chunks never enter context window
+  -> Only chunks whose allowed_roles contain one of the
+     caller's roles are returned
+  -> Chunks outside the caller's roles never enter the context window
 
 Answer generated
   -> Only from authorized chunks

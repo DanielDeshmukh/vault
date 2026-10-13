@@ -195,6 +195,10 @@
   background: #ef4444;
 }
 
+.b-role[data-level="admin"]::before {
+  background: #a855f7;
+}
+
 .b-role:hover {
   border-color: #f7f8f8;
 }

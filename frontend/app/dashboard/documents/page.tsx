@@ -4,20 +4,40 @@ import { useState, useEffect, useCallback } from "react";
 import { api, Document } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
-const LEVEL_LABELS = ["Public", "Internal", "Confidential", "Restricted"];
-const LEVEL_COLORS = [
-  "bg-surface-3 text-ink-muted",
-  "bg-blue-500/15 text-blue-400",
-  "bg-amber-500/15 text-amber-400",
-  "bg-red-500/15 text-red-400",
-];
-
 const SOURCE_ICONS: Record<string, string> = {
   pdf: "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z",
   csv: "M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
   txt: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
   default: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
 };
+
+const MAX_ROLE_PILLS = 3;
+
+function RolePills({ roles }: { roles?: string[] }) {
+  if (!roles || roles.length === 0) {
+    return (
+      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500/15 text-red-400 flex-shrink-0">
+        no roles
+      </span>
+    );
+  }
+  const shown = roles.slice(0, MAX_ROLE_PILLS);
+  return (
+    <span className="flex items-center gap-1 flex-shrink-0">
+      {shown.map((r) => (
+        <span
+          key={r}
+          className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/15 text-blue-400 capitalize"
+        >
+          {r}
+        </span>
+      ))}
+      {roles.length > shown.length && (
+        <span className="text-[10px] text-ink-tertiary">+{roles.length - shown.length}</span>
+      )}
+    </span>
+  );
+}
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -80,12 +100,6 @@ export default function DocumentsPage() {
   };
 
   const handlePreview = useCallback(async (doc: Document) => {
-    if (doc.can_access === false) {
-      setPreviewDoc(doc);
-      setPreviewError("Access denied — your role does not have permission to view this document.");
-      setPreviewLoading(false);
-      return;
-    }
     setPreviewDoc(doc);
     setPreviewLoading(true);
     setPreviewError("");
@@ -148,24 +162,16 @@ export default function DocumentsPage() {
             >
               <div className="flex items-start gap-3 overflow-hidden">
                 <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0">
-                  {doc.can_access === false ? (
-                    <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={SOURCE_ICONS[doc.source] || SOURCE_ICONS.default} />
-                    </svg>
-                  )}
+                  <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={SOURCE_ICONS[doc.source] || SOURCE_ICONS.default} />
+                  </svg>
                 </div>
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-sm truncate">{doc.title}</p>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0 ${LEVEL_COLORS[doc.access_level] || LEVEL_COLORS[0]}`}>
-                      {LEVEL_LABELS[doc.access_level] || "Unknown"}
-                    </span>
+                    <RolePills roles={doc.allowed_roles} />
                     <div className="flex items-center gap-1.5 text-[11px] text-ink-tertiary truncate">
                       <span>{doc.source.toUpperCase()}</span>
                       {doc.department && (
@@ -180,27 +186,18 @@ export default function DocumentsPage() {
               </div>
 
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                {doc.can_access === false ? (
-                  <span className="h-7 flex items-center gap-1 text-xs text-ink-tertiary px-2">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
-                    Access denied
-                  </span>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handlePreview(doc)}
-                    className="h-7 text-xs px-2 text-ink-muted hover:text-foreground"
-                  >
-                    <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Read
-                  </Button>
-                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handlePreview(doc)}
+                  className="h-7 text-xs px-2 text-ink-muted hover:text-foreground"
+                >
+                  <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Read
+                </Button>
                 <div className="flex-1" />
                 <Button
                   size="sm"
@@ -227,10 +224,10 @@ export default function DocumentsPage() {
                 <p className="text-xs text-ink-tertiary mt-0.5">
                   {previewDoc.source.toUpperCase()}
                   {previewDoc.department && ` — ${previewDoc.department}`}
-                  <span className={`ml-2 px-1.5 py-0.5 rounded ${LEVEL_COLORS[previewDoc.access_level] || LEVEL_COLORS[0]}`}>
-                    {LEVEL_LABELS[previewDoc.access_level]}
-                  </span>
                 </p>
+                <div className="mt-1">
+                  <RolePills roles={previewDoc.allowed_roles} />
+                </div>
               </div>
               <button onClick={() => setPreviewDoc(null)} className="p-1.5 rounded-md text-ink-tertiary hover:text-foreground hover:bg-surface-2 ml-3">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

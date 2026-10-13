@@ -1,8 +1,11 @@
+import uuid
+
 import pytest
 
 from app.auth.permissions import (
     AccessLevel,
     build_pinecone_filter,
+    document_role_names,
     get_question_access_level,
 )
 
@@ -231,3 +234,57 @@ def test_expand_query_handles_topic_hints_without_crashing():
     assert variants
     assert isinstance(variants[0], str)
     assert any("vacation" in variant.lower() for variant in variants)
+
+
+def _make_document(allowed_roles, access_level=2):
+    from app.db.models import Document
+
+    return Document(
+        id=uuid.uuid4(),
+        title="Acme contract",
+        content="terms",
+        source="txt",
+        access_level=access_level,
+        allowed_roles=allowed_roles,
+    )
+
+
+class TestDocumentAclSerialization:
+    """The response must expose the same ACL the pre-retrieval filter enforces."""
+
+    def test_roles_are_lowercased_and_deduplicated(self):
+        assert document_role_names(_make_document(["HR", "engineer", "hr"])) == {
+            "hr",
+            "engineer",
+        }
+
+    def test_null_acl_means_nobody(self):
+        """NULL must read as 'no roles', never as 'everyone'."""
+        assert document_role_names(_make_document(None)) == set()
+
+    def test_double_encoded_json_means_nobody(self):
+        """A JSON-stringified array is malformed and must not grant access.
+
+        Regression guard: the corpus ingest once wrote every row's ACL as a
+        double-encoded string, which silently widened access.
+        """
+        assert document_role_names(_make_document('["hr", "legal"]')) == set()
+
+    def test_response_carries_sorted_roles(self):
+        from app.api.documents import DocumentResponse
+
+        doc = _make_document(["finance", "hr"])
+        resp = DocumentResponse(
+            id=str(doc.id),
+            title=doc.title,
+            source=doc.source,
+            access_level=doc.access_level,
+            allowed_roles=sorted(document_role_names(doc)),
+        )
+        assert resp.allowed_roles == ["finance", "hr"]
+
+    def test_response_defaults_to_empty_roles(self):
+        from app.api.documents import DocumentResponse
+
+        resp = DocumentResponse(id="x", title="t", source="txt", access_level=1)
+        assert resp.allowed_roles == []

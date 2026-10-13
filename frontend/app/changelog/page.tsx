@@ -4,18 +4,29 @@ import { SubPageLayout } from "@/components/SubPageLayout";
 
 const CHANGES = [
   {
+    version: "1.1.0",
+    date: "2026-10-13",
+    changes: [
+      { type: "feature", text: "Role-based access control: 8 corpus roles with a deny-by-default allowed_roles ACL on every document" },
+      { type: "feature", text: "49,018-chunk corpus ingested from the GitLab handbook, CUAD contracts and SEC 10-K filings" },
+      { type: "feature", text: "NVIDIA NIM nemotron-3-embed-1b embeddings (2048-dim)" },
+      { type: "feature", text: "Documents API exposes each document's role ACL" },
+      { type: "feature", text: "Admin-only guard on every /api/ingest route" },
+      { type: "fix", text: "Trace endpoint enforces ownership; non-owners cannot read or enumerate other users' traces" },
+    ],
+  },
+  {
     version: "1.0.0",
     date: "2026-09-21",
     changes: [
       { type: "feature", text: "Brutalist landing page with interactive pipeline demo" },
       { type: "feature", text: "7 source connectors: Zendesk, Jira, Slack, Confluence, Transcripts, CSV, Policy docs" },
-      { type: "feature", text: "Permission-first architecture with pre-retrieval RBAC filtering" },
-      { type: "feature", text: "Hybrid search: vector similarity + BM25 keyword matching" },
+      { type: "feature", text: "Permission-first architecture with pre-retrieval filtering" },
+      { type: "feature", text: "Vector similarity search with query expansion" },
       { type: "feature", text: "Cohere cross-encoder reranking" },
       { type: "feature", text: "Cited generation with trace logging" },
-      { type: "feature", text: "4-tier access control: Public, Internal, Confidential, Restricted" },
+      { type: "feature", text: "Numeric access levels (0-3) used as an informational classification" },
       { type: "feature", text: "Golden set evaluation framework (5 questions x 9 users)" },
-      { type: "fix", text: "Permission filter correctly uses access_level instead of non-existent allowed_roles field" },
       { type: "fix", text: "Parallel Pinecone queries for original + expanded search terms" },
       { type: "fix", text: "Asyncio.to_thread wrapping for Cohere SDK calls" },
     ],

@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 const QUERY = "What did we promise Acme Corp in the last renewal call?";
 
 const LINES = [
-  { t: "auth", s: "user=j.rivera role=account_manager scope=[acme-corp, globex]" },
-  { t: "filter", s: "pinecone.filter { access<=CONFIDENTIAL, account\u2208scope } \u2014 applied PRE-retrieval" },
-  { t: "search", s: "hybrid: vector(0.62) + bm25(0.38) \u2192 48 candidates" },
+  { t: "auth", s: "user=j.rivera role=manager scope=[acme-corp, globex]" },
+  { t: "filter", s: "pinecone.filter { allowed_roles \u2208 [manager] } \u2014 applied PRE-retrieval" },
+  { t: "search", s: "vector(0.62) \u2192 48 candidates" },
   { t: "rerank", s: "cohere.rerank \u2192 top 5 (max score 0.94)" },
-  { t: "blocked", s: "3 chunks excluded: [RESTRICTED] exec_escalation.md, hr_notes.doc, pricing_globex.csv" },
+  { t: "blocked", s: "3 chunks excluded: roles \u2229 allowed_roles = \u2205 (exec_escalation.md, hr_notes.doc, pricing_globex.csv)" },
   { t: "generate", s: "command-a-03-2025 @ cohere \u2014 412ms" },
 ];
 
@@ -107,7 +107,7 @@ export function Terminal() {
 const STEPS = [
   { n: "01", name: "Authenticate", d: "Resolve identity, role and account scope from PostgreSQL." },
   { n: "02", name: "Filter", d: "Permission predicate pushed down to the Pinecone query. Before anything is read." },
-  { n: "03", name: "Search", d: "Hybrid retrieval: vector similarity + BM25 keyword match." },
+  { n: "03", name: "Search", d: "Vector similarity search over the pre-filtered corpus." },
   { n: "04", name: "Rerank", d: "Cohere cross-encoder orders candidates by true relevance." },
   { n: "05", name: "Generate", d: "Cohere Command writes a cited answer from authorized chunks only." },
   { n: "06", name: "Log", d: "Full trace persisted: user, scope, chunks, scores, answer, latency." },
@@ -149,48 +149,63 @@ export function Pipeline() {
   );
 }
 
-const ROLES = [
-  { l: 0, name: "Public", who: "All authenticated users", ex: "Policies, onboarding docs" },
-  { l: 1, name: "Internal", who: "Department-scoped", ex: "Team procedures" },
-  { l: 2, name: "Confidential", who: "Account-scoped", ex: "Contracts, support history" },
-  { l: 3, name: "Restricted", who: "Named-user only", ex: "Executive notes, legal" },
+// Mirrors the ACLs the corpus actually carries. Admin is listed on every
+// document, and the backend additionally short-circuits admins to a null
+// filter. Everyone else matches on allowed_roles overlap, exactly as the
+// pre-retrieval Pinecone predicate does.
+const CALLERS = [
+  { name: "intern", level: "0", tier: "public", depts: "general" },
+  { name: "employee", level: "1", tier: "internal", depts: "general, sales" },
+  { name: "engineer", level: "1", tier: "internal", depts: "general, engineering, it_security" },
+  { name: "manager", level: "2", tier: "confidential", depts: "general, sales, engineering, hr" },
+  { name: "hr", level: "2", tier: "confidential", depts: "general, hr" },
+  { name: "legal", level: "3", tier: "restricted", depts: "general, legal" },
+  { name: "finance", level: "3", tier: "restricted", depts: "general, finance" },
+  { name: "admin", level: "admin", tier: "admin", depts: "every department \u2014 unrestricted" },
 ];
 
+const PUBLIC_ROLES = ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"];
+
 const CHUNKS = [
-  { name: "onboarding_handbook.pdf", src: "notion", lvl: 0 },
-  { name: "data_retention_policy.md", src: "confluence", lvl: 0 },
-  { name: "cs_escalation_runbook.md", src: "confluence", lvl: 1 },
-  { name: "#eng-incidents thread", src: "slack", lvl: 1 },
-  { name: "acme_contract_amendment_3.pdf", src: "gdrive", lvl: 2 },
-  { name: "ticket #48213 agent notes", src: "zendesk", lvl: 2 },
-  { name: "acme_renewal_call_0314", src: "gong", lvl: 2 },
-  { name: "exec_escalation_acme.md", src: "notion", lvl: 3 },
-  { name: "legal_hold_2024Q1.doc", src: "gdrive", lvl: 3 },
+  { name: "onboarding_handbook.pdf", src: "notion", roles: PUBLIC_ROLES },
+  { name: "data_retention_policy.md", src: "confluence", roles: PUBLIC_ROLES },
+  { name: "cs_escalation_runbook.md", src: "confluence", roles: ["employee", "engineer", "manager", "admin"] },
+  { name: "#eng-incidents thread", src: "slack", roles: ["engineer", "manager", "admin"] },
+  { name: "ticket #48213 agent notes", src: "zendesk", roles: ["employee", "manager", "hr", "admin"] },
+  { name: "acme_contract_amendment_3.pdf", src: "gdrive", roles: ["manager", "legal", "finance", "admin"] },
+  { name: "acme_renewal_call_0314", src: "gong", roles: ["manager", "hr", "admin"] },
+  { name: "exec_escalation_acme.md", src: "notion", roles: ["legal", "admin"] },
+  { name: "legal_hold_2024Q1.doc", src: "gdrive", roles: ["legal", "admin"] },
 ];
 
 export function PermissionSim() {
-  const [role, setRole] = useState(2);
-  const allowed = CHUNKS.filter((c) => c.lvl <= role).length;
+  const [selected, setSelected] = useState("manager");
+  const isAdmin = selected === "admin";
+  const canSee = (c: (typeof CHUNKS)[number]) => c.roles.includes(selected);
+  const allowed = CHUNKS.filter(canSee).length;
+  const filterText = isAdmin
+    ? "pinecone.search(filter: null) \u2014 admin short-circuits to no predicate"
+    : `pinecone.search(filter: { allowed_roles: { $in: ["${selected}"] } })`;
+
   return (
     <div className="grid lg:grid-cols-2 gap-8">
       <div>
         <div className="b-label mb-4">01 &mdash; select a caller</div>
         <div className="grid gap-3">
-          {ROLES.map((r) => (
+          {CALLERS.map((r) => (
             <div
-              key={r.l}
-              data-level={r.l}
-              className={`b-role ${role === r.l ? "selected" : ""}`}
-              onClick={() => setRole(r.l)}
+              key={r.name}
+              data-level={r.level}
+              className={`b-role ${selected === r.name ? "selected" : ""}`}
+              onClick={() => setSelected(r.name)}
             >
               <div className="flex items-center justify-between">
                 <span className="font-bold uppercase tracking-wide">
-                  <span className="mono text-ink-tertiary mr-3">L{r.l}</span>
-                  {r.name}
+                  <span className="mono text-ink-tertiary mr-3">{r.name}</span>
                 </span>
-                <span className="mono text-[11px] text-ink-subtle">{r.who}</span>
+                <span className="mono text-[11px] text-ink-subtle">{r.tier}</span>
               </div>
-              <div className="text-sm text-ink-tertiary mt-1">{r.ex}</div>
+              <div className="text-sm text-ink-tertiary mt-1">{r.depts}</div>
             </div>
           ))}
         </div>
@@ -204,17 +219,17 @@ export function PermissionSim() {
         </div>
         <div className="border-2 border-border p-4 space-y-2">
           <div className="mono text-[10px] text-ink-tertiary pb-2 border-b border-border">
-            pinecone.search(filter: access_level &le; {role}, account &isin; scope)
+            {filterText}
           </div>
           {CHUNKS.map((c) => {
-            const ok = c.lvl <= role;
+            const ok = canSee(c);
             return (
               <div key={c.name} className={`chunk ${ok ? "allowed" : "blocked"}`}>
                 <span>
                   {ok ? "\u2713" : "\u2715"} {c.name}
                 </span>
-                <span>
-                  {c.src} &middot; L{c.lvl}
+                <span className="truncate">
+                  {c.src} &middot; {c.roles.join(", ")}
                 </span>
               </div>
             );
