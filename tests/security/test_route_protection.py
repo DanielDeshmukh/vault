@@ -23,7 +23,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 
 from app.auth.jwt import create_access_token, get_password_hash, get_current_user
-from app.db.models import User
+from app.db.models import Role, User, UserRole
 from app.db.sessions import async_session
 from app.main import app
 from app.tracing.logger import TraceEntry, trace_logger
@@ -142,8 +142,15 @@ async def client():
         yield ac
 
 
-async def _make_user(tag: str, *, approved: bool, admin: bool) -> tuple[User, str]:
-    """Create a user and mint a token for them. Returns (user, bearer_token)."""
+async def _make_user(
+    tag: str, *, approved: bool, admin: bool, role: str | None = None
+) -> tuple[User, str]:
+    """Create a user and mint a token for them. Returns (user, bearer_token).
+
+    ``role`` mirrors what registration does: a pending applicant is given the
+    default public role, which is what makes them readable-but-not-privileged
+    instead of blank.
+    """
     async with async_session() as db:
         user = User(
             email=f"routeprot_{tag}_{uuid.uuid4().hex[:8]}@vaulttest.local",
@@ -154,6 +161,14 @@ async def _make_user(tag: str, *, approved: bool, admin: bool) -> tuple[User, st
             is_approved=approved,
         )
         db.add(user)
+        await db.flush()
+        if role is not None:
+            role_row = (
+                await db.execute(select(Role).where(Role.name == role))
+            ).scalar_one_or_none()
+            if role_row is None:
+                raise AssertionError(f"role {role!r} missing from roles table")
+            db.add(UserRole(user_id=user.id, role_id=role_row.id))
         await db.commit()
         await db.refresh(user)
         token = create_access_token(
@@ -172,8 +187,10 @@ async def regular_token():
 
 @pytest.fixture(scope="module")
 async def unapproved_token():
-    """An authenticated user who has not been approved yet."""
-    user, token = await _make_user("unapproved", approved=False, admin=False)
+    """A pending applicant holding the default public role registration gives."""
+    user, token = await _make_user(
+        "unapproved", approved=False, admin=False, role="intern"
+    )
     yield token
     await _cleanup(user)
 
@@ -198,6 +215,12 @@ async def _cleanup(user: User) -> None:
         result = await db.execute(select(User).where(User.id == user.id))
         found = result.scalar_one_or_none()
         if found:
+            # Roles must go first: the FK is part of user_roles' primary key,
+            # so SQLAlchemy refuses to blank it out by nulling the parent.
+            for ur in (
+                await db.execute(select(UserRole).where(UserRole.user_id == user.id))
+            ).scalars().all():
+                await db.delete(ur)
             await db.delete(found)
             await db.commit()
 
@@ -208,6 +231,12 @@ async def _delete_user_by_email(email: str) -> None:
         result = await db.execute(select(User).where(User.email == email))
         found = result.scalar_one_or_none()
         if found:
+            # Registration now assigns the default role, so clear it first --
+            # otherwise SQLAlchemy refuses to blank the user_roles FK.
+            for ur in (
+                await db.execute(select(UserRole).where(UserRole.user_id == found.id))
+            ).scalars().all():
+                await db.delete(ur)
             await db.delete(found)
             await db.commit()
 
@@ -301,22 +330,60 @@ async def test_protected_route_rejects_garbage_token(client, method, path, body)
 
 
 # ---------------------------------------------------------------------------
-# 3. unapproved callers
+# 3. pending (unapproved) callers
 # ---------------------------------------------------------------------------
+# A pending applicant holds the default public role registration assigns, so
+# it is readable but not privileged: read routes serve it, while cost-bearing
+# (LLM) and privilege-granting routes still refuse it outright.
+
+PENDING_BLOCKED = ADMIN_ROUTES + INGEST_ROUTES + QUERY_ROUTES
+
+PENDING_ALLOWED = [
+    ("GET", "/api/auth/me", None),
+    ("GET", "/api/documents", None),
+]
+
 
 @pytest.mark.parametrize(
     "method,path,body",
-    ALL_PROTECTED,
-    ids=[f"{m} {p}" for m, p, _ in ALL_PROTECTED],
+    PENDING_BLOCKED,
+    ids=[f"{m} {p}" for m, p, _ in PENDING_BLOCKED],
 )
-async def test_protected_route_rejects_unapproved_user(
+async def test_pending_user_refused_on_privileged_and_priced_routes(
     client, unapproved_token, method, path, body
 ):
-    """A valid token for an unapproved account must still be refused."""
+    """A pending token must not reach admin, ingest, or any model-backed route."""
     r = await _call(client, method, path, body, token=unapproved_token)
     assert r.status_code == 403, (
-        f"{method} {path} returned {r.status_code}, expected 403 for unapproved user"
+        f"{method} {path} returned {r.status_code}, expected 403 for pending user"
     )
+
+
+@pytest.mark.parametrize(
+    "method,path,body",
+    PENDING_ALLOWED,
+    ids=[f"{m} {p}" for m, p, _ in PENDING_ALLOWED],
+)
+async def test_pending_user_can_read_public_surface(
+    client, unapproved_token, method, path, body
+):
+    """Pending is 'default public', not 'locked out': reads must succeed."""
+    r = await _call(client, method, path, body, token=unapproved_token)
+    assert r.status_code == 200, (
+        f"{method} {path} returned {r.status_code}, expected 200 for pending user"
+    )
+
+
+async def test_pending_user_only_sees_public_documents(client, unapproved_token):
+    """The default role exposes the public slice and nothing narrower."""
+    r = await _call(client, "GET", "/api/documents", None, token=unapproved_token)
+    assert r.status_code == 200
+    docs = r.json()
+    assert docs, "pending user should see the public document slice"
+    for d in docs:
+        assert "intern" in (d.get("allowed_roles") or []), (
+            f"pending user saw {d['title']!r} without the default role on its ACL"
+        )
 
 
 # ---------------------------------------------------------------------------

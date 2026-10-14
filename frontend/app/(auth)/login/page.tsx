@@ -56,7 +56,7 @@ export default function LoginPage() {
             </div>
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              Hybrid vector + keyword search
+              Vector search with pre-retrieval filtering
             </div>
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />

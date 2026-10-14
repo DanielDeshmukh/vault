@@ -58,7 +58,7 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async register(data: { email: string; password: string; full_name: string; department: string; designation: string }) {
+  async register(data: { email: string; password: string; full_name: string; department: string; requested_role?: string }) {
     const response = await this.request<{ access_token: string; user: User }>("/api/auth/register", {
       method: "POST",
       body: data,
@@ -193,7 +193,7 @@ export interface User {
   email: string;
   full_name: string;
   department: string;
-  designation?: string;
+  requested_role?: string;
   is_admin: boolean;
   is_approved?: boolean;
   approval_screen_started_at?: string;

@@ -27,7 +27,8 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=8)
     full_name: str
     department: str
-    designation: Optional[str] = None
+    # Optional request only; never grants access. Admin assigns the real role.
+    requested_role: Optional[str] = None
 
 
 class UserLogin(BaseModel):
@@ -40,7 +41,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     department: str
-    designation: Optional[str] = None
+    requested_role: Optional[str] = None
     is_admin: bool
     is_approved: bool = True
     approval_screen_started_at: Optional[str] = None
@@ -55,6 +56,13 @@ class TokenResponse(BaseModel):
     user: UserResponse
 
 
+# Roles an applicant may ask for at signup. Deliberately excludes "admin":
+# that is granted by an existing admin only.
+REQUESTABLE_ROLES = {"intern", "employee", "engineer", "manager", "hr", "legal", "finance"}
+# Applied at signup so a pending account is readable but not privileged.
+DEFAULT_PENDING_ROLE = "intern"
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     # Check if user exists
@@ -64,17 +72,36 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
-    # Create user (no role assigned — admin must approve)
+
+    requested = (user_data.requested_role or "").strip().lower() or None
+    if requested is not None and requested not in REQUESTABLE_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="requested_role must be one of: " + ", ".join(sorted(REQUESTABLE_ROLES))
+        )
+
+    # Create user. Pending accounts get the default public role so they can read
+    # public documents; approval and any higher role are admin decisions.
     user = User(
         email=user_data.email,
         hashed_password=get_password_hash(user_data.password),
         full_name=user_data.full_name,
         department=user_data.department,
-        designation=user_data.designation,
+        requested_role=requested,
         is_approved=False,
     )
     db.add(user)
+    await db.flush()
+
+    default_role = (
+        await db.execute(select(Role).where(Role.name == DEFAULT_PENDING_ROLE))
+    ).scalar_one_or_none()
+    if default_role is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Default role '{DEFAULT_PENDING_ROLE}' is missing"
+        )
+    db.add(UserRole(user_id=user.id, role_id=default_role.id))
     await db.commit()
     await db.refresh(user)
     
@@ -91,7 +118,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             email=user.email,
             full_name=user.full_name,
             department=user.department,
-            designation=user.designation,
+            requested_role=user.requested_role,
             is_admin=user.is_admin,
             is_approved=user.is_approved,
             approval_screen_started_at=None,
@@ -133,7 +160,7 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
             email=user.email,
             full_name=user.full_name,
             department=user.department,
-            designation=user.designation,
+            requested_role=user.requested_role,
             is_admin=user.is_admin,
             is_approved=user.is_approved,
             approval_screen_started_at=user.approval_screen_started_at.isoformat() if user.approval_screen_started_at else None,
@@ -148,7 +175,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         full_name=current_user.full_name,
         department=current_user.department,
-        designation=current_user.designation,
+        requested_role=current_user.requested_role,
         is_admin=current_user.is_admin,
         is_approved=current_user.is_approved,
         approval_screen_started_at=current_user.approval_screen_started_at.isoformat() if current_user.approval_screen_started_at else None,

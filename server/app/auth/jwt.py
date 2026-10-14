@@ -60,17 +60,19 @@ async def get_current_user(
         raise HTTPException(status_code=400, detail="Inactive user")
     if user.email != token_email:
         raise credentials_exception
-    if not user.is_approved:
-        raise HTTPException(status_code=403, detail="Account pending admin approval")
+    # Deliberately NOT rejecting unapproved users here. A pending account holds
+    # the default public role, so it may read public documents. Cost-bearing and
+    # privileged routes gate separately: queries.py rejects unapproved callers
+    # before any model call, and require_admin rejects non-admins outright.
     return user
 
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     """Route guard rejecting any caller who is not an admin.
 
-    Chains on get_current_user, so token validity, active status and admin
-    approval are all enforced before the role check runs. Use this for any
-    route that writes to shared state or exposes other users' data.
+    Chains on get_current_user, so token validity and active status are checked
+    before the role check runs. Use this for any route that writes to shared
+    state or exposes other users' data.
     """
     if not current_user.is_admin:
         raise HTTPException(

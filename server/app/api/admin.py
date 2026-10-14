@@ -24,7 +24,9 @@ class AdminUserResponse(BaseModel):
     email: str
     full_name: str
     department: str
-    designation: Optional[str] = None
+    # Role the applicant asked for at signup, so an admin can compare the
+    # request against what is actually granted.
+    requested_role: Optional[str] = None
     is_admin: bool
     is_approved: bool
     roles: list[str] = []
@@ -54,7 +56,7 @@ async def list_users(
             email=u.email,
             full_name=u.full_name,
             department=u.department,
-            designation=u.designation,
+            requested_role=u.requested_role,
             is_admin=u.is_admin,
             is_approved=u.is_approved,
             roles=role_names,

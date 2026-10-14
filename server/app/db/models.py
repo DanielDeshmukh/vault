@@ -15,7 +15,9 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
     department = Column(String(100), nullable=False)
-    designation = Column(String(100), nullable=True)  # Job title, set at registration
+    # Role the applicant asked for at signup. Advisory only — an admin must
+    # still assign a real role before it grants anything.
+    requested_role = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     is_approved = Column(Boolean, default=False)  # Admin must approve

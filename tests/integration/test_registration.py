@@ -44,11 +44,20 @@ async def cleanup_created_users():
     yield
     if not _created_emails:
         return
-    from sqlalchemy import delete
+    from sqlalchemy import delete, select
 
-    from app.db.models import User
+    from app.db.models import User, UserRole
 
     async with async_session() as db:
+        # Roles first: user_roles.user_id is part of its primary key, so the
+        # FK rejects a user delete while an assigned role still references it.
+        await db.execute(
+            delete(UserRole).where(
+                UserRole.user_id.in_(
+                    select(User.id).where(User.email.in_(_created_emails))
+                )
+            )
+        )
         await db.execute(delete(User).where(User.email.in_(_created_emails)))
         await db.commit()
 
@@ -259,16 +268,26 @@ class TestProtectedEndpoints:
 
 
 class TestApprovalGate:
-    """Unapproved users are blocked everywhere until an admin approves them."""
+    """Pending applicants read the public surface but never the priced one.
 
-    async def test_me_blocked_then_allowed_after_approval(self, client: AsyncClient):
+    Registration assigns the default public role, so a pending account can
+    inspect the app and its own record while still being refused anywhere a
+    model runs or an admin privilege is required.
+    """
+
+    async def test_pending_reads_public_but_priced_routes_stay_forbidden(
+        self, client: AsyncClient
+    ):
         email = unique_email("approval")
-        await client.post("/api/auth/register", json={
+        register_response = await client.post("/api/auth/register", json={
             "email": email,
             "password": "securepassword123",
             "full_name": "Approval User",
             "department": "support",
         })
+        assert register_response.status_code < 400
+        # The requested role is advisory only: registration grants the default.
+        assert register_response.json()["user"]["requested_role"] != "admin"
 
         login_response = await client.post("/api/auth/login", json={
             "email": email,
@@ -277,14 +296,27 @@ class TestApprovalGate:
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
-        # Blocked before approval
-        before = await client.get("/api/auth/me", headers=headers)
-        assert before.status_code == 403
+        # /me is a plain read, so the pending applicant can inspect itself.
+        me = await client.get("/api/auth/me", headers=headers)
+        assert me.status_code == 200
+        assert me.json()["is_approved"] is False
 
-        # Admin approves
+        # The default role resolves to a non-empty public document list.
+        docs = await client.get("/api/documents", headers=headers)
+        assert docs.status_code == 200
+        assert docs.json(), "default role should expose the public slice"
+
+        # Anything priced (model) or privileged stays refused pre-approval.
+        priced = await client.post("/api/query", json={"question": "hi"}, headers=headers)
+        assert priced.status_code == 403
+        assert "approval" in priced.json()["detail"].lower()
+
+        privileged = await client.get("/api/admin/users", headers=headers)
+        assert privileged.status_code == 403
+        assert "Admin access required" in privileged.json()["detail"]
+
+        # Admin approves; the same token now sees the approved flag.
         await approve_user(email)
-
-        # Same token now works
         after = await client.get("/api/auth/me", headers=headers)
         assert after.status_code == 200
         data = after.json()

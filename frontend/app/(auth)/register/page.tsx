@@ -7,6 +7,18 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+// Roles an applicant may request. Excludes "admin" by design: that is granted
+// by an existing admin only, and requesting one here would grant nothing.
+const REQUESTABLE_ROLES = [
+  { value: "intern", label: "Intern — general documents" },
+  { value: "employee", label: "Employee — general, sales" },
+  { value: "engineer", label: "Engineer — engineering, IT security" },
+  { value: "manager", label: "Manager — sales, engineering, HR" },
+  { value: "hr", label: "HR — human resources" },
+  { value: "legal", label: "Legal — legal" },
+  { value: "finance", label: "Finance — finance" },
+];
+
 export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -14,7 +26,7 @@ export default function RegisterPage() {
     password: "",
     full_name: "",
     department: "",
-    designation: "",
+    requested_role: "intern",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +46,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -139,19 +151,28 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="designation" className="text-sm font-medium text-foreground">
-                  Designation
+                <label htmlFor="requested_role" className="text-sm font-medium text-foreground">
+                  Requested role
                 </label>
-                <Input
-                  id="designation"
-                  name="designation"
-                  value={formData.designation}
+                <select
+                  id="requested_role"
+                  name="requested_role"
+                  value={formData.requested_role}
                   onChange={handleChange}
-                  required
-                  placeholder="Software Engineer"
-                  className="h-11"
-                />
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  {REQUESTABLE_ROLES.map((r) => (
+                    <option key={r.value} value={r.value}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-surface-2 border border-border text-xs text-ink-tertiary">
+              Your choice is a request only. You start with public documents, and
+              an admin grants your actual role after review.
             </div>
 
             <div className="space-y-2">

@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import { api, AdminUser } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
-const ROLES = ["Public", "Internal", "Confidential", "Restricted"];
+const ROLES = ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"];
 
 const ROLE_COLORS: Record<string, string> = {
-  Public: "bg-surface-3 text-ink-muted",
-  Internal: "bg-blue-500/15 text-blue-400",
-  Confidential: "bg-amber-500/15 text-amber-400",
-  Restricted: "bg-red-500/15 text-red-400",
+  intern: "bg-surface-3 text-ink-muted",
+  employee: "bg-blue-500/15 text-blue-400",
+  engineer: "bg-blue-500/15 text-blue-400",
+  manager: "bg-amber-500/15 text-amber-400",
+  hr: "bg-amber-500/15 text-amber-400",
+  legal: "bg-red-500/15 text-red-400",
+  finance: "bg-red-500/15 text-red-400",
+  admin: "bg-purple-500/15 text-purple-400",
 };
 
 function RoleBadge({ role }: { role: string }) {
@@ -251,10 +255,12 @@ function UserCard({
           <p className="text-xs text-ink-muted truncate">{user.email}</p>
           <div className="flex items-center gap-2 mt-1 text-xs text-ink-tertiary">
             <span>{user.department}</span>
-            {user.designation && (
+            {user.requested_role && (
               <>
                 <span className="text-border">|</span>
-                <span>{user.designation}</span>
+                <span>
+                  requested <span className="text-foreground">{user.requested_role}</span>
+                </span>
               </>
             )}
           </div>

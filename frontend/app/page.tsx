@@ -104,7 +104,7 @@ const API_ENDPOINTS = [
   "password": "s3cureP@ss",
   "full_name": "Juan Rivera",
   "department": "Customer Success",
-  "designation": "Account Manager"
+  "requested_role": "manager"
 }`,
     response: `{
   "access_token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -114,10 +114,10 @@ const API_ENDPOINTS = [
     "email": "j.rivera@globex.com",
     "full_name": "Juan Rivera",
     "department": "Customer Success",
-    "designation": "Account Manager",
+    "requested_role": "manager",
     "is_admin": false,
     "is_approved": false,
-    "approval_screen_started_at": "2026-09-21T14:30:00Z"
+    "approval_screen_started_at": null
   }
 }`,
   },
@@ -137,7 +137,7 @@ const API_ENDPOINTS = [
     "email": "j.rivera@globex.com",
     "full_name": "Juan Rivera",
     "department": "Customer Success",
-    "designation": "Account Manager",
+    "requested_role": "manager",
     "is_admin": false,
     "is_approved": true,
     "approval_screen_started_at": null
