@@ -335,6 +335,12 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
                 </button>
               );
             }
+            // Relative hrefs inherited from handbook chunks would resolve
+            // against this app and 404. With no single source page to resolve
+            // them against, only absolute links stay clickable.
+            if (!/^(https?:\/\/|mailto:)/i.test(href ?? "")) {
+              return <>{children}</>;
+            }
             return <a href={href} className="text-primary underline underline-offset-2 hover:text-primary-hover" target="_blank" rel="noreferrer">{children}</a>;
           },
         }}

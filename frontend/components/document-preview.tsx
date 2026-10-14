@@ -133,56 +133,123 @@ interface MdProps {
   href?: string;
 }
 
-const MARKDOWN_COMPONENTS = {
-  h1: ({ children }: MdProps) => <h1 className={H1}>{children}</h1>,
-  h2: ({ children }: MdProps) => <h2 className={H2}>{children}</h2>,
-  h3: ({ children }: MdProps) => <h3 className={H3}>{children}</h3>,
-  h4: ({ children }: MdProps) => <h4 className={H4}>{children}</h4>,
-  p: ({ children }: MdProps) => <p className={BODY}>{children}</p>,
-  ul: ({ children }: MdProps) => (
-    <ul className="list-disc pl-5 my-3">{children}</ul>
-  ),
-  ol: ({ children }: MdProps) => (
-    <ol className="list-decimal pl-5 my-3">{children}</ol>
-  ),
-  li: ({ children }: MdProps) => <li className={ITEM}>{children}</li>,
-  a: ({ children, href }: MdProps) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-primary underline underline-offset-2"
-    >
-      {children}
-    </a>
-  ),
-  strong: ({ children }: MdProps) => (
-    <strong className="font-semibold text-foreground">{children}</strong>
-  ),
-  em: ({ children }: MdProps) => <em className="italic">{children}</em>,
-  code: ({ children }: MdProps) => <code className={INLINE_CODE}>{children}</code>,
-  pre: ({ children }: MdProps) => <pre className={BLOCK_CODE}>{children}</pre>,
-  blockquote: ({ children }: MdProps) => (
-    <blockquote className="border-l-2 border-border pl-3 my-3 italic">
-      {children}
-    </blockquote>
-  ),
-  hr: () => <hr className="border-border my-4" />,
+// Links inside the corpus are written for the document's original site.
+// Rendered unchanged they resolve against the Vault origin, so a handbook
+// href such as "../../upstream-studios/" becomes /upstream-studios and 404s.
+// Resolve relative hrefs against the source's real home instead; anything
+// that cannot be placed confidently stays plain text rather than a dead link.
+const SOURCE_BASES: Record<string, string> = {
+  "gitlab-handbook": "https://handbook.gitlab.com/handbook/",
 };
 
-export function DocumentPreview({ content }: { content: string }) {
+// "gitlab-handbook:product/ux/_index.md" -> the page's URL on the source site.
+// Handbook pages are directory-style (".../product/ux/"), so a filename becomes
+// a directory and "_index.md" becomes its parent.
+function sourcePageUrl(source?: string): string | null {
+  if (!source) return null;
+  const cut = source.indexOf(":");
+  const kind = cut === -1 ? source : source.slice(0, cut);
+  const path = cut === -1 ? "" : source.slice(cut + 1);
+  const base = SOURCE_BASES[kind];
+  if (!base) return null;
+  if (!path) return base;
+
+  const rel = path.replace(/\\/g, "/").replace(/^\/+/, "");
+  const url = rel.endsWith("_index.md")
+    ? rel.slice(0, -"_index.md".length)
+    : rel.endsWith(".md")
+      ? `${rel.slice(0, -3)}/`
+      : rel.endsWith("/")
+        ? rel
+        : `${rel}/`;
+  try {
+    return new URL(url, base).toString();
+  } catch {
+    return null;
+  }
+}
+
+function safeHref(href?: string, source?: string): string | null {
+  const h = href?.trim();
+  if (!h) return null;
+  // In-page anchors do nothing outside the original page.
+  if (h.startsWith("#")) return null;
+  if (h.startsWith("//")) return h;
+  // Absolute: keep http(s), drop javascript:/data:/file: etc.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(h)) return /^https?:/i.test(h) ? h : null;
+
+  const base = sourcePageUrl(source);
+  if (!base) return null;
+  try {
+    return new URL(h, base).toString();
+  } catch {
+    return null;
+  }
+}
+
+function markdownComponents(source?: string) {
+  return {
+    h1: ({ children }: MdProps) => <h1 className={H1}>{children}</h1>,
+    h2: ({ children }: MdProps) => <h2 className={H2}>{children}</h2>,
+    h3: ({ children }: MdProps) => <h3 className={H3}>{children}</h3>,
+    h4: ({ children }: MdProps) => <h4 className={H4}>{children}</h4>,
+    p: ({ children }: MdProps) => <p className={BODY}>{children}</p>,
+    ul: ({ children }: MdProps) => (
+      <ul className="list-disc pl-5 my-3">{children}</ul>
+    ),
+    ol: ({ children }: MdProps) => (
+      <ol className="list-decimal pl-5 my-3">{children}</ol>
+    ),
+    li: ({ children }: MdProps) => <li className={ITEM}>{children}</li>,
+    a: ({ children, href }: MdProps) => {
+      const target = safeHref(href, source);
+      if (!target) return <>{children}</>;
+      return (
+        <a
+          href={target}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2"
+        >
+          {children}
+        </a>
+      );
+    },
+    strong: ({ children }: MdProps) => (
+      <strong className="font-semibold text-foreground">{children}</strong>
+    ),
+    em: ({ children }: MdProps) => <em className="italic">{children}</em>,
+    code: ({ children }: MdProps) => (
+      <code className={INLINE_CODE}>{children}</code>
+    ),
+    pre: ({ children }: MdProps) => <pre className={BLOCK_CODE}>{children}</pre>,
+    blockquote: ({ children }: MdProps) => (
+      <blockquote className="border-l-2 border-border pl-3 my-3 italic">
+        {children}
+      </blockquote>
+    ),
+    hr: () => <hr className="border-border my-4" />,
+  };
+}
+
+export function DocumentPreview({
+  content,
+  source,
+}: {
+  content: string;
+  source?: string;
+}) {
   const markdown = useMemo(() => looksLikeMarkdown(content), [content]);
   const blocks = useMemo(
     () => (markdown ? [] : parsePlainText(content)),
     [content, markdown]
   );
+  const components = useMemo(() => markdownComponents(source), [source]);
 
   if (markdown) {
     return (
       <div>
-        <ReactMarkdown components={MARKDOWN_COMPONENTS}>
-          {content}
-        </ReactMarkdown>
+        <ReactMarkdown components={components}>{content}</ReactMarkdown>
       </div>
     );
   }

@@ -332,7 +332,10 @@ export default function DocumentsPage() {
                   <p className="text-sm text-destructive font-medium">{previewError}</p>
                 </div>
               ) : previewDoc.content ? (
-                <DocumentPreview content={previewDoc.content} />
+                <DocumentPreview
+                  content={previewDoc.content}
+                  source={previewDoc.source}
+                />
               ) : (
                 <div className="flex items-center justify-center h-32 text-ink-muted text-sm">No content available</div>
               )}
