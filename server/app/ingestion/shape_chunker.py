@@ -8,6 +8,9 @@ each section intact:
   with headings inside fenced code blocks ignored.
 * SEC 10-K filings            -> tag-stripped prose sectioned on the SEC-mandated
   "Item N. Title" markers, which all five filings in the corpus expose.
+* Contracts (CUAD exhibits)   -> numbered clauses, "12. Heading", on a short line.
+* Statutes (labour codes)     -> numbered sections, "12. (1) ...", which is how an
+  Act of Parliament lays its provisions out.
 
 A section is only split further when it breaches ``max_chunk_chars``. Splitting
 then happens at paragraph boundaries, then sentence boundaries, never mid-word.
@@ -22,6 +25,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
 
 # Deliberately generous: the caller's record cap is ~40 KB, so stay under it.
 DEFAULT_MAX_CHUNK_CHARS = 38_000
@@ -58,6 +62,22 @@ _TAG = re.compile(r"(?s)<[^>]+>")
 _ENTITY = re.compile(r"&#x[0-9a-fA-F]+;|&#\d+;|&[a-zA-Z][a-zA-Z0-9]{1,8};")
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])[ \t]+(?=[A-Z0-9\"'(\[])")
+
+# A numbered clause heading: "12. DEFINITIONS." on a line of its own. The line
+# length cap is the filter -- prose wrapped into a clause starts mid-sentence and
+# runs far past it, while a real heading stays short. Measured over all 510 CUAD
+# contracts: 426 files have at least one, median 11 per file.
+_CONTRACT_CLAUSE = re.compile(r"^[ \t]*\d{1,3}[ \t]*\.[ \t]+\S[^\n]{0,110}", re.MULTILINE)
+
+# A numbered provision of an Act: "12. (1) Where..." or "12. The Board shall...".
+# Anchored to line start and to an upper-case or opening paren after the number
+# so gazette page furniture ("2 THE GAZETTE OF INDIA") cannot open a section.
+_STATUTE_SECTION = re.compile(r"^[ \t]*\d{1,3}[ \t]*\.[ \t]+(?=[A-Z(])[^\n]{0,110}", re.MULTILINE)
+
+# Boundaries closer together than this are merged away. Without a floor the
+# clause regex produces micro-sections (a heading, then one sentence) and the
+# index fills with near-duplicate one-paragraph vectors.
+MIN_SECTION_CHARS = 1_200
 
 PARAGRAPH_BREAK = "\n\n"
 
@@ -234,6 +254,52 @@ def _clean_sec_title(num: str, raw_title: str) -> str:
     return f"Item {num.upper()}. {t}" if t else f"Item {num.upper()}"
 
 
+def _clip_title(raw: str, limit: int = 90) -> str:
+    """Shorten a matched heading line to something citable."""
+    t = re.sub(r"[ \t]+", " ", raw).strip()
+    t = t.strip(" .,:;")
+    return t if len(t) <= limit else t[: limit - 1].rstrip() + "\u2026"
+
+
+def _iter_structured_sections(
+    body: str,
+    heading_re: re.Pattern[str],
+    min_chars: int = MIN_SECTION_CHARS,
+) -> Iterable[Section]:
+    """Split ``body`` on ``heading_re``, keeping every section at least ``min_chars``.
+
+    Shared by the contract and statute shapes, which differ only in which
+    marker opens a section. Boundaries are dropped when they fall closer than
+    ``min_chars`` to the previous *kept* boundary, so a false positive (a wrapped
+    prose line that happens to start with ``12.``) cannot dice a clause into
+    one-paragraph fragments. Offsets stay exact: sections tile ``body`` and each
+    one is passed through :func:`_exact_bounds`.
+    """
+    bounds: list[tuple[int, str | None]] = [
+        (m.start(), _clip_title(m.group(0))) for m in heading_re.finditer(body)
+    ]
+    if not bounds:
+        text, s, e = _exact_bounds(body, 0, len(body))
+        if text:
+            yield Section(None, text, s, e)
+        return
+
+    kept = [bounds[0]]
+    for b in bounds[1:]:
+        if b[0] - kept[-1][0] >= min_chars:
+            kept.append(b)
+
+    prologue, p_start, p_end = _exact_bounds(body, 0, kept[0][0])
+    if prologue:
+        yield Section(None, prologue, p_start, p_end)
+
+    for i, (start, title) in enumerate(kept):
+        end = kept[i + 1][0] if i + 1 < len(kept) else len(body)
+        text, x_start, x_end = _exact_bounds(body, start, end)
+        if text:
+            yield Section(title, text, x_start, x_end)
+
+
 def _split_oversized(text: str, limit: int, overlap: int) -> list[tuple[str, int, int]]:
     """Split ``text`` over ``limit`` chars at paragraph, then sentence, boundaries.
 
@@ -335,6 +401,30 @@ class ShapeChunker:
         sections = list(_iter_sec_sections(prose))
         return self._emit(sections, source_path, source_title, report)
 
+    def chunk_contract(
+        self, text: str, source_path: str, source_title: str | None = None
+    ) -> tuple[list[ShapedChunk], ChunkingReport]:
+        """Chunk a CUAD contract exhibit on its numbered clauses."""
+        report = ChunkingReport(source_path=source_path, kind="contract")
+        if len(text.strip()) < 200:
+            report.warnings.append(
+                f"only {len(text.strip())} chars of text; document may be a stub"
+            )
+        sections = list(_iter_structured_sections(text, _CONTRACT_CLAUSE))
+        return self._emit(sections, source_path, source_title, report)
+
+    def chunk_statute(
+        self, text: str, source_path: str, source_title: str | None = None
+    ) -> tuple[list[ShapedChunk], ChunkingReport]:
+        """Chunk an Act on its numbered provisions."""
+        report = ChunkingReport(source_path=source_path, kind="statute")
+        if len(text.strip()) < 200:
+            report.warnings.append(
+                f"only {len(text.strip())} chars of text; extraction may have failed"
+            )
+        sections = list(_iter_structured_sections(text, _STATUTE_SECTION))
+        return self._emit(sections, source_path, source_title, report)
+
     def chunk(
         self, text: str, source_path: str, kind: str, source_title: str | None = None
     ) -> tuple[list[ShapedChunk], ChunkingReport]:
@@ -342,6 +432,10 @@ class ShapeChunker:
             return self.chunk_markdown(text, source_path, source_title)
         if kind == "sec_filing":
             return self.chunk_sec_filing(text, source_path, source_title)
+        if kind == "contract":
+            return self.chunk_contract(text, source_path, source_title)
+        if kind == "statute":
+            return self.chunk_statute(text, source_path, source_title)
         raise ValueError(f"unknown document kind: {kind!r}")
 
     # -- internals ----------------------------------------------------------
@@ -388,3 +482,75 @@ class ShapeChunker:
         if not chunks:
             report.warnings.append("no chunks produced")
         return chunks, report
+
+
+# ------------------------------------------------------------ source layer --
+# The two offline scripts that consume this module (``build_chunks.py`` and
+# ``ingest_corpus.py``) both load it by path to avoid importing the DB engine.
+# Kind detection and source loading live here so they cannot drift: the text a
+# chunk is offset against must be the same text ``documents.content`` stores, or
+# every ``section_span_*`` points at the wrong character.
+
+# Formats neither script can turn into text. Failing loudly beats chunking
+# binary bytes as markdown and silently filling the index with replacement chars.
+# ``.pdf`` is not listed: :func:`read_source_text` extracts it with pypdf.
+UNSUPPORTED_EXTS = {".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx"}
+
+
+def detect_kind(entry: dict) -> str:
+    """Pick the chunking shape from a manifest entry.
+
+    The manifest carries no ``kind`` column, but its ``source`` is unique per
+    fetch stage: ``cuad:`` for contract exhibits, a bare ``http(s)://`` URL for
+    the four labour codes fetched directly, and the two original stages
+    otherwise. Keying on that keeps the file extension out of the decision --
+    CUAD ships the same agreement as both ``.txt`` and ``.pdf`` and both must
+    land in the contract shape.
+    """
+    source = entry.get("source", "")
+    if source.startswith("cuad:"):
+        return "contract"
+    if source.startswith(("http://", "https://")):
+        return "statute"
+    p = entry["path"].lower()
+    if p.endswith((".htm", ".html")):
+        return "sec_filing"
+    if p.endswith(".md"):
+        return "markdown"
+    ext = Path(entry["path"]).suffix.lower()
+    if ext in UNSUPPORTED_EXTS:
+        raise ValueError(f"unsupported file type {ext!r} -- no parser (add one or skip)")
+    return "markdown"
+
+
+def read_source_text(path: Path, kind: str) -> str:
+    """Load a source document as text, extracting PDFs page by page.
+
+    ``kind`` is accepted so callers pass the same value they chunked with; only
+    the extension decides how bytes become text.
+    """
+    if path.suffix.lower() != ".pdf":
+        return path.read_text(encoding="utf-8", errors="replace")
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:  # pragma: no cover - dependency guard
+        raise ValueError("pypdf is required to extract PDF text; pip install pypdf") from exc
+    try:
+        reader = PdfReader(str(path))
+        return "\n".join((page.extract_text() or "") for page in reader.pages)
+    except Exception as exc:  # noqa: BLE001 - report, don't abort the run
+        raise ValueError(f"PDF extraction failed: {type(exc).__name__}: {exc}") from exc
+
+
+def cleaned_content(text: str, kind: str) -> str:
+    """Return exactly the text the chunker offset against.
+
+    ``ShapedChunk.start_char``/``end_char`` are relative to the cleaned text,
+    not the raw file, so ``documents.content`` must hold the same string or the
+    stored spans will not line up with it.
+    """
+    if kind == "sec_filing":
+        return _html_to_prose(text)
+    if kind == "markdown":
+        return _strip_markdown_frontmatter(text)[0]
+    return text

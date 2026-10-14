@@ -39,28 +39,14 @@ _spec.loader.exec_module(_mod)
 ShapeChunker = _mod.ShapeChunker
 _FRONTMATTER = _mod._FRONTMATTER
 _FRONT_TITLE = _mod._FRONT_TITLE
+_detect_kind = _mod.detect_kind
+_read_text = _mod.read_source_text
 
 CORPUS = REPO / "corpus"
 TENANT_ID = "acme"
 
 # Fields the manifest cannot supply. Defaulted here, then reported.
 DEFAULTED_FIELDS = ("owner", "version", "page", "updated_at", "allowed_groups")
-
-# Binary formats we have no parser for. Failing loudly beats chunking PDF
-# bytes as markdown and silently filling the index with replacement chars.
-UNSUPPORTED_EXTS = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx"}
-
-
-def _detect_kind(rel_path: str) -> str:
-    p = rel_path.lower()
-    if p.endswith((".htm", ".html")):
-        return "sec_filing"
-    if p.endswith(".md"):
-        return "markdown"
-    ext = Path(rel_path).suffix.lower()
-    if ext in UNSUPPORTED_EXTS:
-        raise ValueError(f"unsupported file type {ext!r} -- no parser (add one or skip)")
-    return "markdown"
 
 
 def _source_title(rel_path: str, text: str, kind: str) -> str:
@@ -76,9 +62,17 @@ def _source_title(rel_path: str, text: str, kind: str) -> str:
         return stem
     # SEC filing: <title> is just a ticker/date slug, so derive from filename.
     # e.g. apple_10k_2025-09-27 -> Apple 10-K (2025-09-27)
-    parts = Path(rel_path).stem.split("_")
-    if len(parts) >= 3 and parts[1] == "10k":
-        return f"{parts[0].title()} 10-K ({parts[2]})"
+    if kind == "sec_filing":
+        parts = Path(rel_path).stem.split("_")
+        if len(parts) >= 3 and parts[1] == "10k":
+            return f"{parts[0].title()} 10-K ({parts[2]})"
+        return stem
+    # Contracts and statutes both open with their own title line -- "CO-BRANDING
+    # AND ADVERTISING AGREEMENT", "THE CODE ON WAGES, 2019" -- which beats the
+    # file stem. Fall back when the opening line is not title-shaped.
+    first = next((ln.strip() for ln in text.splitlines() if ln.strip()), "")
+    if 8 <= len(first) <= 120:
+        return first
     return stem
 
 
@@ -117,7 +111,7 @@ def build(limit: int | None = None, dry_run: bool = False) -> dict:
         rel_path = entry["path"]
         dept = entry["department"]
         try:
-            kind = _detect_kind(rel_path)
+            kind = _detect_kind(entry)
         except ValueError as exc:
             stats["failed"].append({"path": rel_path, "error": str(exc)})
             continue
@@ -128,7 +122,10 @@ def build(limit: int | None = None, dry_run: bool = False) -> dict:
             continue
 
         try:
-            text = abs_path.read_text(encoding="utf-8", errors="replace")
+            text = _read_text(abs_path, kind)
+        except ValueError as exc:
+            stats["failed"].append({"path": rel_path, "error": str(exc)})
+            continue
         except Exception as exc:  # noqa: BLE001 - report, don't abort the run
             stats["failed"].append({"path": rel_path, "error": repr(exc)})
             continue

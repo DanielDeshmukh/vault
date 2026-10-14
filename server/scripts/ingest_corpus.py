@@ -36,6 +36,10 @@ CORPUS = REPO / "corpus"
 CHUNKS = CORPUS / "chunks.jsonl"
 EMBED_NPY = CORPUS / "embeddings.npy"
 EMBED_IDS = CORPUS / "embedding_ids.json"
+# sha256 of each record's embedded slice, in EMBED_IDS order. Lets a later run
+# tell "same id, same text" (reuse the vector) from "same id, new text"
+# (re-embed), which id equality alone cannot.
+EMBED_HASHES = CORPUS / "embedding_hashes.json"
 
 # Chars fed to the embedder. The provider also truncates internally, but
 # keeping the corpus-side cap explicit documents what was actually embedded.
@@ -120,8 +124,58 @@ CHECKPOINT_EVERY = 20
 EMBED_CKPT = CORPUS / "embeddings.ckpt.npz"
 
 
+def _reuse_published(
+    want_ids: list[str],
+    hashes: list[str],
+    vectors,
+    done,
+) -> int:
+    """Copy already-published vectors forward for records whose text is unchanged.
+
+    ``manifest.jsonl`` only ever grows, so appending documents leaves the leading
+    ids byte-identical to whatever ``embeddings.npy`` already holds. Re-embedding
+    those would bill for the whole corpus every time one file is added. A record
+    qualifies only when its id *and* its embedded-slice hash both match, so an id
+    reused under new text cannot silently inherit a stale vector.
+    """
+    if not (EMBED_NPY.exists() and EMBED_IDS.exists() and EMBED_HASHES.exists()):
+        return 0
+    import numpy as np
+
+    try:
+        old_ids = json.loads(EMBED_IDS.read_text(encoding="utf-8"))
+        old_hashes = json.loads(EMBED_HASHES.read_text(encoding="utf-8"))
+        old_vecs = np.load(EMBED_NPY)
+    except Exception as exc:  # noqa: BLE001 - unreadable means re-embed, not abort
+        print(f"  published embeddings unreadable ({type(exc).__name__}); embedding all")
+        return 0
+
+    if not (len(old_ids) == len(old_hashes) == old_vecs.shape[0]):
+        print("  published artifacts disagree on length; embedding all")
+        return 0
+    if old_vecs.shape[1] != vectors.shape[1]:
+        print(
+            f"  embedding dim changed {old_vecs.shape[1]} -> {vectors.shape[1]}; "
+            "embedding all"
+        )
+        return 0
+
+    by_id = {rid: i for i, rid in enumerate(old_ids)}
+    reused = 0
+    for i, rid in enumerate(want_ids):
+        j = by_id.get(rid)
+        if j is None or old_hashes[j] != hashes[i]:
+            continue
+        vectors[i] = old_vecs[j]
+        done[i] = True
+        reused += 1
+    return reused
+
+
 def _embed(records: list[dict], resume: bool = True) -> int:
     """Embed every record via app.embeddings. Returns the number of failures."""
+    import hashlib
+
     import numpy as np
 
     from app.embeddings import EMBED_DIM, NIM_BATCH, embed_texts
@@ -130,24 +184,45 @@ def _embed(records: list[dict], resume: bool = True) -> int:
     want_ids = [r["id"] for r in records]
     vectors = np.zeros((n, EMBED_DIM), dtype=np.float32)
     done = np.zeros(n, dtype=bool)
+    # Hash exactly what will be sent, so a hash match means "same embedder input".
+    hashes = [
+        hashlib.sha256(r["metadata"]["text"][:EMBED_CHARS].encode()).hexdigest()
+        for r in records
+    ]
 
     # Resume from a checkpoint when it matches this exact record set.
+    resumed = False
     if resume and EMBED_CKPT.exists():
         try:
             with np.load(EMBED_CKPT) as ck:
                 if list(ck["ids"]) == want_ids and ck["vectors"].shape == vectors.shape:
                     vectors = ck["vectors"]
                     done = ck["done"]
+                    resumed = True
                     print(f"  resumed: {int(done.sum()):,}/{n:,} already embedded")
                 else:
                     print("  checkpoint does not match current chunks.jsonl; restarting")
         except Exception as exc:  # noqa: BLE001 - a corrupt ckpt is just a restart
             print(f"  checkpoint unreadable ({type(exc).__name__}); restarting")
 
+    if resume and not resumed:
+        reused = _reuse_published(want_ids, hashes, vectors, done)
+        if reused:
+            pending_count = n - reused
+            print(
+                f"  reused {reused:,}/{n:,} unchanged vectors; "
+                f"{pending_count:,} left to embed"
+            )
+
     failures = 0
     pending: list[int] = [i for i in range(n) if not done[i]]
     batches = (len(pending) + NIM_BATCH - 1) // NIM_BATCH
     t0 = time.time()
+    print(
+        f"  embedding {len(pending):,} texts in {batches:,} batches of {NIM_BATCH} "
+        f"(reusing {n - len(pending):,})",
+        flush=True,
+    )
 
     def save_ckpt() -> None:
         tmp = EMBED_CKPT.with_name(EMBED_CKPT.name + ".tmp")
@@ -177,13 +252,17 @@ def _embed(records: list[dict], resume: bool = True) -> int:
 
         if b % CHECKPOINT_EVERY == 0 or idx >= len(pending):
             save_ckpt()
-            rate = b / max(time.time() - t0, 1e-9)
-            eta = (batches - b) / max(rate, 1e-9)
-            print(
-                f"  batch {b}/{batches}  done={int(done.sum()):,}/{n:,}  "
-                f"failures={failures}  eta {eta / 60:.1f} min",
-                flush=True,
-            )
+        # Print every batch: a progress line every N batches is
+        # indistinguishable from a hung process.
+        elapsed = time.time() - t0
+        rate = b / max(elapsed, 1e-9)
+        eta = (batches - b) / max(rate, 1e-9)
+        print(
+            f"  batch {b:>3}/{batches}  done={int(done.sum()):,}/{n:,}  "
+            f"failures={failures}  {elapsed:5.1f}s elapsed  "
+            f"eta {eta:5.1f}s",
+            flush=True,
+        )
 
     if not done.all():
         missing = int((~done).sum())
@@ -192,8 +271,14 @@ def _embed(records: list[dict], resume: bool = True) -> int:
         return missing
 
     save_ckpt()
-    np.save(EMBED_NPY, vectors)
+    # Atomic replace: np.save would truncate the previous 400 MB array before
+    # writing, so an interrupt here would destroy the only copy.
+    tmp_npy = EMBED_NPY.with_name(EMBED_NPY.name + ".tmp")
+    with open(tmp_npy, "wb") as fh:
+        np.save(fh, vectors)
+    os.replace(tmp_npy, EMBED_NPY)
     EMBED_IDS.write_text(json.dumps(want_ids, indent=0), encoding="utf-8")
+    EMBED_HASHES.write_text(json.dumps(hashes, indent=0), encoding="utf-8")
     elapsed = time.time() - t0
     print(f"\nembed ok: {n:,} vectors, {batches:,} API calls, {elapsed / 60:.1f} min")
     print(f"  {EMBED_NPY}  ({EMBED_NPY.stat().st_size:,} bytes)")
@@ -259,14 +344,21 @@ async def _load_pg(conn: asyncpg.Connection, records: list[dict]) -> dict:
     for did in doc_order:
         first = by_doc[did][0]["metadata"]
         rel_path = first["source_file"]
-        raw = (CORPUS / rel_path).read_text(encoding="utf-8", errors="replace")
-        if rel_path.lower().endswith((".htm", ".html")):
-            content = mod._html_to_prose(raw)
+        entry = manifest.get(rel_path, {})
+        # Same kind + same extraction as build_chunks.py. section_span_* index
+        # into this string, so any drift here silently mislocates every span.
+        if entry:
+            kind = mod.detect_kind(entry)
         else:
-            content = mod._strip_markdown_frontmatter(raw)[0]
+            kind = (
+                "sec_filing"
+                if rel_path.lower().endswith((".htm", ".html"))
+                else "markdown"
+            )
+        raw = mod.read_source_text(CORPUS / rel_path, kind)
+        content = mod.cleaned_content(raw, kind)
         content_chars += len(content)
 
-        entry = manifest.get(rel_path, {})
         source = (entry.get("source") or first["department"])[:100]
         level = ACCESS_LEVEL_BY_CLASSIFICATION.get(first["classification"], 0)
         # Passed as raw objects: the connection's json codec already runs

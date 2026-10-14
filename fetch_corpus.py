@@ -57,11 +57,17 @@ SEC_COMPANIES = {  # name: CIK
 }
 
 DIRECT_FILES = [  # (url, department, filename)
-    ("https://www.indiacode.nic.in/bitstream/123456789/15793/1/aA2019-29.pdf",
-     "hr", "india_code_on_wages_2019.pdf"),
-    # Add the other three labour codes from https://www.indiacode.nic.in
-    # (Industrial Relations Code 2020, Code on Social Security 2020,
-    #  OSH & Working Conditions Code 2020) as extra tuples here.
+    # The four central labour codes, from the Ministry of Labour & Employment.
+    # indiacode.nic.in is dead (every DSpace path 504s after the move to
+    # indiacode.gov.in), so these come from labour.gov.in instead.
+    ("https://www.labour.gov.in/static/uploads/2025/06/c328da14bbb15fc4ad571dc33e7a4ab3.pdf",
+     "hr", "code_on_wages_2019.pdf"),
+    ("https://www.labour.gov.in/static/uploads/2025/07/682a44b5426bff2c1f4943ee1b2fd566.pdf",
+     "hr", "industrial_relations_code_2020.pdf"),
+    ("https://www.labour.gov.in/static/uploads/2025/07/b0620548445580767b5c0d18c95c26f7.pdf",
+     "hr", "code_on_social_security_2020.pdf"),
+    ("https://dgfasli.gov.in/public/Admin/Cms/AllPdf/650059fbb8f1a9.98699174.pdf",
+     "hr", "osh_working_conditions_code_2020.pdf"),
 ]
 
 CUAD_URL = "https://zenodo.org/api/records/4595826/files/CUAD_v1.zip/content"
