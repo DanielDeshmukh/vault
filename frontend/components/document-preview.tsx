@@ -38,6 +38,51 @@ function looksLikeMarkdown(text: string): boolean {
   return false;
 }
 
+// Imported pages carry authoring artefacts: markdownlint comments, stray
+// <br>/<p>/<span> tags and numeric entities. React deliberately does not
+// render raw HTML, so without this pass readers see the tags themselves.
+// A closed whitelist is used rather than "<[^>]+>" -- an unrestricted
+// pattern would eat genuine prose such as "to < 100 GB for GitLab.com".
+const HTML_COMMENT = /<!--[\s\S]*?-->/g;
+// Formatting tags that are used bare ("<b>", "<br/>"): attributes are refused
+// outright, so prose like "a<b when b>0" cannot be mistaken for a tag.
+const BARE_TAGS = /<\/?(?:b|i|u|s|em|strong|br|hr)\s*\/?>/gi;
+// Tags that legitimately carry attributes must actually have them, so an
+// unmatched "<" in running text still cannot be swallowed.
+const ATTR_TAGS =
+  /<\/?(?:p|div|span|a|img|h[1-6]|ul|ol|li|table|thead|tbody|tfoot|tr|td|th|section|article|figure|figcaption|blockquote|code|pre|sub|sup|kbd|abbr)(?:\s+[a-z-]+(?::[a-z-]+)?\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>"']+))*\s*\/?>/gi;
+
+const ENTITIES: Record<string, string> = {
+  nbsp: " ",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  "#39": "'",
+  "#x27": "'",
+  rsquo: "’",
+  lsquo: "‘",
+  rdquo: "”",
+  ldquo: "“",
+  mdash: "—",
+  ndash: "–",
+  hellip: "…",
+};
+
+function normalizeContent(text: string): string {
+  let out = text.replace(HTML_COMMENT, "");
+  // Breaks must become newlines rather than disappear with the tag.
+  out = out.replace(/<\s*br\s*\/?\s*>/gi, "\n");
+  out = out.replace(/<\s*\/\s*p\s*>/gi, "\n\n");
+  out = out.replace(BARE_TAGS, "").replace(ATTR_TAGS, "");
+  // Decoded last so "&lt;b&gt;" cannot become a tag that then gets stripped.
+  return out.replace(/&([a-z#][a-z0-9]{1,8});/gi, (whole, name) => {
+    const key = String(name).toLowerCase();
+    return key in ENTITIES ? ENTITIES[key] : whole;
+  });
+}
+
 // Top-level clause ("12. DEFINITIONS."). Deliberately requires whitespace
 // after the number so sub-clauses ("12.1 The Company shall ...") stay body
 // text instead of becoming headings. Length-capped so a clause whose first
@@ -239,17 +284,18 @@ export function DocumentPreview({
   content: string;
   source?: string;
 }) {
-  const markdown = useMemo(() => looksLikeMarkdown(content), [content]);
+  const normalized = useMemo(() => normalizeContent(content), [content]);
+  const markdown = useMemo(() => looksLikeMarkdown(normalized), [normalized]);
   const blocks = useMemo(
-    () => (markdown ? [] : parsePlainText(content)),
-    [content, markdown]
+    () => (markdown ? [] : parsePlainText(normalized)),
+    [normalized, markdown]
   );
   const components = useMemo(() => markdownComponents(source), [source]);
 
   if (markdown) {
     return (
       <div>
-        <ReactMarkdown components={components}>{content}</ReactMarkdown>
+        <ReactMarkdown components={components}>{normalized}</ReactMarkdown>
       </div>
     );
   }
