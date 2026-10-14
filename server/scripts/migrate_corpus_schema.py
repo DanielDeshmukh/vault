@@ -22,6 +22,20 @@ STATEMENTS = [
     "ALTER TABLE documents ADD COLUMN IF NOT EXISTS source_file text",
     "CREATE UNIQUE INDEX IF NOT EXISTS ix_documents_doc_id ON documents (doc_id)",
     "CREATE INDEX IF NOT EXISTS ix_documents_classification ON documents (classification)",
+    # Full-text search over title + content. Title weighted A, body B, so
+    # ts_rank prefers a document about the query over one that mentions it.
+    # STORED generated column: Postgres backfills every existing row and keeps
+    # it current, so scripts/ingest_corpus.py needs no change. The expression
+    # must stay byte-identical to Document.search_vector in app/db/models.py,
+    # or create_all on a fresh database would build a different column.
+    (
+        "ALTER TABLE documents ADD COLUMN IF NOT EXISTS search_vector tsvector "
+        "GENERATED ALWAYS AS ("
+        "setweight(to_tsvector('english', coalesce(title, '')), 'A') || "
+        "setweight(to_tsvector('english', coalesce(content, '')), 'B')"
+        ") STORED"
+    ),
+    "CREATE INDEX IF NOT EXISTS ix_documents_search_vector ON documents USING gin (search_vector)",
     # --- document_chunks -------------------------------------------------
     "ALTER TABLE document_chunks ADD COLUMN IF NOT EXISTS citation text",
     "ALTER TABLE document_chunks ADD COLUMN IF NOT EXISTS section_index integer",

@@ -380,8 +380,10 @@ async def test_pending_user_only_sees_public_documents(client, unapproved_token)
     """The default role exposes the public slice and nothing narrower."""
     r = await _call(client, "GET", "/api/documents", None, token=unapproved_token)
     assert r.status_code == 200
-    docs = r.json()
+    body = r.json()
+    docs = body["items"]
     assert docs, "pending user should see the public document slice"
+    assert body["total"] >= len(docs)
     for d in docs:
         assert "intern" in (d.get("allowed_roles") or []), (
             f"pending user saw {d['title']!r} without the default role on its ACL"

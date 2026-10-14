@@ -341,7 +341,16 @@ async def _load_pg(conn: asyncpg.Connection, records: list[dict]) -> dict:
     doc_id_to_uuid: dict[str, str] = {}
     content_chars = 0
 
-    for did in doc_order:
+    # Staging these rows reads and extracts every source -- 5,224 files, 514 of
+    # them PDFs -- which takes minutes. The connection is idle for that whole
+    # window, the server reaps it, and the first INSERT afterwards died with
+    # ConnectionDoesNotExistError. Ping it while we work, and report progress:
+    # minutes of silence is indistinguishable from a hang.
+    t_ping = time.monotonic()
+    for i, did in enumerate(doc_order):
+        if time.monotonic() - t_ping > 30:
+            await conn.fetchval("SELECT 1")
+            t_ping = time.monotonic()
         first = by_doc[did][0]["metadata"]
         rel_path = first["source_file"]
         entry = manifest.get(rel_path, {})
@@ -384,9 +393,10 @@ async def _load_pg(conn: asyncpg.Connection, records: list[dict]) -> dict:
                 meta_obj,
             )
         )
+        if (i + 1) % 500 == 0 or i + 1 == len(doc_order):
+            print(f"  staged {i + 1:,}/{len(doc_order):,} documents", flush=True)
 
-    await conn.executemany(
-        """
+    doc_sql = """
         INSERT INTO documents
             (id, doc_id, title, content, source, source_file, department,
              access_level, classification, allowed_roles, metadata,
@@ -394,9 +404,9 @@ async def _load_pg(conn: asyncpg.Connection, records: list[dict]) -> dict:
         VALUES
             (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9::json,
              $10::json, now(), now())
-        """,
-        doc_rows,
-    )
+    """
+    for start in range(0, len(doc_rows), PG_BATCH):
+        await conn.executemany(doc_sql, doc_rows[start : start + PG_BATCH])
     rows = await conn.fetch("SELECT id, doc_id FROM documents")
     doc_id_to_uuid = {r["doc_id"]: str(r["id"]) for r in rows}
     print(f"  documents: {len(doc_rows):,} rows, {content_chars:,} content chars")
@@ -433,6 +443,9 @@ async def _load_pg(conn: asyncpg.Connection, records: list[dict]) -> dict:
             """,
             chunk_rows[start : start + PG_BATCH],
         )
+        done = min(start + PG_BATCH, len(chunk_rows))
+        if done == len(chunk_rows) or done % (PG_BATCH * 5) == 0:
+            print(f"  chunks {done:,}/{len(chunk_rows):,}", flush=True)
     print(f"  document_chunks: {len(chunk_rows):,} rows")
 
     return doc_id_to_uuid

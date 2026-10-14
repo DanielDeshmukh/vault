@@ -304,7 +304,9 @@ class TestApprovalGate:
         # The default role resolves to a non-empty public document list.
         docs = await client.get("/api/documents", headers=headers)
         assert docs.status_code == 200
-        assert docs.json(), "default role should expose the public slice"
+        body = docs.json()
+        assert body["items"], "default role should expose the public slice"
+        assert body["total"] >= len(body["items"])
 
         # Anything priced (model) or privileged stays refused pre-approval.
         priced = await client.post("/api/query", json={"question": "hi"}, headers=headers)

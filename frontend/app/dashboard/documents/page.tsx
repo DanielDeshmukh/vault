@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { api, Document } from "@/lib/api";
+import { api, Classification, Document } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { DocumentPreview } from "@/components/document-preview";
 
 const SOURCE_ICONS: Record<string, string> = {
   pdf: "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z",
@@ -12,6 +13,17 @@ const SOURCE_ICONS: Record<string, string> = {
 };
 
 const MAX_ROLE_PILLS = 3;
+const INITIAL_LIMIT = 10;
+const PAGE_LIMIT = 50;
+const SEARCH_DEBOUNCE_MS = 250;
+
+type Filter = "all" | Classification;
+
+const FILTERS: Array<{ value: Filter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "internal", label: "Internal" },
+  { value: "restricted", label: "Restricted" },
+];
 
 function RolePills({ roles }: { roles?: string[] }) {
   if (!roles || roles.length === 0) {
@@ -41,51 +53,68 @@ function RolePills({ roles }: { roles?: string[] }) {
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  const classification = filter === "all" ? undefined : filter;
 
-  const loadDocuments = async () => {
+  // Debounced so a keystroke does not fire a query per character. Setting the
+  // same value back is a no-op, so this does not double-fetch on mount.
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setQuery(searchInput.trim()),
+      SEARCH_DEBOUNCE_MS
+    );
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const loadFirstPage = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      const docs = await api.listDocuments();
-      setDocuments(docs);
+      const res = await api.listDocuments({
+        limit: INITIAL_LIMIT,
+        offset: 0,
+        classification,
+        q: query || undefined,
+      });
+      setDocuments(res.items);
+      setTotal(res.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load documents");
     } finally {
       setLoading(false);
     }
-  };
+  }, [classification, query]);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
+  useEffect(() => {
+    loadFirstPage();
+  }, [loadFirstPage]);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
     setError("");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("source", file.name.split(".").pop() || "csv");
-      formData.append("account_id", "unknown");
-      formData.append("department", "general");
-      formData.append("access_level", "0");
-      const response = await fetch("/api/ingest", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${api.getToken()}` },
-        body: formData,
+      const res = await api.listDocuments({
+        limit: PAGE_LIMIT,
+        offset: documents.length,
+        classification,
+        q: query || undefined,
       });
-      if (!response.ok) throw new Error("Upload failed");
-      await loadDocuments();
+      setDocuments((prev) => [...prev, ...res.items]);
+      setTotal(res.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : "Failed to load documents");
     } finally {
-      setUploading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -94,6 +123,7 @@ export default function DocumentsPage() {
     try {
       await api.deleteDocument(id);
       setDocuments((prev) => prev.filter((d) => d.id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Delete failed");
     }
@@ -116,28 +146,61 @@ export default function DocumentsPage() {
     }
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-ink-muted">
-        Loading documents...
-      </div>
-    );
-  }
+  const filtered = filter !== "all" || query.length > 0;
 
   return (
-    <div className="p-4 md:p-6 space-y-6 w-full overflow-hidden">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold font-display">Documents</h1>
-          <p className="text-sm text-ink-muted mt-1">Manage ingested documents</p>
+    <div className="p-4 md:p-6 space-y-4 w-full overflow-hidden">
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold font-display">Documents</h1>
+        <p className="text-sm text-ink-muted mt-1">
+          {total > 0 ? `${total.toLocaleString()} documents` : "Manage ingested documents"}
+        </p>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center gap-3">
+        <div className="relative w-full md:w-80">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+            />
+          </svg>
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search titles and contents…"
+            aria-label="Search documents"
+            className="w-full h-9 rounded-md border border-border bg-surface-1 pl-9 pr-3 text-sm text-foreground placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
         </div>
-        <div className="flex-shrink-0">
-          <input type="file" id="file-upload" className="hidden" accept=".csv,.pdf,.docx,.txt" onChange={handleUpload} />
-          <Button asChild disabled={uploading} size="sm">
-            <label htmlFor="file-upload" className="cursor-pointer">
-              {uploading ? "Uploading..." : "Upload"}
-            </label>
-          </Button>
+
+        <div className="flex items-center gap-2">
+          {FILTERS.map((f) => {
+            const active = filter === f.value;
+            return (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setFilter(f.value)}
+                aria-pressed={active}
+                className={
+                  active
+                    ? "h-8 px-3 rounded-md text-xs font-medium bg-primary text-primary-foreground"
+                    : "h-8 px-3 rounded-md text-xs font-medium border border-border text-ink-muted hover:text-foreground hover:bg-surface-1"
+                }
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -148,69 +211,92 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      {documents.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center h-40 text-ink-muted text-sm">
+          Loading documents...
+        </div>
+      ) : documents.length === 0 ? (
         <div className="rounded-lg border border-border bg-surface-1 p-12 text-center">
-          <p className="text-ink-muted mb-2">No documents yet</p>
-          <p className="text-sm text-ink-tertiary">Upload a CSV, PDF, or text file to get started</p>
+          <p className="text-ink-muted mb-2">
+            {filtered ? "No documents match your search" : "No documents yet"}
+          </p>
+          <p className="text-sm text-ink-tertiary">
+            {filtered
+              ? "Try a different term or clear the filters."
+              : "Documents are ingested by an administrator."}
+          </p>
         </div>
       ) : (
-        <div className="grid gap-3">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="rounded-lg border border-border bg-surface-1 p-4 hover:border-border/80 transition-colors overflow-hidden"
-            >
-              <div className="flex items-start gap-3 overflow-hidden">
-                <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={SOURCE_ICONS[doc.source] || SOURCE_ICONS.default} />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-sm truncate">{doc.title}</p>
+        <>
+          <div className="grid gap-3">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="rounded-lg border border-border bg-surface-1 p-4 hover:border-border/80 transition-colors overflow-hidden"
+              >
+                <div className="flex items-start gap-3 overflow-hidden">
+                  <div className="w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-ink-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={SOURCE_ICONS[doc.source] || SOURCE_ICONS.default} />
+                    </svg>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <RolePills roles={doc.allowed_roles} />
-                    <div className="flex items-center gap-1.5 text-[11px] text-ink-tertiary truncate">
-                      <span>{doc.source.toUpperCase()}</span>
-                      {doc.department && (
-                        <>
-                          <span className="text-border">|</span>
-                          <span className="truncate">{doc.department}</span>
-                        </>
-                      )}
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm truncate">{doc.title}</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <RolePills roles={doc.allowed_roles} />
+                      <div className="flex items-center gap-1.5 text-[11px] text-ink-tertiary truncate">
+                        <span>{doc.source.toUpperCase()}</span>
+                        {doc.department && (
+                          <>
+                            <span className="text-border">|</span>
+                            <span className="truncate">{doc.department}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handlePreview(doc)}
-                  className="h-7 text-xs px-2 text-ink-muted hover:text-foreground"
-                >
-                  <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Read
-                </Button>
-                <div className="flex-1" />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleDelete(doc.id)}
-                  className="h-7 text-xs px-2 text-ink-tertiary hover:text-destructive"
-                >
-                  Delete
-                </Button>
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handlePreview(doc)}
+                    className="h-7 text-xs px-2 text-ink-muted hover:text-foreground"
+                  >
+                    <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Read
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDelete(doc.id)}
+                    className="h-7 text-xs px-2 text-ink-tertiary hover:text-destructive"
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col items-center gap-2 pt-1">
+            <span className="text-xs text-ink-tertiary">
+              Showing {documents.length.toLocaleString()} of {total.toLocaleString()}
+            </span>
+            {documents.length < total && (
+              <Button variant="outline" size="sm" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? "Loading…" : "Show more"}
+              </Button>
+            )}
+          </div>
+        </>
       )}
 
       {/* Preview Modal */}
@@ -246,7 +332,7 @@ export default function DocumentsPage() {
                   <p className="text-sm text-destructive font-medium">{previewError}</p>
                 </div>
               ) : previewDoc.content ? (
-                <pre className="text-sm text-ink-muted whitespace-pre-wrap font-sans leading-relaxed">{previewDoc.content}</pre>
+                <DocumentPreview content={previewDoc.content} />
               ) : (
                 <div className="flex items-center justify-center h-32 text-ink-muted text-sm">No content available</div>
               )}

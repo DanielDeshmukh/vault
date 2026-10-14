@@ -1,7 +1,18 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Boolean, Integer, ForeignKey, Text, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import (
+    Column,
+    String,
+    DateTime,
+    Boolean,
+    Integer,
+    ForeignKey,
+    Text,
+    JSON,
+    Computed,
+    Index,
+)
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 
 from app.db.sessions import Base
@@ -78,9 +89,31 @@ class Document(Base):
     classification = Column(String(50))
     allowed_roles = Column(JSON, default=list)
 
+    # Full-text index over title + content, maintained by Postgres rather than
+    # by application code. Title is weighted A and body B so ts_rank prefers a
+    # document that is *about* the query over one that merely mentions it.
+    # GENERATED ALWAYS AS ... STORED means the database backfills existing rows
+    # and scripts/ingest_corpus.py needs no change: its INSERT lists columns
+    # explicitly, so Postgres fills this one in itself.
+    search_vector = Column(
+        TSVECTOR,
+        Computed(
+            "setweight(to_tsvector('english', coalesce(title, '')), 'A') || "
+            "setweight(to_tsvector('english', coalesce(content, '')), 'B')",
+            persisted=True,
+        ),
+    )
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
+    __table_args__ = (
+        # GIN, not the default btree: an inverted index answers "which docs
+        # contain these terms" in time proportional to the match, not to the
+        # 94 MB of content it would otherwise have to read.
+        Index("ix_documents_search_vector", "search_vector", postgresql_using="gin"),
+    )
+
     # Relationships
     chunks = relationship("DocumentChunk", back_populates="document")
     accesses = relationship("DocumentAccess", back_populates="document")

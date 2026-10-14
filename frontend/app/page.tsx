@@ -165,33 +165,46 @@ access_level: 2`,
     path: "/api/documents",
     auth: true,
     request: `// no body required
-// Authorization: Bearer <token>`,
-    response: `[
-  {
-    "id": "doc_8f2a9c1e",
-    "title": "acme_renewal_call_0314",
-    "source": "gong",
-    "account_id": "acme-corp",
-    "department": "customer-success",
-    "access_level": 2,
-    "allowed_roles": ["manager", "legal", "finance", "admin"],
-    "owner_id": "usr_a1b2c3d4",
-    "created_at": "2026-03-15T10:00:00Z",
-    "can_access": true
-  },
-  {
-    "id": "doc_3b7d4e2f",
-    "title": "Data Retention Policy v2.1",
-    "source": "confluence",
-    "account_id": null,
-    "department": "compliance",
-    "access_level": 0,
-    "allowed_roles": ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"],
-    "owner_id": "usr_sarah_chen",
-    "created_at": "2026-01-10T08:30:00Z",
-    "can_access": true
-  }
-]`,
+// Authorization: Bearer <token>
+//
+// Query params
+//   limit           1..100 (default 10)
+//   offset          default 0
+//   classification  "internal" | "restricted"
+//   q               full-text search over title + content`,
+    response: `{
+  "items": [
+    {
+      "id": "doc_8f2a9c1e",
+      "title": "acme_renewal_call_0314",
+      "source": "gong",
+      "account_id": "acme-corp",
+      "department": "customer-success",
+      "access_level": 2,
+      "classification": "internal",
+      "allowed_roles": ["manager", "legal", "finance", "admin"],
+      "owner_id": "usr_a1b2c3d4",
+      "created_at": "2026-03-15T10:00:00Z",
+      "can_access": true
+    },
+    {
+      "id": "doc_3b7d4e2f",
+      "title": "Data Retention Policy v2.1",
+      "source": "confluence",
+      "account_id": null,
+      "department": "compliance",
+      "access_level": 0,
+      "classification": "restricted",
+      "allowed_roles": ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"],
+      "owner_id": "usr_sarah_chen",
+      "created_at": "2026-01-10T08:30:00Z",
+      "can_access": true
+    }
+  ],
+  "total": 5132,
+  "limit": 10,
+  "offset": 0
+}`,
   },
   {
     method: "GET",
@@ -206,6 +219,7 @@ access_level: 2`,
   "account_id": "acme-corp",
   "department": "customer-success",
   "access_level": 2,
+  "classification": "internal",
   "allowed_roles": ["manager", "legal", "finance", "admin"],
   "owner_id": "usr_a1b2c3d4",
   "created_at": "2026-03-15T10:00:00Z",

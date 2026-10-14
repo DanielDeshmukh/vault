@@ -175,8 +175,14 @@ class ApiClient {
   }
 
   // Document endpoints
-  async listDocuments() {
-    return this.request<Document[]>("/api/documents");
+  async listDocuments(params: DocumentListParams = {}) {
+    const qs = new URLSearchParams();
+    if (params.limit != null) qs.set("limit", String(params.limit));
+    if (params.offset != null) qs.set("offset", String(params.offset));
+    if (params.classification) qs.set("classification", params.classification);
+    if (params.q) qs.set("q", params.q);
+    const suffix = qs.toString() ? `?${qs.toString()}` : "";
+    return this.request<DocumentListResponse>(`/api/documents${suffix}`);
   }
 
   async getDocument(id: string) {
@@ -232,6 +238,22 @@ export interface Document {
   access_level: number;
   allowed_roles?: string[];
   content?: string;
+}
+
+export type Classification = "internal" | "restricted";
+
+export interface DocumentListParams {
+  limit?: number;
+  offset?: number;
+  classification?: Classification;
+  q?: string;
+}
+
+export interface DocumentListResponse {
+  items: Document[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export const api = new ApiClient(API_URL);
