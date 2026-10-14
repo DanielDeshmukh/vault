@@ -124,3 +124,6 @@ CREDENTIALS.md
 credentials.md
 **/CREDENTIALS.md
 
+# Corpus backups (cleanup_corpus.py) - contains document content, never commit
+backups/
+
