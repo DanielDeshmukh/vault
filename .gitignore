@@ -117,3 +117,9 @@ server/eval_results*.json
 
 # Downloaded corpus (fetch_corpus.py) - large, regenerable
 corpus/
+
+# Demo account passwords - the repo is public, never commit these
+CREDENTIALS.md
+credentials.md
+**/CREDENTIALS.md
+
