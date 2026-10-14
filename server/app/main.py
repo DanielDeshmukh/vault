@@ -56,5 +56,13 @@ async def startup():
 
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
+    """Liveness probe.
+
+    Both paths are registered on purpose: locally ``test_api.py`` hits the bare
+    ``/health`` against uvicorn, but Vercel only routes ``/api/*`` (plus an
+    explicit ``/health`` entry in vercel.json) into this function, so a single
+    route leaves one of the two environments answering 404.
+    """
     return {"status": "healthy", "app": settings.APP_NAME}

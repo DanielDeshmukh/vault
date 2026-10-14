@@ -31,6 +31,7 @@ from app.tracing.logger import TraceEntry, trace_logger
 # Routes that are public by design. Anything not listed here must be protected.
 PUBLIC_ALLOWLIST = {
     ("GET", "/health"),
+    ("GET", "/api/health"),
     ("POST", "/api/auth/register"),
     ("POST", "/api/auth/login"),
 }
@@ -86,6 +87,7 @@ ADMIN_ONLY = ADMIN_ROUTES + INGEST_ROUTES
 # paths). Used to catch a route being renamed, dropped, or silently added.
 EXPECTED_ROUTE_TEMPLATES = {
     ("GET", "/health"),
+    ("GET", "/api/health"),
     ("POST", "/api/auth/register"),
     ("POST", "/api/auth/login"),
     ("GET", "/api/auth/me"),
