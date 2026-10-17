@@ -339,7 +339,7 @@ def _html_to_prose(html: str) -> str:
 def _looks_like_html(angle: str) -> bool:
     """True for ``<td>`` / ``</div>``; False for ``<username>`` and friends."""
     m = re.match(r"</?([a-zA-Z][a-zA-Z0-9]*)\b", angle)
-    return bool(m) and m.group(1).lower() in _HTML_NAME_SET
+    return m is not None and m.group(1).lower() in _HTML_NAME_SET
 
 
 def _mask_regions(text: str) -> tuple[str, list[str]] | None:

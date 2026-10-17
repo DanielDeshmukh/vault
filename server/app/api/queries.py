@@ -1,14 +1,14 @@
+import json
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from typing import Optional
-from datetime import datetime
-import json
 
 from app.auth.jwt import get_current_user
 from app.db.models import User
-from app.retrieval.search import HybridSearch
 from app.retrieval.generator import CitationGenerator
+from app.retrieval.search import HybridSearch
 from app.tracing.logger import trace_logger
 
 router = APIRouter()
@@ -16,10 +16,10 @@ router = APIRouter()
 
 class QueryRequest(BaseModel):
     question: str
-    context: Optional[str] = Field(default=None, max_length=6000)
+    context: str | None = Field(default=None, max_length=6000)
 
 
-def build_retrieval_query(question: str, conversation_context: Optional[str]) -> str:
+def build_retrieval_query(question: str, conversation_context: str | None) -> str:
     """Keep follow-up retrieval anchored to the current conversation topic."""
     if not conversation_context:
         return question
@@ -46,7 +46,7 @@ async def query(
 ):
     """
     Query the knowledge base with permission-aware retrieval.
-    
+
     This endpoint:
     1. Authenticates the user
     2. Builds permission filter (pre-retrieval)
@@ -73,11 +73,11 @@ async def query(
     # questions whose words happen to overlap a restricted term.
     try:
         start_time = datetime.utcnow()
-        
+
         # Initialize components
         search = HybridSearch()
         generator = CitationGenerator()
-        
+
         # Execute permission-aware search
         results = await search.search(
             query=request.question,
@@ -85,7 +85,7 @@ async def query(
             top_k=6,
             use_reranker=True
         )
-        
+
         # Log retrieved chunks
         trace_logger.log_retrieved_chunks(
             trace,
@@ -99,17 +99,17 @@ async def query(
                 for r in results
             ]
         )
-        
+
         # Generate cited answer
         generated = await generator.generate(
             query=request.question,
             results=results,
             conversation_context=request.context,
         )
-        
+
         # Calculate latency
         latency_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
-        
+
         # Log answer
         trace_logger.log_answer(
             trace,
@@ -117,7 +117,7 @@ async def query(
             generated.citations,
             latency_ms
         )
-        
+
         return QueryResponse(
             answer=generated.answer,
             citations=[
@@ -131,7 +131,7 @@ async def query(
             ],
             trace_id=trace.trace_id
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

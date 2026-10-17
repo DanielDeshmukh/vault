@@ -1,7 +1,8 @@
 import asyncio
-import asyncpg
 import json
 import os
+
+import asyncpg
 
 DB_URL = os.environ.get("DATABASE_URL", "")
 

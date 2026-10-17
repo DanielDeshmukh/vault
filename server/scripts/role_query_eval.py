@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 ROLE_LEVELS = {
     "public": 0,
     "internal": 1,

@@ -1,21 +1,22 @@
-import httpx
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from datetime import datetime
 
-from app.ingestion.connectors.base import BaseConnector, RawDocument, DocumentMetadata, SourceType
+import httpx
+
+from app.ingestion.connectors.base import BaseConnector, DocumentMetadata, RawDocument, SourceType
 
 
 class ConfluenceConnector(BaseConnector):
     """Connect to Confluence API to fetch pages."""
-    
+
     @property
     def source_type(self) -> SourceType:
         return SourceType.CONFLUENCE
-    
+
     async def fetch(self, config: dict) -> AsyncIterator[RawDocument]:
         """
         Fetch pages from Confluence.
-        
+
         Config:
             base_url: Confluence instance URL
             email: User email
@@ -26,38 +27,38 @@ class ConfluenceConnector(BaseConnector):
         email = config.get("email")
         api_token = config.get("api_token")
         space_key = config.get("space_key")
-        
-        if not all([base_url, email, api_token]):
+
+        if not base_url or not email or not api_token:
             raise ValueError("Missing required Confluence config: base_url, email, api_token")
-        
+
         auth = (email, api_token)
-        
+
         async with httpx.AsyncClient() as client:
             # Fetch pages
             url = f"{base_url}/wiki/rest/api/content"
-            params = {
+            params: dict[str, str | int] = {
                 "limit": 100,
                 "expand": "body.storage,version,space"
             }
-            
+
             if space_key:
                 params["spaceKey"] = space_key
-            
+
             while True:
                 response = await client.get(url, auth=auth, params=params)
                 response.raise_for_status()
                 data = response.json()
-                
+
                 for page in data.get("results", []):
                     # Extract content from storage format
                     body = page.get("body", {}).get("storage", {}).get("value", "")
-                    
+
                     # Parse HTML content
                     content = self._format_page(page, body)
-                    
+
                     # Get space info
                     space = page.get("space", {})
-                    
+
                     yield RawDocument(
                         source=SourceType.CONFLUENCE,
                         source_id=page["id"],
@@ -73,34 +74,34 @@ class ConfluenceConnector(BaseConnector):
                         created_at=datetime.fromisoformat(page["createdAt"].replace("Z", "+00:00")) if page.get("createdAt") else None,
                         author=page.get("version", {}).get("author", {}).get("email"),
                     )
-                
+
                 # Check for more pages
                 if data.get("size", 0) < data.get("limit", 100):
                     break
-                
+
                 # Get next page
                 links = data.get("_links", {})
                 next_link = links.get("next")
-                
+
                 if next_link:
                     url = f"{base_url}/wiki{next_link}" if next_link.startswith("/") else next_link
                     params = {}
                 else:
                     break
-    
+
     def _format_page(self, page: dict, body: str) -> str:
         """Format a Confluence page into readable content."""
         parts = [
             f"Title: {page.get('title', 'Untitled')}",
             f"Space: {page.get('space', {}).get('name', 'Unknown')}",
         ]
-        
+
         # Add version info
         version = page.get("version", {})
         if version:
             parts.append(f"Version: {version.get('number', 'Unknown')}")
             parts.append(f"Last updated: {version.get('when', 'Unknown')}")
-        
+
         # Add body content (HTML)
         if body:
             # Simple HTML to text conversion
@@ -109,13 +110,13 @@ class ConfluenceConnector(BaseConnector):
             text = re.sub(r'<[^>]+>', ' ', body)
             text = re.sub(r'\s+', ' ', text).strip()
             parts.append(f"Content:\n{text}")
-        
+
         return "\n\n".join(parts)
-    
+
     def _infer_department(self, space_name: str) -> str:
         """Infer department from space name."""
         space_lower = space_name.lower()
-        
+
         if any(kw in space_lower for kw in ["support", "help", "customer"]):
             return "support"
         elif any(kw in space_lower for kw in ["sales", "marketing", "growth"]):
@@ -126,9 +127,9 @@ class ConfluenceConnector(BaseConnector):
             return "hr"
         elif any(kw in space_lower for kw in ["legal", "compliance", "policy"]):
             return "legal"
-        
+
         return "general"
-    
+
     def extract_metadata(self, doc: RawDocument, config: dict) -> DocumentMetadata:
         """Extract metadata from Confluence document."""
         return DocumentMetadata(
@@ -141,25 +142,25 @@ class ConfluenceConnector(BaseConnector):
             timestamp=doc.created_at,
             tags=[],
         )
-    
+
     async def test_connection(self, config: dict) -> bool:
         """Test Confluence connection."""
         try:
             base_url = config.get("base_url")
             email = config.get("email")
             api_token = config.get("api_token")
-            
-            if not all([base_url, email, api_token]):
+
+            if not base_url or not email or not api_token:
                 return False
-            
+
             auth = (email, api_token)
-            
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(
                     f"{base_url}/wiki/rest/api/user/current",
                     auth=auth
                 )
                 return response.status_code == 200
-                
+
         except Exception:
             return False

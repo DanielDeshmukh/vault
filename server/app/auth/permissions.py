@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.db.models import User, UserRole, Role, DocumentAccess, Document
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.models import Document, DocumentAccess, Role, User, UserRole
 
 
 class AccessLevel(int, Enum):
@@ -73,7 +73,7 @@ async def get_user_allowed_account_ids(user: User, db: AsyncSession) -> list[str
     # Admins have access to all accounts
     if user.is_admin:
         return []  # Empty means no filter applied
-    
+
     result = await db.execute(
         select(Document.account_id)
         .join(DocumentAccess, DocumentAccess.document_id == Document.id)
@@ -90,7 +90,7 @@ async def get_user_allowed_role_names(user: User, db: AsyncSession) -> list[str]
         .join(UserRole, UserRole.role_id == Role.id)
         .where(UserRole.user_id == user.id)
     )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 def document_role_names(document: Document) -> set[str]:
@@ -106,13 +106,13 @@ def document_role_names(document: Document) -> set[str]:
 
 
 def build_pinecone_filter(
-    max_access_level: Optional[int] = None,
-    allowed_account_ids: Optional[list[str]] = None,
-    allowed_role_names: Optional[list[str]] = None,
-    user_id: Optional[str] = None,
-    access_level: Optional[int] = None,
-    department: Optional[str] = None,
-    allowed_roles: Optional[list[str]] = None,
+    max_access_level: int | None = None,
+    allowed_account_ids: list[str] | None = None,
+    allowed_role_names: list[str] | None = None,
+    user_id: str | None = None,
+    access_level: int | None = None,
+    department: str | None = None,
+    allowed_roles: list[str] | None = None,
 ) -> dict:
     """
     Build a Pinecone metadata filter for permission-aware search.
@@ -131,7 +131,7 @@ def build_pinecone_filter(
     allowed_role_names = allowed_role_names or allowed_roles or []
     user_id = user_id or ""
 
-    conditions = [{"access_level": {"$lte": int(max_access_level)}}]
+    conditions: list[dict[str, object]] = [{"access_level": {"$lte": int(max_access_level)}}]
 
     if allowed_account_ids:
         conditions.append({"account_id": {"$in": allowed_account_ids}})
@@ -147,21 +147,21 @@ async def can_access_document(user: User, document_id: str, db: AsyncSession) ->
     # Admins can access everything
     if user.is_admin:
         return True
-    
+
     result = await db.execute(
         select(Document)
         .where(Document.id == document_id)
     )
     document = result.scalar_one_or_none()
-    
+
     if not document:
         return False
-    
+
     # Check access level
     max_level = await get_user_max_access_level(user, db)
     if document.access_level > max_level:
         return False
-    
+
     # Check explicit document access
     result = await db.execute(
         select(DocumentAccess)
@@ -172,12 +172,12 @@ async def can_access_document(user: User, document_id: str, db: AsyncSession) ->
     )
     if result.scalar_one_or_none():
         return True
-    
+
     # Check if user's roles grant access
     user_roles = await get_user_allowed_role_names(user, db)
     if document.allowed_roles:
         for role in document.allowed_roles:
             if role in user_roles:
                 return True
-    
+
     return False

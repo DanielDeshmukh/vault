@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Optional
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     ZENDESK = "zendesk"
     JIRA = "jira"
     SLACK = "slack"
@@ -23,8 +23,8 @@ class RawDocument:
     title: str
     content: str
     metadata: dict = field(default_factory=dict)
-    created_at: Optional[datetime] = None
-    author: Optional[str] = None
+    created_at: datetime | None = None
+    author: str | None = None
 
 
 @dataclass
@@ -35,56 +35,60 @@ class DocumentMetadata:
     account_id: str
     department: str
     access_level: int  # 0=public, 1=internal, 2=confidential, 3=restricted
-    owner_id: Optional[str] = None
+    owner_id: str | None = None
     allowed_roles: list[str] = field(default_factory=list)
     allowed_users: list[str] = field(default_factory=list)
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
     tags: list[str] = field(default_factory=list)
 
 
 class BaseConnector(ABC):
     """Abstract base class for all source connectors."""
-    
+
     @property
     @abstractmethod
     def source_type(self) -> SourceType:
         """Return the source type for this connector."""
         pass
-    
+
     @abstractmethod
-    async def fetch(self, config: dict) -> AsyncIterator[RawDocument]:
+    def fetch(self, config: dict) -> AsyncIterator[RawDocument]:
         """
         Fetch documents from the source.
-        
+
+        Declared without `async` so implementations may be async generator
+        functions (`async def` + `yield`), which are callables returning
+        AsyncIterator rather than coroutines.
+
         Args:
             config: Source-specific configuration (API keys, filters, etc.)
-            
+
         Yields:
             RawDocument instances
         """
-        pass
-    
+        ...
+
     @abstractmethod
     def extract_metadata(self, doc: RawDocument, config: dict) -> DocumentMetadata:
         """
         Extract structured metadata from a raw document.
-        
+
         Args:
             doc: The raw document
             config: Source-specific configuration
-            
+
         Returns:
             DocumentMetadata with permission and context info
         """
         pass
-    
+
     async def test_connection(self, config: dict) -> bool:
         """
         Test if the source connection is valid.
-        
+
         Args:
             config: Source-specific configuration
-            
+
         Returns:
             True if connection is successful
         """

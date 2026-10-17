@@ -1,5 +1,6 @@
-import httpx
 import os
+
+import httpx
 
 BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
 DEMO_PASS = os.environ.get("VAULT_DEMO_PASSWORD", "")

@@ -1,14 +1,14 @@
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from uuid import UUID
 from sqlalchemy import bindparam, func, literal, literal_column, select
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, TEXT
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import load_only, selectinload
+from sqlalchemy.orm import load_only
 
 from app.auth.jwt import get_current_user
 from app.auth.permissions import document_role_names, get_user_allowed_role_names
-from app.db.models import User, Document, DocumentChunk
+from app.db.models import Document, DocumentChunk, User
 from app.db.sessions import get_db
 
 router = APIRouter()

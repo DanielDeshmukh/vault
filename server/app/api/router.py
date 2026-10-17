@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from app.auth.router import router as auth_router
-from app.api.queries import router as queries_router
+from app.api.admin import router as admin_router
 from app.api.documents import router as documents_router
 from app.api.ingestion import router as ingestion_router
-from app.api.admin import router as admin_router
+from app.api.queries import router as queries_router
+from app.auth.router import router as auth_router
 
 api_router = APIRouter()
 

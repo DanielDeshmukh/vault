@@ -1,11 +1,22 @@
 import asyncio
-import cohere
 import re
-from typing import Optional, AsyncGenerator
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
+from typing import cast
+
+import cohere
+from cohere.types import (
+    AssistantChatMessageV2,
+    SystemChatMessageV2,
+    ToolChatMessageV2,
+    UserChatMessageV2,
+)
 
 from app.config import settings
 from app.retrieval.search import SearchResult
+
+# The V2 chat endpoint takes plain dicts on the wire; cast at the SDK boundary.
+CohereMessage = UserChatMessageV2 | AssistantChatMessageV2 | SystemChatMessageV2 | ToolChatMessageV2
 
 
 @dataclass
@@ -35,7 +46,7 @@ Format: Direct answer first, then supporting details with citations."""
     def __init__(self):
         self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
 
-    def _build_messages(self, query: str, results: list[SearchResult], conversation_context: Optional[str] = None) -> list[dict]:
+    def _build_messages(self, query: str, results: list[SearchResult], conversation_context: str | None = None) -> list[dict]:
         context = self._build_context(results)
         context_block = f"Previous conversation context:\n{conversation_context}\n\n" if conversation_context else ""
         user_message = f"""Sources ({len(results)}):
@@ -53,15 +64,19 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         self,
         query: str,
         results: list[SearchResult],
-        conversation_context: Optional[str] = None,
+        conversation_context: str | None = None,
     ) -> GeneratedAnswer:
         messages = self._build_messages(query, results, conversation_context)
         response = await asyncio.to_thread(
             self.client.chat,
             model=settings.COHERE_CHAT_MODEL,
-            messages=messages,
+            messages=cast(list[CohereMessage], messages),
         )
-        answer_text = response.message.content[0].text
+        content_items = response.message.content or []
+        answer_text = next(
+            (item.text for item in content_items if item.type == "text"),
+            "",
+        )
         citations = self._extract_citations(answer_text, results)
         return GeneratedAnswer(answer=answer_text, citations=citations)
 
@@ -69,16 +84,19 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         self,
         query: str,
         results: list[SearchResult],
-        conversation_context: Optional[str] = None,
+        conversation_context: str | None = None,
     ) -> AsyncGenerator[str, None]:
         messages = self._build_messages(query, results, conversation_context)
         for event in self.client.chat_stream(
             model=settings.COHERE_CHAT_MODEL,
-            messages=messages,
+            messages=cast(list[CohereMessage], messages),
         ):
             if hasattr(event, "type") and event.type == "content-delta":
                 try:
-                    text = event.delta.message.content.text
+                    delta = event.delta
+                    message = delta.message if delta is not None else None
+                    message_content = message.content if message is not None else None
+                    text = message_content.text if message_content is not None else None
                     if text:
                         yield text
                 except (AttributeError, TypeError):

@@ -1,9 +1,9 @@
-from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.db.models import User, Document
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.auth.permissions import document_role_names, get_user_allowed_role_names
+from app.db.models import Document, User
 
 # Matches no legitimate corpus role. Used as the filter value for a user who
 # holds zero roles so the vector store returns nothing instead of everything.
@@ -29,7 +29,7 @@ class PermissionFilter:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def build_filter(self, user: User) -> Optional[dict]:
+    async def build_filter(self, user: User) -> dict | None:
         """
         Build a Pinecone filter from the user's role names.
 

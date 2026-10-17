@@ -10,11 +10,10 @@ Example:
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from app.auth.permissions import build_pinecone_filter
-
 
 ROLE_LEVELS = {
     "public": 0,

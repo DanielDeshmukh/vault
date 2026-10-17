@@ -8,11 +8,11 @@ Usage:
   python -m scripts.evaluate_ambiguous
 """
 import json
-import time
-import httpx
-import sys
 import os
-from dataclasses import dataclass, field, asdict
+import time
+from dataclasses import asdict, dataclass, field
+
+import httpx
 
 BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
 DEMO_PASS = os.environ.get("VAULT_DEMO_PASSWORD", "")
@@ -62,7 +62,7 @@ def login(email, password, retries=3):
             r = httpx.post(f"{BASE}/api/auth/login", json={"email": email, "password": password}, timeout=30)
             r.raise_for_status()
             return r.json()["access_token"]
-        except Exception as e:
+        except Exception:
             if attempt < retries - 1:
                 time.sleep(2 * (attempt + 1))
             else:
@@ -115,7 +115,7 @@ def main():
 
         try:
             token = login(email, user["password"])
-            print(f"  Login: OK")
+            print("  Login: OK")
         except Exception as e:
             ur.errors.append(f"Login failed: {e}")
             print(f"  Login: FAILED - {e}")
@@ -194,7 +194,7 @@ def main():
 
     with open("eval_results_ambiguous.json", "w") as f:
         json.dump([asdict(ur) for ur in all_user_results], f, indent=2)
-    print(f"\nResults saved to eval_results_ambiguous.json")
+    print("\nResults saved to eval_results_ambiguous.json")
 
 
 if __name__ == "__main__":

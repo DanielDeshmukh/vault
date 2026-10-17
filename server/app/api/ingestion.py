@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from pydantic import BaseModel
-from typing import Optional
+
 from app.auth.jwt import require_admin
 from app.db.models import User
 from app.db.sessions import get_db
-from app.ingestion.pipeline import IngestionPipeline
 from app.ingestion.connectors.base import RawDocument, SourceType
+from app.ingestion.pipeline import IngestionPipeline
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ async def ingest_document(
     """
     # Read file content
     content = await file.read()
-    
+
     # Determine source type
     source_type_map = {
         "csv": SourceType.CSV,
@@ -51,7 +52,7 @@ async def ingest_document(
         "txt": SourceType.POLICY,
     }
     source_type = source_type_map.get(source, SourceType.POLICY)
-    
+
     # Create raw document
     raw_doc = RawDocument(
         source=source_type,
@@ -64,7 +65,7 @@ async def ingest_document(
             "access_level": access_level,
         }
     )
-    
+
     # Run ingestion pipeline
     pipeline = IngestionPipeline()
     result = await pipeline.ingest_single_document(
@@ -73,7 +74,7 @@ async def ingest_document(
         user_id=str(current_user.id),
         config={"account_id": account_id, "department": department}
     )
-    
+
     return IngestionResponse(
         documents_processed=result.documents_processed,
         chunks_created=result.chunks_created,
@@ -102,7 +103,7 @@ async def ingest_direct(
         "policy": SourceType.POLICY,
     }
     source_type = source_type_map.get(request.source, SourceType.POLICY)
-    
+
     raw_doc = RawDocument(
         source=source_type,
         source_id=f"direct-{hash(request.content)}",
@@ -114,7 +115,7 @@ async def ingest_direct(
             "access_level": request.access_level,
         }
     )
-    
+
     # Run ingestion pipeline
     pipeline = IngestionPipeline()
     result = await pipeline.ingest_single_document(
@@ -126,7 +127,7 @@ async def ingest_direct(
             "department": request.department,
         }
     )
-    
+
     return IngestionResponse(
         documents_processed=result.documents_processed,
         chunks_created=result.chunks_created,
@@ -146,21 +147,30 @@ async def test_connector(
     makes outbound calls, so it must not be reachable by ordinary users.
     """
     from app.ingestion.connectors import (
-        ZendeskConnector, JiraConnector, SlackConnector, ConfluenceConnector
+        ConfluenceConnector,
+        JiraConnector,
+        SlackConnector,
+        ZendeskConnector,
     )
-    
-    connector_map = {
+
+    connector_map: dict[
+        str,
+        type[ZendeskConnector]
+        | type[JiraConnector]
+        | type[SlackConnector]
+        | type[ConfluenceConnector],
+    ] = {
         "zendesk": ZendeskConnector,
         "jira": JiraConnector,
         "slack": SlackConnector,
         "confluence": ConfluenceConnector,
     }
-    
+
     connector_class = connector_map.get(source)
     if not connector_class:
         return {"success": False, "error": f"Unknown source: {source}"}
-    
+
     connector = connector_class()
     success = await connector.test_connection(config)
-    
+
     return {"success": success, "source": source}

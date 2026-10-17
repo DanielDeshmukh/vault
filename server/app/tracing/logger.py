@@ -1,7 +1,5 @@
-from datetime import datetime
-from typing import Optional
 from dataclasses import dataclass, field
-import json
+from datetime import datetime
 
 from app.db.models import User
 
@@ -14,29 +12,29 @@ class TraceEntry:
     user_email: str
     query: str
     timestamp: datetime
-    permission_filter: Optional[dict] = None
+    permission_filter: dict | None = None
     retrieved_chunks: list[dict] = field(default_factory=list)
     answer: str = ""
     citations: list[dict] = field(default_factory=list)
     latency_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class TraceLogger:
     """
     Structured trace logger for query audit trail.
-    
+
     Logs every query, retrieved chunk, and generated answer
     for compliance and debugging purposes.
     """
-    
+
     def __init__(self):
         self.traces: list[TraceEntry] = []
-    
+
     def create_trace(self, user: User, query: str) -> TraceEntry:
         """Create a new trace entry."""
         import uuid
-        
+
         trace = TraceEntry(
             trace_id=str(uuid.uuid4()),
             user_id=str(user.id),
@@ -46,15 +44,15 @@ class TraceLogger:
         )
         self.traces.append(trace)
         return trace
-    
-    def log_permission_filter(self, trace: TraceEntry, filter_dict: Optional[dict]):
+
+    def log_permission_filter(self, trace: TraceEntry, filter_dict: dict | None):
         """Log the permission filter applied."""
         trace.permission_filter = filter_dict
-    
+
     def log_retrieved_chunks(self, trace: TraceEntry, chunks: list[dict]):
         """Log retrieved chunks."""
         trace.retrieved_chunks = chunks
-    
+
     def log_answer(
         self,
         trace: TraceEntry,
@@ -66,18 +64,18 @@ class TraceLogger:
         trace.answer = answer
         trace.citations = citations
         trace.latency_ms = latency_ms
-    
+
     def log_error(self, trace: TraceEntry, error: str):
         """Log an error."""
         trace.error = error
-    
-    def get_trace(self, trace_id: str) -> Optional[TraceEntry]:
+
+    def get_trace(self, trace_id: str) -> TraceEntry | None:
         """Get a trace by ID."""
         for trace in self.traces:
             if trace.trace_id == trace_id:
                 return trace
         return None
-    
+
     def to_dict(self, trace: TraceEntry) -> dict:
         """Convert trace to dictionary for logging/storage."""
         return {

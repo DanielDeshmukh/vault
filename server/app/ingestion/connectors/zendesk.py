@@ -1,21 +1,22 @@
-import httpx
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from datetime import datetime
 
-from app.ingestion.connectors.base import BaseConnector, RawDocument, DocumentMetadata, SourceType
+import httpx
+
+from app.ingestion.connectors.base import BaseConnector, DocumentMetadata, RawDocument, SourceType
 
 
 class ZendeskConnector(BaseConnector):
     """Connect to Zendesk API to fetch tickets and comments."""
-    
+
     @property
     def source_type(self) -> SourceType:
         return SourceType.ZENDESK
-    
+
     async def fetch(self, config: dict) -> AsyncIterator[RawDocument]:
         """
         Fetch tickets from Zendesk.
-        
+
         Config:
             subdomain: Zendesk subdomain
             email: Agent email
@@ -26,29 +27,30 @@ class ZendeskConnector(BaseConnector):
         email = config.get("email")
         api_token = config.get("api_token")
         org_id = config.get("org_id")
-        
-        if not all([subdomain, email, api_token]):
+
+        if not subdomain or not email or not api_token:
             raise ValueError("Missing required Zendesk config: subdomain, email, api_token")
-        
+
         base_url = f"https://{subdomain}.zendesk.com/api/v2"
         auth = (f"{email}/token", api_token)
-        
+
         async with httpx.AsyncClient() as client:
             # Fetch tickets
             url = f"{base_url}/search.json"
+            params: dict[str, str] | None
             params = {"query": "type:ticket"}
             if org_id:
                 params["query"] += f" organization_id:{org_id}"
-            
+
             while url:
                 response = await client.get(url, auth=auth, params=params)
                 response.raise_for_status()
                 data = response.json()
-                
+
                 for ticket in data.get("results", []):
                     # Create raw document from ticket
                     content = self._format_ticket(ticket)
-                    
+
                     yield RawDocument(
                         source=SourceType.ZENDESK,
                         source_id=str(ticket["id"]),
@@ -64,15 +66,15 @@ class ZendeskConnector(BaseConnector):
                         created_at=datetime.fromisoformat(ticket["created_at"].replace("Z", "+00:00")) if ticket.get("created_at") else None,
                         author=ticket.get("requester_id"),
                     )
-                    
+
                     # Fetch comments for this ticket
                     async for comment in self._fetch_comments(client, base_url, auth, ticket["id"]):
                         yield comment
-                
+
                 # Pagination
                 url = data.get("next_page")
                 params = None  # Params are included in next_page URL
-    
+
     async def _fetch_comments(
         self,
         client: httpx.AsyncClient,
@@ -82,11 +84,11 @@ class ZendeskConnector(BaseConnector):
     ) -> AsyncIterator[RawDocument]:
         """Fetch comments for a ticket."""
         url = f"{base_url}/tickets/{ticket_id}/comments.json"
-        
+
         response = await client.get(url, auth=auth)
         response.raise_for_status()
         data = response.json()
-        
+
         for comment in data.get("comments", []):
             yield RawDocument(
                 source=SourceType.ZENDESK,
@@ -102,7 +104,7 @@ class ZendeskConnector(BaseConnector):
                 created_at=datetime.fromisoformat(comment["created_at"].replace("Z", "+00:00")) if comment.get("created_at") else None,
                 author=str(comment.get("author_id")),
             )
-    
+
     def _format_ticket(self, ticket: dict) -> str:
         """Format ticket into readable content."""
         parts = [
@@ -111,12 +113,12 @@ class ZendeskConnector(BaseConnector):
             f"Priority: {ticket.get('priority')}",
             f"Description:\n{ticket.get('description', 'No description')}",
         ]
-        
+
         if ticket.get("tags"):
             parts.append(f"Tags: {', '.join(ticket['tags'])}")
-        
+
         return "\n\n".join(parts)
-    
+
     def extract_metadata(self, doc: RawDocument, config: dict) -> DocumentMetadata:
         """Extract metadata from Zendesk document."""
         return DocumentMetadata(
@@ -129,23 +131,23 @@ class ZendeskConnector(BaseConnector):
             timestamp=doc.created_at,
             tags=doc.metadata.get("tags", []),
         )
-    
+
     async def test_connection(self, config: dict) -> bool:
         """Test Zendesk connection."""
         try:
             subdomain = config.get("subdomain")
             email = config.get("email")
             api_token = config.get("api_token")
-            
-            if not all([subdomain, email, api_token]):
+
+            if not subdomain or not email or not api_token:
                 return False
-            
+
             base_url = f"https://{subdomain}.zendesk.com/api/v2"
             auth = (f"{email}/token", api_token)
-            
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{base_url}/users/me.json", auth=auth)
                 return response.status_code == 200
-                
+
         except Exception:
             return False

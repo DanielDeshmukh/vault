@@ -11,11 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
 
+from eval.golden_set import GOLDEN_SET
+
 from app.auth.jwt import get_password_hash
+from app.auth.permissions import get_question_access_level
 from app.db.models import Role, User, UserRole
 from app.db.sessions import async_session
-from eval.golden_set import GOLDEN_SET
-from app.auth.permissions import get_question_access_level
 
 BASE_URL = "http://localhost:8000/api"
 ROLE_LEVELS = {

@@ -1,7 +1,7 @@
 """Download new documents for expanded corpus."""
-import httpx
 import os
-import io
+
+import httpx
 from pypdf import PdfReader
 
 DOCS = [

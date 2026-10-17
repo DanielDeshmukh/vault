@@ -1,12 +1,12 @@
+
 from pinecone import Pinecone, ServerlessSpec
-from typing import Optional
 
 from app.config import settings
 
 
 class PineconeClient:
     def __init__(self):
-        self._client: Optional[Pinecone] = None
+        self._client: Pinecone | None = None
         self._index = None
 
     @property
@@ -42,7 +42,7 @@ class PineconeClient:
         self,
         vector: list[float],
         top_k: int = 10,
-        filter: Optional[dict] = None,
+        filter: dict | None = None,
         include_metadata: bool = True
     ) -> list[dict]:
         results = self.index.query(

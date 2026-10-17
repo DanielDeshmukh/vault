@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.jwt import (
+    create_access_token,
+    get_current_user,
+    get_password_hash,
+    verify_password,
+)
+from app.config import settings
+from app.db.models import Role, User, UserRole
+from app.db.sessions import get_db
 
 # Syntax-only email format check: accepts internal domains (e.g. @vault.local)
 # and performs no DNS deliverability lookups.
 EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-
-from app.db.sessions import get_db
-from app.db.models import User, Role, UserRole
-from app.auth.jwt import (
-    get_password_hash,
-    verify_password,
-    create_access_token,
-    get_current_user,
-)
-from app.config import settings
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ class UserCreate(BaseModel):
     full_name: str
     department: str
     # Optional request only; never grants access. Admin assigns the real role.
-    requested_role: Optional[str] = None
+    requested_role: str | None = None
 
 
 class UserLogin(BaseModel):
@@ -41,11 +41,11 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     department: str
-    requested_role: Optional[str] = None
+    requested_role: str | None = None
     is_admin: bool
     is_approved: bool = True
-    approval_screen_started_at: Optional[str] = None
-    
+    approval_screen_started_at: str | None = None
+
     class Config:
         from_attributes = True
 
@@ -104,13 +104,13 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(UserRole(user_id=user.id, role_id=default_role.id))
     await db.commit()
     await db.refresh(user)
-    
+
     # Create token
     access_token = create_access_token(
         data={"sub": str(user.id), "email": user.email},
         expires_delta=timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     )
-    
+
     return TokenResponse(
         access_token=access_token,
         user=UserResponse(
@@ -130,29 +130,29 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
 async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == credentials.email))
     user = result.scalar_one_or_none()
-    
+
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
-    
+
     if not user.is_approved:
         if user.approval_screen_started_at is None:
             user.approval_screen_started_at = datetime.utcnow()
             await db.commit()
-    
+
     access_token = create_access_token(
         data={"sub": str(user.id), "email": user.email},
         expires_delta=timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     )
-    
+
     return TokenResponse(
         access_token=access_token,
         user=UserResponse(

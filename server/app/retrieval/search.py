@@ -1,10 +1,9 @@
 import asyncio
 from dataclasses import dataclass
-from typing import Optional
 
+from app.db.models import User
 from app.db.pinecone import pinecone_client
 from app.db.sessions import async_session
-from app.db.models import User
 from app.retrieval.permission_filter import PermissionFilter
 
 
@@ -56,7 +55,7 @@ def expand_query(query: str) -> list[str]:
         if keyword in q_lower:
             expansions.append(query + " " + expansion)
     # Generate keyword-focused variant by stripping filler words
-    STOP_WORDS = {
+    stop_words = {
         "i", "me", "my", "we", "our", "you", "your", "he", "she", "it",
         "they", "them", "the", "a", "an", "is", "am", "are", "was", "were",
         "be", "been", "being", "have", "has", "had", "do", "does", "did",
@@ -69,7 +68,7 @@ def expand_query(query: str) -> list[str]:
         "other", "some", "such", "than", "too", "very", "just", "also",
         "now", "here", "there", "up", "out", "so", "only", "own", "same",
     }
-    words = [w for w in q_lower.split() if w.isalnum() and w not in STOP_WORDS]
+    words = [w for w in q_lower.split() if w.isalnum() and w not in stop_words]
     if words:
         keyword_query = " ".join(words)
         expansions.append(keyword_query)
@@ -135,7 +134,7 @@ class HybridSearch:
 
         return search_results[:top_k]
 
-    async def _get_filter(self, user: User) -> Optional[dict]:
+    async def _get_filter(self, user: User) -> dict | None:
         async with async_session() as db:
             perm_filter = PermissionFilter(db)
             return await perm_filter.build_filter(user)

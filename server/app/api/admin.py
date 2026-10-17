@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel
-from typing import Optional
 
-from app.db.sessions import get_db
-from app.db.models import User, Role, UserRole
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.auth.jwt import require_admin
+from app.db.models import Role, User, UserRole
+from app.db.sessions import get_db
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ class AdminUserResponse(BaseModel):
     department: str
     # Role the applicant asked for at signup, so an admin can compare the
     # request against what is actually granted.
-    requested_role: Optional[str] = None
+    requested_role: str | None = None
     is_admin: bool
     is_approved: bool
     roles: list[str] = []

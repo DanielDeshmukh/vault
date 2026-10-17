@@ -9,6 +9,13 @@ Seeding is idempotent and the phases are independent:
   * roles and users are seeded on every run, so a populated corpus no longer
     blocks user seeding (the old script returned before reaching them).
 
+Both role families come from one command: the tier roles (Public, Internal,
+Confidential, Restricted) that gate the legacy UI, and the 8 corpus roles
+(intern, employee, ...) that registration and retrieval depend on. Without the
+corpus set, POST /api/auth/register answers 500 -- app/auth/router.py assigns
+DEFAULT_PENDING_ROLE = "intern" and fails when that row is missing, which is
+exactly how 23 integration/security tests broke.
+
 VAULT_DEMO_PASSWORD must be set when a user has to be created; it is refused
 rather than stored empty, because an empty hash would be a broken login.
 """
@@ -26,6 +33,8 @@ from sqlalchemy.orm import sessionmaker
 from app.auth.jwt import get_password_hash
 from app.config import settings
 from app.db.models import Document, DocumentChunk, Role, User, UserRole
+from scripts.seed_corpus_roles import CORPUS_ROLES as CORPUS_ROLE_NAMES
+from scripts.seed_corpus_roles import GRANTS as CORPUS_GRANTS
 
 # Sync engine for local seed (use direct Neon endpoint, not pooler)
 _db_url = settings.DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://").replace("postgres://", "postgresql+psycopg2://")
@@ -38,6 +47,12 @@ ROLES = [
     {"name": "Internal", "description": "Department-scoped access", "access_level": 1},
     {"name": "Confidential", "description": "Account-scoped access", "access_level": 2},
     {"name": "Restricted", "description": "Named-user only access", "access_level": 3},
+    # Corpus roles, imported so this script and seed_corpus_roles.py can never
+    # drift apart. access_level=0: they drive retrieval, not the tier ceiling.
+    *(
+        {"name": n, "description": f"Corpus role: {n}", "access_level": 0}
+        for n in CORPUS_ROLE_NAMES
+    ),
 ]
 
 USERS = [
@@ -130,7 +145,10 @@ def _seed_users():
                 session.flush()
                 created += 1
 
-            for rn in u["roles"]:
+            # Tier roles declared above, plus the corpus grants this user's
+            # persona needs (admin gets "admin", intern gets intern+employee,
+            # ...). Both are link-if-missing, so re-running never duplicates.
+            for rn in [*u["roles"], *CORPUS_GRANTS.get(u["email"], [])]:
                 if rn not in role_map:
                     continue
                 link = session.scalar(
@@ -148,9 +166,10 @@ def _seed_users():
         session.commit()
 
     n_users = session.scalar(select(func.count(User.id)))
+    n_roles = session.scalar(select(func.count(Role.id)))
     # UserRole is a composite-key link table: it has no surrogate id column.
     n_links = session.scalar(select(func.count()).select_from(UserRole))
-    print(f"  users created {created}, total {n_users}; role links {n_links}")
+    print(f"  users created {created}, total {n_users}; roles {n_roles}; role links {n_links}")
     return user_ids
 
 

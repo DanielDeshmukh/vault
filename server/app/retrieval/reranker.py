@@ -1,6 +1,6 @@
 import asyncio
+
 import cohere
-from typing import Optional
 
 from app.config import settings
 from app.retrieval.search import SearchResult

@@ -1,10 +1,10 @@
 import asyncio
+
 from sqlalchemy import select
 
-from app.db.sessions import async_session
-from app.db.models import User, Role
 from app.auth.jwt import get_password_hash
-
+from app.db.models import Role, User
+from app.db.sessions import async_session
 
 ROLE_LEVELS = {
     "Public": 0,

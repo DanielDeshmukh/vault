@@ -1,10 +1,10 @@
-import pytest
 import asyncio
-from typing import AsyncGenerator
 
-from app.db.sessions import async_session
-from app.db.models import User, Role, UserRole
+import pytest
+
 from app.auth.jwt import get_password_hash
+from app.db.models import Role, User, UserRole
+from app.db.sessions import async_session
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +35,7 @@ async def test_user(db_session) -> User:
     )
     db_session.add(user)
     await db_session.flush()
-    
+
     # Create and assign role
     role = Role(
         name="Support Agent",
@@ -44,13 +44,13 @@ async def test_user(db_session) -> User:
     )
     db_session.add(role)
     await db_session.flush()
-    
+
     user_role = UserRole(user_id=user.id, role_id=role.id)
     db_session.add(user_role)
-    
+
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     return user
 
 
@@ -67,5 +67,5 @@ async def admin_user(db_session) -> User:
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     return user

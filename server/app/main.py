@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.config import settings
-from app.api.router import api_router
-from app.db.sessions import engine, Base, async_session
 from sqlalchemy import select
 
+from app.api.router import api_router
+from app.config import settings
+from app.db.sessions import Base, async_session, engine
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -36,7 +35,8 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    from sqlalchemy import select, func
+    from sqlalchemy import func
+
     from app.db.models import User
     async with async_session() as session:
         result = await session.execute(select(func.count(User.id)))

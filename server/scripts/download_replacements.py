@@ -1,6 +1,8 @@
 """Download replacement documents."""
-import httpx
 import os
+
+import httpx
+from pypdf import PdfReader
 
 DOCS = [
     {"title": "State of Nevada Employee Handbook", "url": "https://nvjobs.nv.gov/uploadedFiles/hrnvgov/Content/Resources/Publications/Employee_Handbook.pdf", "source": "policy", "account_id": "state_gov", "department": "human_resources", "access_level": 0},
@@ -25,7 +27,6 @@ for i, d in enumerate(DOCS):
         print(f"FAIL: {e}")
 
 # Verify
-from pypdf import PdfReader
 print("\n--- New docs ---")
 for idx in [10, 11, 12, 13]:
     fname = f"downloads/doc_{idx}.pdf"

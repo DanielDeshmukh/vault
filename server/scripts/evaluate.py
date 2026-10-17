@@ -7,11 +7,12 @@ Runs 50 test queries against the API and scores each on:
 Usage: cd server && python -m scripts.evaluate
 """
 import json
-import time
-import httpx
-import sys
 import os
-from dataclasses import dataclass, field, asdict
+import sys
+import time
+from dataclasses import asdict, dataclass, field
+
+import httpx
 
 BASE = os.environ.get("VAULT_API_URL", "https://vault-rbac-rag.vercel.app")
 EMAIL = os.environ.get("VAULT_ADMIN_EMAIL", "admin@vaultdemo.com")
@@ -149,7 +150,6 @@ def score_answer(answer: str, expect_keywords: list[str]) -> tuple[int, int]:
 
 
 def evaluate():
-    import sys
     start_idx = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
     print("=" * 70)
@@ -255,12 +255,12 @@ def evaluate():
         print(f"{cat:<18} {len(items):>5} {kw:>9.0%} {cites:>10.1f} {score:>10.3f}")
 
     # Worst performing
-    print(f"\n--- Lowest keyword recall ---")
+    print("\n--- Lowest keyword recall ---")
     ranked = sorted(successes, key=lambda r: r.keyword_ratio)
     for r in ranked[:5]:
         print(f"  {r.keyword_ratio:.0%} | {r.q}")
 
-    print(f"\n--- Lowest citation scores ---")
+    print("\n--- Lowest citation scores ---")
     no_cite = [r for r in results if r.num_citations == 0 and not r.error]
     if no_cite:
         for r in no_cite[:5]:
@@ -280,7 +280,7 @@ def evaluate():
 
     with open("eval_results.json", "w") as f:
         json.dump(out, f, indent=2)
-    print(f"\nResults saved to eval_results.json")
+    print("\nResults saved to eval_results.json")
 
 
 if __name__ == "__main__":

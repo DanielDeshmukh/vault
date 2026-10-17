@@ -1,6 +1,6 @@
 import asyncio
+
 import httpx
-import json
 
 BASE = "https://vault-rbac-rag.vercel.app"
 
@@ -36,7 +36,7 @@ async def main():
                     json={"question": question},
                     headers=headers)
                 data = r.json()
-                answer = data.get("answer", "")
+                data.get("answer", "")
                 citations = data.get("citations", [])
                 titles = [c.get("title", "?")[:40] for c in citations]
                 print(f"\n  Q: {question}")

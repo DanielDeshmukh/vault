@@ -6,18 +6,17 @@ import io
 import os
 import re
 import sys
-import math
-import httpx
+
 import cohere
-from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sqlalchemy import create_engine, select, func, text
-from sqlalchemy.orm import Session, sessionmaker
-from app.db.models import User, Role, UserRole, Document, DocumentChunk
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import sessionmaker
+
 from app.auth.jwt import get_password_hash
 from app.config import settings
+from app.db.models import Document, DocumentChunk, Role, User, UserRole
 
 # Sync engine (direct Neon, not pooler)
 _db_url = settings.DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://").replace("postgres://", "postgresql+psycopg2://")
