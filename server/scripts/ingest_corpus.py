@@ -44,6 +44,11 @@ EMBED_HASHES = CORPUS / "embedding_hashes.json"
 # Chars fed to the embedder. The provider also truncates internally, but
 # keeping the corpus-side cap explicit documents what was actually embedded.
 EMBED_CHARS = 2000
+
+# VAULT_PG_ONLY=1 rebuilds Postgres from the cached corpus while leaving the
+# live Pinecone index alone. Used when pointing at a fresh/alternative database
+# whose vectors are already correct in the index.
+PG_ONLY = os.environ.get("VAULT_PG_ONLY", "") == "1"
 # Pinecone rejects a request whose decoded message exceeds 4 MB. The binding
 # cost is 4 bytes per float (2048-dim -> 8 KB) plus ~6.8 KB of worst-case
 # protobuf metadata, so a batch tops out near 280 records. 100 keeps us at
@@ -608,17 +613,20 @@ async def _load(records: list[dict], resume: bool = False) -> int:
 
     # Old vectors carry access_level/account_id metadata that no longer exists
     # in the schema, so the index is cleared rather than merged into.
-    print("\n[wipe] pinecone")
-    if already == 0:
-        print("  index already empty; skipping wipe")
+    if PG_ONLY:
+        print("\n[skip] pinecone wipe -- VAULT_PG_ONLY=1 (index left untouched)")
     else:
-        try:
-            pinecone_client.index.delete(delete_all=True, namespace="")
-            print("  cleared pinecone index (delete_all)")
-        except Exception as exc:  # noqa: BLE001 - fall back to a metadata filter
-            print(f"  delete_all failed ({type(exc).__name__}); using tenant filter")
-            pinecone_client.index.delete(filter={"tenant_id": {"$eq": "acme"}}, namespace="")
-            print("  cleared pinecone index (tenant filter)")
+        print("\n[wipe] pinecone")
+        if already == 0:
+            print("  index already empty; skipping wipe")
+        else:
+            try:
+                pinecone_client.index.delete(delete_all=True, namespace="")
+                print("  cleared pinecone index (delete_all)")
+            except Exception as exc:  # noqa: BLE001 - fall back to a metadata filter
+                print(f"  delete_all failed ({type(exc).__name__}); using tenant filter")
+                pinecone_client.index.delete(filter={"tenant_id": {"$eq": "acme"}}, namespace="")
+                print("  cleared pinecone index (tenant filter)")
 
     print("[wipe] postgres")
     conn = await asyncpg.connect(_require("DATABASE_URL"))
@@ -632,6 +640,10 @@ async def _load(records: list[dict], resume: bool = False) -> int:
             await _load_pg(conn, records)
     finally:
         await conn.close()
+
+    if PG_ONLY:
+        print("[skip] pinecone write -- VAULT_PG_ONLY=1 (index left untouched)")
+        return len(records)
 
     print("[write] pinecone")
     _load_pinecone(records)

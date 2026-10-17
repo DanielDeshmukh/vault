@@ -127,6 +127,15 @@ class DocumentChunk(Base):
     content = Column(Text, nullable=False)
     chunk_index = Column(Integer, nullable=False)
     pinecone_id = Column(String(255))  # Reference to Pinecone
+    # Added to the live schema by scripts/migrate_corpus_schema.py. Rows
+    # written through the ORM before that migration leave these NULL; rows
+    # written by scripts/ingest_corpus.py always fill them in.
+    citation = Column(Text)
+    section_index = Column(Integer)
+    section_span_start = Column(Integer)
+    section_span_end = Column(Integer)
+    part = Column(Integer)
+    section_parts = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

@@ -63,6 +63,125 @@ _ENTITY = re.compile(r"&#x[0-9a-fA-F]+;|&#\d+;|&[a-zA-Z][a-zA-Z0-9]{1,8};")
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])[ \t]+(?=[A-Z0-9\"'(\[])")
 
+# --- markdown artefact stripping ---------------------------------------------
+#
+# The stripper used to work off a bare ``<[^>]+>``, which also matched markdown
+# autolinks (``<https://...>``), email autolinks and documentation placeholders
+# such as ``<username>`` -- measured at 128 documents that the stripper
+# triggered on and would have damaged. Those are content, not markup.
+#
+# The pipeline therefore masks every region that must survive byte-identical
+# (fenced code, inline code, autolinks, non-HTML ``<...>``) into private-use
+# sentinels, runs the HTML/Hugo pass over what is left, then restores them.
+# Masking first also means the pass cannot mint a new fence out of its own
+# output, which is how ``&#96;&#96;&#96;`` entities previously corrupted a page.
+
+# Sentinel brackets live in the Unicode private-use area, so they cannot appear
+# in corpus text and survive whitespace normalisation. There are two kinds:
+#
+#   * a FENCE sentinel is a hard barrier -- an HTML comment or ``<script>`` block
+#     may never span one, or it would swallow a documented code sample;
+#   * a content sentinel (inline code, autolink, placeholder) is soft -- a
+#     comment is free to swallow it, because a comment is authoring metadata and
+#     the whole point is to delete it. Without that distinction a comment that
+#     mentions ``_index.md`` could never close.
+_FENCE_SENT_L = "\ue000"
+_SENT_L = "\ue002"
+_SENT_R = "\ue001"
+_SENT_RE = re.compile("[\ue000\ue002](\\d+)\ue001")
+
+# Multi-line elements (comments, script/style, iframe) may legitimately span
+# lines, but must stop dead at a fenced code block -- otherwise an early
+# ``<!--`` swallows the next code block, or tens of thousands of characters of
+# prose on its way to the next ``-->``. That defect alone cost one template 98%
+# of its content and removed 42k characters from a delivery methodology page.
+_NO_CROSS = r"(?:.(?!" + _FENCE_SENT_L + r"))"
+
+# Authoring artefacts that ride along in GitLab handbook markdown.
+_HUGO_BLOCK = re.compile(rf"(?s)<!--{_NO_CROSS}*?-->")
+
+# Real HTML elements. Anything not on this list is treated as content.
+_HTML_INLINE = {
+    "a", "abbr", "b", "bdi", "bdo", "big", "cite", "code", "data", "del", "dfn",
+    "em", "font", "i", "img", "ins", "kbd", "mark", "q", "rp", "rt", "ruby", "s",
+    "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u",
+    "var", "wbr",
+}
+# Elements whose removal should leave a line break behind.
+_HTML_BLOCK = {
+    "address", "article", "aside", "blockquote", "caption", "center", "col",
+    "colgroup", "dd", "details", "dialog", "div", "dl", "dt", "fieldset",
+    "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5",
+    "h6", "header", "hgroup", "hr", "html", "legend", "li", "main", "menu",
+    "nav", "ol", "optgroup", "output", "p", "picture", "pre", "script",
+    "section", "style", "summary", "table", "tbody", "tfoot", "thead", "tr",
+    "ul",
+}
+# Head/document machinery: void elements with no readable content, dropped whole.
+_HTML_VOID = {"base", "link", "meta"}
+_HTML_NAMES = sorted(
+    _HTML_INLINE | _HTML_BLOCK | _HTML_VOID | {"td", "th", "br", "iframe"}
+)
+_HTML_NAME_SET = frozenset(_HTML_NAMES)
+
+# Open/close tag. Group 1 is "/" for a closing tag, group 2 the element name.
+_HTML_TAG = re.compile(r"(?i)<(/?)(" + "|".join(_HTML_NAMES) + r")\b[^>]*>")
+
+# Whole-element removal: these tags are pure machinery, their content is code.
+_SCRIPT_STYLE = re.compile(rf"(?is)<(script|style)\b[^>]*>{_NO_CROSS}*?</\1\s*>")
+# ``[^<]*?`` keeps the element from swallowing the rest of the document when a
+# page ships an unclosed tag.
+_IFRAME = re.compile(
+    rf"(?is)<iframe\b[^>]*>{_NO_CROSS}*?</iframe\s*>|<iframe\b[^>]*/?>"
+)
+_VOID_ELEMENT = re.compile(rf"(?i)<(?:{'|'.join(sorted(_HTML_VOID))})\b[^>]*/?>")
+_IMG = re.compile(r"(?i)<img\b([^>]*)/?>")
+_SRC = re.compile(r"""src\s*=\s*["']([^"']+)["']""", re.I)
+_ALT = re.compile(r"""alt\s*=\s*["']([^"']+)["']""", re.I)
+
+# Inline code spans. Runs after fence masking, so only spans outside fences.
+_INLINE_CODE = re.compile(r"(?<!`)(`+)(?!`)(.+?)(?<!`)\1(?!`)", re.S)
+
+# Markdown autolinks and bare email autolinks -- these are content.
+_AUTO_LINK = re.compile(
+    r"<(?:(?:https?|ftp)://|mailto:)[^<>\s]+>"
+    r"|<[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+>",
+    re.I,
+)
+_ANY_ANGLE = re.compile(r"<[^>\n]*>")
+
+# Hugo shortcodes. Group 1 is the delimiter (``<`` or ``%``), group 2 the body.
+# ``[^{}]*`` is safe because a shortcode cannot nest a brace.
+_HUGO_SHORTCODE = re.compile(r"\{\{([<%])\s*([^{}]*?)\s*[>%]\}\}")
+# Attributes whose value is itself prose worth keeping.
+_HUGO_KEEP_ATTRS = ("header", "title", "summary", "name")
+# Shortcodes whose only argument is a human-readable label, so substituting it
+# preserves meaning. Slugs, IDs and video IDs are deliberately absent -- they
+# would inject meaningless tokens into an embedding.
+_HUGO_KEEP_ARG = frozenset(
+    {"member-by-name", "member-by-gitlab", "team-by-name", "label", "notice"}
+)
+_HUGO_VIDEO = frozenset({"youtube", "vimeo"})
+
+# Cheap pre-check. Autolinks and placeholders alone are left alone, so they do
+# not need to trigger a pass at all.
+_ARTEFACT_GATE = re.compile(
+    r"\{\{[<%]|<!--|</?(?:" + "|".join(_HTML_NAMES) + r")\b"
+    r"|\[\s*insert\b",
+    re.I,
+)
+
+# Authoring placeholders such as "[insert issue number here]". They are removed
+# because a retriever would otherwise be able to answer a factual question with
+# the instruction itself. Bracketed text that does not begin with "insert" --
+# footnote references, [Add-On], [added to the website repository] -- is left
+# untouched, so this cannot eat real prose. Runs inside fences because the pass
+# masks fenced code first.
+_INSERT_PLACEHOLDER = re.compile(r"\[\s*insert\b[^\]\n]{0,70}\]", re.I)
+
+# Indented (4-space) code is deliberately NOT detected: nested list content is
+# also indented four spaces, so a detector would mask real prose.
+
 # A numbered clause heading: "12. DEFINITIONS." on a line of its own. The line
 # length cap is the filter -- prose wrapped into a clause starts mid-sentence and
 # runs far past it, while a real heading stays short. Measured over all 510 CUAD
@@ -215,6 +334,194 @@ def _html_to_prose(html: str) -> str:
     t = re.sub(r" *\n *", "\n", t)
     t = re.sub(r"\n{3,}", "\n\n", t)
     return t.strip()
+
+
+def _looks_like_html(angle: str) -> bool:
+    """True for ``<td>`` / ``</div>``; False for ``<username>`` and friends."""
+    m = re.match(r"</?([a-zA-Z][a-zA-Z0-9]*)\b", angle)
+    return bool(m) and m.group(1).lower() in _HTML_NAME_SET
+
+
+def _mask_regions(text: str) -> tuple[str, list[str]] | None:
+    """Replace every must-survive region with a sentinel; ``None`` if unsafe.
+
+    Regions are masked, never rewritten in place, so the substitution pass
+    cannot see -- and therefore cannot damage -- fenced code, inline code,
+    autolinks or placeholders.
+    """
+    if _SENT_L in text or _FENCE_SENT_L in text:
+        return None
+
+    n = len(text)
+    lines = text.split("\n")
+
+    # 1) fenced code blocks, tracked line by line.
+    in_fence = [False] * n
+    in_fence_state = False
+    pos = 0
+    for ln in lines:
+        ends = pos + len(ln)
+        if _FENCE.match(ln) or in_fence_state:
+            for k in range(pos, min(ends, n)):
+                in_fence[k] = True
+        if _FENCE.match(ln):
+            in_fence_state = not in_fence_state
+        pos = ends + 1
+
+    # 2) inline code spans, only outside fences.
+    never = list(in_fence)
+    for m in _INLINE_CODE.finditer(text):
+        if in_fence[m.start()]:
+            continue
+        for k in range(m.start(), m.end()):
+            never[k] = True
+
+    # 3) Hugo shortcodes sit *outside* fences but contain a bare ``<...>`` that
+    # must not be mistaken for a placeholder and protected.
+    hugo_spans = [
+        m.span()
+        for m in _HUGO_SHORTCODE.finditer(text)
+        if not never[m.start()]
+    ]
+    hi = 0
+
+    def _inside_hugo(pos: int) -> bool:
+        nonlocal hi
+        while hi < len(hugo_spans) and hugo_spans[hi][1] <= pos:
+            hi += 1
+        return hi < len(hugo_spans) and hugo_spans[hi][0] <= pos < hugo_spans[hi][1]
+
+    # 4) autolinks, emails and any ``<...>`` that is not a real HTML element.
+    for m in _ANY_ANGLE.finditer(text):
+        if never[m.start()]:
+            continue
+        angle = m.group(0)
+        # Comments and shortcodes stay visible: they are content to *remove*,
+        # not to protect.
+        if angle.startswith("<!--") or _inside_hugo(m.start()):
+            continue
+        if _AUTO_LINK.match(angle) or not _looks_like_html(angle):
+            for k in range(m.start(), m.end()):
+                never[k] = True
+
+    regions: list[str] = []
+    out: list[str] = []
+    k = 0
+    while k < n:
+        if never[k]:
+            j = k
+            while j < n and never[j]:
+                j += 1
+            regions.append(text[k:j])
+            # A run that contains a fence gets the hard barrier; anything else
+            # gets the soft one so comments can still be deleted wholesale.
+            left = _FENCE_SENT_L if any(in_fence[i] for i in range(k, j)) else _SENT_L
+            out.append(f"{left}{len(regions) - 1}{_SENT_R}")
+            k = j
+        else:
+            out.append(text[k])
+            k += 1
+    return "".join(out), regions
+
+
+def _hugo_repl(m: re.Match) -> str:
+    """Drop a shortcode, but keep any argument that is prose in its own right."""
+    body = m.group(2).strip()
+    if not body or body.startswith("/"):
+        return "\n"
+
+    name_m = re.match(r"([a-zA-Z0-9_:-]+)", body)
+    if not name_m:
+        return "\n"
+    name = name_m.group(1).lower()
+    if name == "include":
+        # The payload lives in another file and Hugo is not running here, so
+        # there is nothing to expand into.
+        return "\n"
+
+    for attr in _HUGO_KEEP_ATTRS:
+        am = re.search(rf'{attr}\s*=\s*"([^"]*)"', body, re.I) or re.search(
+            rf"{attr}\s*=\s*'([^']*)'", body, re.I
+        )
+        if am and am.group(1).strip():
+            return am.group(1).strip()
+
+    qm = re.search(r'"([^"]+)"', body[name_m.end() :])
+    if qm and name in _HUGO_KEEP_ARG:
+        return qm.group(1).strip()
+    if qm and name in _HUGO_VIDEO:
+        return "[video]"
+    return "\n"
+
+
+def _iframe_repl(m: re.Match) -> str:
+    """Drop the element; keep the URL so an embedded talk stays findable."""
+    sm = _SRC.search(m.group(0))
+    return f" {sm.group(1).strip()} " if sm else " "
+
+
+def _img_repl(m: re.Match) -> str:
+    am = _ALT.search(m.group(0))
+    return f" {am.group(1).strip()} " if am else " "
+
+
+# Cell boundaries become pipe separators and row/list boundaries become line
+# breaks, so a table stays readable to retrieval instead of collapsing into a
+# single run-on paragraph.
+_TD_TH = frozenset({"td", "th"})
+_ROW_LI = frozenset({"tr", "li"})
+
+
+def _html_tag_repl(m: re.Match) -> str:
+    closing = m.group(1) == "/"
+    name = m.group(2).lower()
+    if name in _TD_TH:
+        return " | " if closing else " "
+    if name in _ROW_LI:
+        return "\n" if closing else ""
+    if name == "br":
+        return "\n"
+    if name in _HTML_BLOCK:
+        return "\n"
+    return " "
+
+
+def _clean_masked(t: str) -> str:
+    t = _HUGO_BLOCK.sub(" ", t)
+    t = _SCRIPT_STYLE.sub(" ", t)
+    t = _VOID_ELEMENT.sub(" ", t)
+    t = _IFRAME.sub(_iframe_repl, t)
+    t = _IMG.sub(_img_repl, t)
+    t = _HUGO_SHORTCODE.sub(_hugo_repl, t)
+    t = _HTML_TAG.sub(_html_tag_repl, t)
+    t = _INSERT_PLACEHOLDER.sub("", t)
+    t = t.replace("\xa0", " ")
+    # Tidy only what the pass disturbed. Leading indentation is load-bearing in
+    # markdown -- list nesting depends on it -- so it is left alone.
+    t = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", t)
+    t = re.sub(r"[ \t]+\n", "\n", t)
+    t = re.sub(r"(?m)^[ \t]+$", "", t)
+    t = re.sub(r"\n{3,}", "\n\n", t)
+    return t.strip("\n")
+
+
+def _strip_markdown_artifacts(text: str) -> str:
+    """Strip Hugo shortcodes, HTML comments and HTML tags from markdown.
+
+    Handbooks quote HTML and Hugo in code samples on purpose; fenced code,
+    inline code, autolinks and placeholders are masked first and restored
+    byte-identical afterwards.
+    """
+    if not _ARTEFACT_GATE.search(text):
+        return text
+
+    masked = _mask_regions(text)
+    if masked is None:
+        # A private-use sentinel already appears in the source; refuse to guess.
+        return text
+    body, regions = masked
+    body = _clean_masked(body)
+    return _SENT_RE.sub(lambda m: regions[int(m.group(1))], body)
 
 
 def _iter_sec_sections(prose: str) -> Iterable[Section]:
@@ -384,6 +691,9 @@ class ShapeChunker:
         self, text: str, source_path: str, source_title: str | None = None
     ) -> tuple[list[ShapedChunk], ChunkingReport]:
         body, fm_title, _offset = _strip_markdown_frontmatter(text)
+        # Offsets must be measured against the same string ``cleaned_content``
+        # stores, so artefact stripping happens here as well as there.
+        body = _strip_markdown_artifacts(body)
         title = source_title or fm_title
         report = ChunkingReport(source_path=source_path, kind="markdown")
         sections = list(_iter_markdown_sections(body))
@@ -552,5 +862,5 @@ def cleaned_content(text: str, kind: str) -> str:
     if kind == "sec_filing":
         return _html_to_prose(text)
     if kind == "markdown":
-        return _strip_markdown_frontmatter(text)[0]
+        return _strip_markdown_artifacts(_strip_markdown_frontmatter(text)[0])
     return text
