@@ -1,5 +1,7 @@
 # Vault
 
+[![CI](https://github.com/DanielDeshmukh/vault/actions/workflows/ci.yml/badge.svg)](https://github.com/DanielDeshmukh/vault/actions/workflows/ci.yml)
+
 **Permission-Aware Enterprise Knowledge System**
 
 Vault is an enterprise-grade knowledge retrieval system that enables support teams, account managers, and customer success staff to ask natural-language questions across scattered internal documents and receive cited, grounded answers — while enforcing strict permission boundaries that prevent unauthorized content from ever reaching the language model.
@@ -205,7 +207,7 @@ A leakage test suite runs adversarial and boundary queries per role and asserts 
 
 Canary strings are real, distinctive passages taken from restricted documents (for example, a specific party name and clause from one contract, or a specific figure from a 10-K). If a canary appears in a response to an unauthorized role, the test fails.
 
-Results: _fill in after running the suite (pass rate, number of cases, date)._
+Results as of 2026-10-17: the leakage suite runs 12 cases — **9 passed, 3 skipped** (the live-service cases need Pinecone, Cohere, and NVIDIA API keys and skip when those are absent). The full test suite passes **173 of 176** on an empty database (the same 3 skip).
 
 ### Design decisions and known limitations
 
@@ -269,34 +271,62 @@ A curated set of 50 questions spanning:
 
 ## API Reference
 
+All endpoints are served by FastAPI at `http://localhost:8000` (interactive docs at `/docs`). Everything under `/api` requires `Authorization: Bearer <token>` except registration, login, and the health probes.
+
 ### Authentication
 
 ```
-POST /api/auth/register
-POST /api/auth/login
+POST /api/auth/register     { email, password, full_name } → auth token (201)
+POST /api/auth/login        { email, password }            → auth token
+GET  /api/auth/me                                      → current user
 ```
 
 ### Queries
 
 ```
-POST /api/query
-Authorization: Bearer <token>
-Body: { "question": "string", "context": "optional" }
+POST /api/query             { "question": "string", "context": "optional, max 6000 chars" }
 Response: { "answer": "string", "citations": [...], "trace_id": "string" }
+
+POST /api/query/stream      same body, streamed as Server-Sent Events
+GET  /api/query/trace/{trace_id}   full audit trace of a past query
 ```
 
-### Document Management
+### Documents
 
 ```
-POST /api/documents/ingest
-GET  /api/documents/{id}
+GET    /api/documents       ?q=&classification=&limit=(1–100, default 10)&offset=
+Response: { items, total, limit, offset } — list rows carry no document content;
+          q runs Postgres full-text search over the pages the caller may see
+GET    /api/documents/{id}  full document including content
 DELETE /api/documents/{id}
+```
+
+### Ingestion (admin only)
+
+```
+POST /api/ingest            multipart file + form fields: source, account_id,
+                            department, access_level
+POST /api/ingest/direct     { title, content, source, account_id, department, access_level }
+POST /api/ingest/test-connector   exercise a connector without writing
+
+Response: { "documents_processed": int, "chunks_created": int, "errors": [...] }
+```
+
+### Administration (admin only)
+
+```
+GET    /api/admin/users
+PUT    /api/admin/users/{id}/approve
+PUT    /api/admin/users/{id}/reject
+PUT    /api/admin/users/{id}/role
+DELETE /api/admin/users/{id}
+GET    /api/admin/roles
 ```
 
 ### Health
 
 ```
-GET /health
+GET /health          also served at /api/health for proxied deployments
 ```
 
 ---
@@ -311,6 +341,91 @@ GET /health
 | **Pinecone** | Vector database with metadata filtering (`allowed_roles`, `department`) |
 | **PostgreSQL** | Users, roles, documents, and chunk ACLs — source of truth |
 | **FastAPI** | High-performance async API framework |
+
+---
+
+## Development
+
+### Prerequisites
+
+- Python 3.13 (project constraint `^3.11`)
+- Node.js 20+
+- PostgreSQL (CI uses 16)
+
+### Backend setup
+
+```bash
+# pinned, trimmed dependency set for lint, type-check, and tests
+pip install -r server/requirements-ci.txt
+
+# or the full dependency set declared in server/pyproject.toml (includes uvicorn)
+pip install poetry && cd server && poetry install
+```
+
+Configuration lives in `server/.env` (gitignored; no example file is committed):
+
+| Variable | Needed for |
+|---|---|
+| `DATABASE_URL` | everything — `postgresql+asyncpg://user:pass@host/db` |
+| `PINECONE_API_KEY` | ingestion and queries (vector index) |
+| `COHERE_API_KEY` | answer generation and reranking |
+| `NVIDIA_API_KEY` | document embeddings |
+| `JWT_SECRET_KEY` | token signing (defaults to empty) |
+| `VAULT_DEMO_PASSWORD` | password assigned to the seeded demo users |
+
+### Seeding
+
+One command creates the schema, the 12 roles, and 4 demo users — and ingests the public corpus only when the database is empty (a populated corpus is never re-ingested):
+
+```bash
+cd server && python -m scripts.seed_local
+```
+
+The API server prints the same hint at startup if no users exist.
+
+### Running
+
+```bash
+cd server && python -m uvicorn app.main:app --reload    # API at http://localhost:8000/docs
+
+cd frontend && npm install && npm run dev               # web app at http://localhost:3000
+```
+
+### Testing
+
+From the repository root — `server` must be on the import path:
+
+```bash
+# Linux/macOS
+PYTHONPATH=server python -m pytest tests -q
+
+# PowerShell
+$env:PYTHONPATH = "server"; python -m pytest tests -q
+```
+
+- The suite bootstraps its own schema, roles, and 30 fixture documents when the database is empty, so any throwaway database works.
+- The 3 live-service cases (Pinecone, Cohere, NVIDIA) skip automatically when those keys are absent; the other 173 need no API keys.
+- CI runs the same suite in three steps: `tests/unit`, `tests/integration`, `tests/security`.
+
+Lint and type-check (from `server/`):
+
+```bash
+ruff check .     # lint
+mypy app/        # types
+```
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request to `master`:
+
+| Job | What it runs |
+|---|---|
+| Backend Lint & Typecheck | `ruff check` and `mypy app/` in `server/` on Python 3.13 |
+| Backend Tests | unit, integration, and security suites against an empty PostgreSQL 16 service database |
+| Frontend Lint & Typecheck | `npm run lint` and `tsc --noEmit` |
+| Frontend Build | `npm run build` |
+
+Backend jobs install only `server/requirements-ci.txt`. The 3 live-service tests run in CI only when the repository secrets `PINECONE_API_KEY`, `COHERE_API_KEY`, and `NVIDIA_API_KEY` are configured; without them they skip, and the suite still passes.
 
 ---
 
