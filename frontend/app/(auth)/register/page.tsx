@@ -62,7 +62,7 @@ export default function RegisterPage() {
             Join your team<br />on Vault
           </h1>
           <p className="text-ink-muted leading-relaxed">
-            Create an account and get access to your organization's knowledge base.
+            Create an account and get access to your organization&apos;s knowledge base.
             An admin will review your request and assign appropriate permissions.
           </p>
           <div className="mt-8 space-y-3 text-sm text-ink-tertiary">

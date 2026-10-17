@@ -46,7 +46,7 @@ export default function LoginPage() {
             Enterprise Knowledge<br />Retrieval System
           </h1>
           <p className="text-ink-muted leading-relaxed">
-            Permission-aware AI search across your organization's documents.
+            Permission-aware AI search across your organization&apos;s documents.
             Ask questions, get cited answers from authorized sources only.
           </p>
           <div className="mt-8 space-y-3 text-sm text-ink-tertiary">
