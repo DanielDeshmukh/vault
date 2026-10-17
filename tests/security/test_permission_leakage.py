@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from datetime import datetime
 
@@ -7,6 +9,15 @@ from app.db.models import User, Role, UserRole, Document, DocumentAccess
 from app.db.sessions import async_session
 from app.auth.jwt import get_password_hash
 from app.retrieval.permission_filter import PermissionFilter
+
+# Retrieval + generation runs against live Pinecone, Cohere and NVIDIA NIM.
+# CI has no secrets, and these tests deliberately fail on infrastructure
+# errors rather than passing vacuously -- so without the keys they must skip,
+# not fail. Everything else in this file is DB/logic only and always runs.
+needs_live_services = pytest.mark.skipif(
+    not all(os.environ.get(k) for k in ("PINECONE_API_KEY", "COHERE_API_KEY", "NVIDIA_API_KEY")),
+    reason="live retrieval+generation: set PINECONE_API_KEY, COHERE_API_KEY, NVIDIA_API_KEY",
+)
 
 
 @pytest.fixture
@@ -185,6 +196,7 @@ async def test_permission_filter_does_not_force_owner_only_access():
 class TestPermissionBoundary:
     """Test permission boundary enforcement."""
     
+    @needs_live_services
     @pytest.mark.asyncio
     async def test_permission_boundary_questions(self, test_user):
         """
@@ -217,6 +229,7 @@ class TestPermissionBoundary:
                     result.citations, test_user
                 ), f"Question {question.id} leaked unauthorized content"
     
+    @needs_live_services
     @pytest.mark.asyncio
     async def test_no_unauthorized_chunk_leakage(self, test_user, restricted_document):
         """
@@ -281,6 +294,7 @@ class TestZeroLeakage:
     The target is 0.0 unauthorized leakage rate.
     """
     
+    @needs_live_services
     @pytest.mark.asyncio
     async def test_zero_leakage_across_all_categories(self, test_user):
         """
