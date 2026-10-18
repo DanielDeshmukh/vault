@@ -1,0 +1,37 @@
+# Ship only app sources to Vercel; the cloud build installs its own deps.
+corpus/
+backups/
+phases/
+eval/
+tests/
+.github/
+.agents/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.playwright-mcp/
+.git/
+*.log
+*.dump
+
+**/__pycache__/
+**/.mypy_cache/
+**/.pytest_cache/
+**/.ruff_cache/
+
+frontend/node_modules/
+frontend/.next/
+frontend/.vercel/
+
+server/.mypy_cache/
+server/.pytest_cache/
+server/.ruff_cache/
+server/eval_results*.json
+server/Dockerfile
+server/docker-compose.yml
+
+# never upload local secrets
+.env
+.env.*
+**/.env
+**/.env.*
