@@ -215,15 +215,18 @@ class HybridSearch:
             return await perm_filter.build_filter(user)
 
     async def _get_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """Batch embed all query variants.
+        """Batch embed all query variants (cached; input_type=query).
 
         Delegates to app.embeddings so query vectors come from the same model
         and dimensionality as the corpus vectors in Pinecone. Mixing providers
-        here silently breaks retrieval.
+        here silently breaks retrieval. ``input_type="query"`` matches the
+        ``"passage"`` mode the corpus was indexed with (NVIDIA requirement),
+        and the TTL cache absorbs repeated queries against the trial tier's
+        rate limit.
         """
-        from app.embeddings import embed_texts
+        from app.embeddings import embed_query_batch
 
-        return await asyncio.to_thread(embed_texts, texts)
+        return await asyncio.to_thread(embed_query_batch, texts)
 
     async def _get_embedding(self, text: str) -> list[float]:
         embeddings = await self._get_embeddings([text])

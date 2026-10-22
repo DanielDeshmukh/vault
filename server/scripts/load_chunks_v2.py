@@ -9,13 +9,17 @@ truth, ``Base.metadata.create_all``) and rows are inserted with
 ``ON CONFLICT (chunk_id) DO NOTHING``, so re-runs insert 0 and never touch
 existing rows. This writes chunk text only -- no vectors, no Pinecone.
 
-    cd server && $env:PYTHONUTF8="1" && python -m scripts.load_chunks_v2
+``--target local|neon`` is REQUIRED: the script prints the masked DB host
+before any write and aborts if the resolved host does not match the
+requested target (see scripts/db_target.py).
+
+    cd server && $env:PYTHONUTF8="1" && python -m scripts.load_chunks_v2 --target neon
 
 The ``app.*`` imports live inside ``main`` on purpose: ``app.config`` and
 ``app.db.sessions`` read ``DATABASE_URL`` at import time, so the environment
 must be settled first.
 """
-
+import argparse
 import asyncio
 import json
 import os
@@ -25,6 +29,8 @@ from pathlib import Path
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from scripts.db_target import add_target_arg, resolve_target
 
 RECORDS_PATH = Path(__file__).resolve().parents[2] / "corpus" / "v2_dryrun" / "records.jsonl"
 BATCH_SIZE = 2000
@@ -68,14 +74,13 @@ def _row(meta: dict) -> dict:
 
 
 async def main() -> int:
+    ap = argparse.ArgumentParser()
+    add_target_arg(ap)
+    args = ap.parse_args()
+
     _load_env()
-    if not os.environ.get("DATABASE_URL"):
-        # Local convention: server/.env carries NEON_DATABASE_URL instead.
-        neon = os.environ.get("NEON_DATABASE_URL", "")
-        if not neon:
-            print("ERROR: Set DATABASE_URL (or NEON_DATABASE_URL in server/.env)")
-            return 1
-        os.environ["DATABASE_URL"] = neon
+    # Explicit target: validate + print masked host BEFORE any DB touch.
+    os.environ["DATABASE_URL"] = resolve_target(args.target, env_loaded=True)
 
     # Import after the environment is settled: app.config reads it at import.
     from app.db.models import DocumentChunkV2
