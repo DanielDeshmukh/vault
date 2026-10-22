@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import { api, Citation, StreamEvent } from "@/lib/api";
 import { useSidebar } from "@/components/layout/sidebar";
+import { ChunkPreviewModal } from "@/components/chunk-preview";
 
 interface ConversationTurn {
   id: string;
@@ -37,6 +38,7 @@ export default function QueryPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [firstName, setFirstName] = useState("");
+  const [openChunk, setOpenChunk] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toggleCollapsed } = useSidebar();
@@ -52,6 +54,17 @@ export default function QueryPage() {
           setFirstName(user.full_name.split(" ")[0]);
         }
       }
+    } catch {}
+  }, []);
+
+  // Deep link (?chunk=doc_x%230001) opens the preview directly -- used for
+  // shareable chunk references and checkpoint evidence capture. Read from
+  // window.location rather than useSearchParams to avoid the Suspense
+  // requirement that hook imposes on statically prerendered pages.
+  useEffect(() => {
+    try {
+      const chunk = new URLSearchParams(window.location.search).get("chunk");
+      if (chunk) setOpenChunk(chunk);
     } catch {}
   }, []);
 
@@ -233,7 +246,7 @@ export default function QueryPage() {
           /* Conversation turns */
           <div className="max-w-3xl mx-auto px-4 py-8 pb-40">
             {turns.map((turn) => (
-              <TurnView key={turn.id} turn={turn} />
+              <TurnView key={turn.id} turn={turn} onOpenChunk={setOpenChunk} />
             ))}
             {isSearching && !turns.find(t => t.status === "streaming") && (
               <div className="flex items-center gap-2 text-ink-muted text-sm py-4">
@@ -285,11 +298,25 @@ export default function QueryPage() {
           </p>
         </div>
       </div>
+
+      {/* Chunk preview: opened from source cards, answer citations, or ?chunk= */}
+      {openChunk && (
+        <ChunkPreviewModal
+          chunkId={openChunk}
+          onClose={() => setOpenChunk(null)}
+        />
+      )}
     </div>
   );
 }
 
-function TurnView({ turn }: { turn: ConversationTurn }) {
+function TurnView({
+  turn,
+  onOpenChunk,
+}: {
+  turn: ConversationTurn;
+  onOpenChunk: (chunkId: string) => void;
+}) {
   const answerRef = useRef<HTMLDivElement>(null);
   const [showSources, setShowSources] = useState(false);
 
@@ -329,7 +356,11 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
                   type="button"
                   className="mx-0.5 inline-flex align-super text-[10px] font-medium text-primary hover:text-primary-hover"
                   title={citation?.title}
-                  onClick={() => setShowSources(true)}
+                  onClick={() =>
+                    citation?.chunk_id
+                      ? onOpenChunk(citation.chunk_id)
+                      : setShowSources(true)
+                  }
                 >
                   [{children}]
                 </button>
@@ -402,7 +433,12 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
                   {showSources && (
                     <div className="mt-3 space-y-2">
                       {turn.sources.map((src, i) => (
-                        <SourceCard key={i} citation={src} index={i + 1} />
+                        <SourceCard
+                          key={i}
+                          citation={src}
+                          index={i + 1}
+                          onOpenChunk={onOpenChunk}
+                        />
                       ))}
                     </div>
                   )}
@@ -423,9 +459,17 @@ function TurnView({ turn }: { turn: ConversationTurn }) {
   );
 }
 
-function SourceCard({ citation, index }: { citation: Citation; index: number }) {
-  return (
-    <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg bg-surface-1 border border-border text-xs">
+function SourceCard({
+  citation,
+  index,
+  onOpenChunk,
+}: {
+  citation: Citation;
+  index: number;
+  onOpenChunk: (chunkId: string) => void;
+}) {
+  const inner = (
+    <>
       <div className="flex-shrink-0 w-5 h-5 rounded bg-surface-3 flex items-center justify-center text-[10px] font-medium text-ink-muted">
         {index}
       </div>
@@ -437,6 +481,36 @@ function SourceCard({ citation, index }: { citation: Citation; index: number }) 
           <span>{(citation.score * 100).toFixed(0)}% match</span>
         </div>
       </div>
+    </>
+  );
+
+  // With a chunk handle the card opens the chunk preview: heading-path
+  // breadcrumb, badges and the rendered text_md hydrated from Postgres.
+  if (citation.chunk_id) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenChunk(citation.chunk_id)}
+        title="Preview this source chunk"
+        className="flex items-start gap-3 px-3 py-2.5 rounded-lg bg-surface-1 border border-border text-xs w-full text-left hover:border-border-strong hover:bg-surface-2 transition-colors"
+      >
+        {inner}
+        <svg
+          className="w-3.5 h-3.5 flex-shrink-0 text-ink-tertiary mt-0.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+        </svg>
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg bg-surface-1 border border-border text-xs">
+      {inner}
     </div>
   );
 }

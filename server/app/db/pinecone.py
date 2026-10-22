@@ -25,7 +25,9 @@ class PineconeClient:
         self._client = None
         self._index = None
 
-    async def create_index(self, dimension: int = 1024):
+    async def create_index(self, dimension: int | None = None):
+        if dimension is None:
+            dimension = settings.EMBED_DIM
         existing_indexes = [idx.name for idx in self.client.list_indexes()]
         if settings.PINECONE_INDEX_NAME not in existing_indexes:
             self.client.create_index(

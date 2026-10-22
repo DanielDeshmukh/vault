@@ -189,6 +189,14 @@ class ApiClient {
     return this.request<Document>(`/api/documents/${id}`);
   }
 
+  // Chunk ids contain "#" (doc_id#index), which is a URL fragment marker:
+  // they must be percent-encoded in the path or the server never sees them.
+  async getChunk(chunkId: string) {
+    return this.request<ChunkDetail>(
+      `/api/documents/chunk/${encodeURIComponent(chunkId)}`
+    );
+  }
+
   async deleteDocument(id: string) {
     return this.request(`/api/documents/${id}`, { method: "DELETE" });
   }
@@ -217,9 +225,27 @@ export interface QueryResponse {
 
 export interface Citation {
   document_id: string;
+  // Handle for hydrating the chunk's text_md from Postgres in the preview.
+  chunk_id: string;
   title: string;
   source: string;
   score: number;
+}
+
+// GET /api/documents/chunk/{chunk_id} -- text_md hydrated server-side; the
+// renderer never receives text_embed (embedding text is not display text).
+export interface ChunkDetail {
+  chunk_id: string;
+  doc_id: string;
+  title: string;
+  heading_path: string[];
+  department: string | null;
+  classification: string | null;
+  source_type: string | null;
+  source_path: string | null;
+  block_type: string | null;
+  chunk_version: number;
+  text_md: string;
 }
 
 export type StreamEvent =

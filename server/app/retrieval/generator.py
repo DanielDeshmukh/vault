@@ -48,7 +48,12 @@ Format: Direct answer first, then supporting details with citations."""
 
     def _build_messages(self, query: str, results: list[SearchResult], conversation_context: str | None = None) -> list[dict]:
         context = self._build_context(results)
-        context_block = f"Previous conversation context:\n{conversation_context}\n\n" if conversation_context else ""
+        context_block = (
+            "CONVERSATION CONTEXT (use this only for resolving references such as "
+            f'"each" or "that policy"; it is not source evidence):\n{conversation_context}\n\n'
+            if conversation_context
+            else ""
+        )
         user_message = f"""Sources ({len(results)}):
 {context}
 
@@ -130,6 +135,9 @@ Answer comprehensively using ALL sources above. Cite each with [document_id]."""
                 if doc_id == match or result.id == match:
                     citations.append({
                         "document_id": doc_id or result.id,
+                        # The preview modal hydrates text_md by chunk id from
+                        # Postgres, so every citation carries its handle.
+                        "chunk_id": result.id,
                         "title": result.metadata.get("source_title", "Untitled"),
                         "source": result.metadata.get("department", "unknown"),
                         "score": result.score

@@ -21,11 +21,13 @@ import time
 import urllib.error
 import urllib.request
 
+from app.config import settings
+
 # NIM accepts large batches and showed no rate limiting; 128 balances
 # throughput against per-call latency and payload size.
 NIM_BATCH = 128
 NIM_MAX_CHARS = 2000
-EMBED_DIM = 2048
+EMBED_DIM = settings.EMBED_DIM
 _MODEL = "nvidia/nemotron-3-embed-1b"
 _ENDPOINT = "https://integrate.api.nvidia.com/v1/embeddings"
 

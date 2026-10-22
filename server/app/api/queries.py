@@ -6,12 +6,42 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.auth.jwt import get_current_user
+from app.config import settings
 from app.db.models import User
 from app.retrieval.generator import CitationGenerator
-from app.retrieval.search import HybridSearch
+from app.retrieval.search import HybridSearch, SearchResult
 from app.tracing.logger import trace_logger
 
 router = APIRouter()
+
+# Plan decision locked at CP3: below the rerank threshold the model must say
+# so instead of stretching weak chunks into a confident-looking reply. The
+# wording is fixed (not model-generated) so the behaviour is testable.
+NO_ANSWER_TEXT = (
+    "I couldn't find anything relevant in your authorized documents for that "
+    "question. Try rephrasing it with more specific terms, such as the exact "
+    "policy name or topic."
+)
+
+
+def below_relevance_threshold(
+    search: HybridSearch, results: list[SearchResult]
+) -> bool:
+    """True when this result set must produce the explicit no-answer reply.
+
+    * No results at all: nothing to ground an answer on.
+    * Cohere rerank scores (0..1 relevance): gated by
+      ``RERANK_NO_ANSWER_THRESHOLD``.
+    * Fallback / no-rerank paths keep vector cosine scores, a different
+      scale that the threshold was never calibrated against, so they are
+      not gated (documented in search.last_flow["rerank_fallback"]).
+    """
+    if not results:
+        return True
+    flow = search.last_flow
+    if not flow.get("reranked") or flow.get("rerank_fallback"):
+        return False
+    return results[0].score < settings.RERANK_NO_ANSWER_THRESHOLD
 
 
 class QueryRequest(BaseModel):
@@ -28,6 +58,7 @@ def build_retrieval_query(question: str, conversation_context: str | None) -> st
 
 class Citation(BaseModel):
     document_id: str
+    chunk_id: str
     title: str
     source: str
     score: float
@@ -78,11 +109,13 @@ async def query(
         search = HybridSearch()
         generator = CitationGenerator()
 
-        # Execute permission-aware search
+        # Execute permission-aware search. Final top-k is 8 (plan decision
+        # locked at CP3; the old non-stream path used 6 while the stream
+        # path already used 8).
         results = await search.search(
             query=request.question,
             user=current_user,
-            top_k=6,
+            top_k=8,
             use_reranker=True
         )
 
@@ -99,6 +132,12 @@ async def query(
                 for r in results
             ]
         )
+
+        # Below the relevance floor: short-circuit before the LLM call, with
+        # no citations -- weak chunks must not be presented as evidence.
+        if below_relevance_threshold(search, results):
+            trace_logger.log_answer(trace, NO_ANSWER_TEXT, [], 0)
+            return QueryResponse(answer=NO_ANSWER_TEXT, citations=[], trace_id=trace.trace_id)
 
         # Generate cited answer
         generated = await generator.generate(
@@ -123,6 +162,7 @@ async def query(
             citations=[
                 Citation(
                     document_id=c["document_id"],
+                    chunk_id=c["chunk_id"],
                     title=c["title"],
                     source=c["source"],
                     score=c["score"]
@@ -186,11 +226,23 @@ async def query_stream(
             for r in results:
                 source_list.append({
                     "document_id": r.metadata.get("doc_id", r.id),
+                    "chunk_id": r.id,
                     "title": r.metadata.get("source_title", "Untitled"),
                     "source": r.metadata.get("citation",
                                              r.metadata.get("source_file", "unknown")),
                     "score": round(r.score, 4),
                 })
+
+            # Same gate as the non-stream path: no answer is generated from
+            # weak or absent candidates, and no sources are shown as if they
+            # had supported one.
+            if below_relevance_threshold(search, results):
+                trace_logger.log_answer(trace, NO_ANSWER_TEXT, [], 0)
+                yield f"data: {json.dumps({'type': 'sources', 'sources': []})}\n\n"
+                yield f"data: {json.dumps({'type': 'delta', 'content': NO_ANSWER_TEXT})}\n\n"
+                yield f"data: {json.dumps({'type': 'citations', 'citations': []})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'trace_id': trace.trace_id})}\n\n"
+                return
 
             yield f"data: {json.dumps({'type': 'sources', 'sources': source_list})}\n\n"
 

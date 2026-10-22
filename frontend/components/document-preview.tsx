@@ -2,6 +2,10 @@
 
 import { useMemo, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+
+import { sourcePageUrl } from "@/lib/sources";
 
 const H1 = "text-2xl font-semibold text-foreground mt-6 mb-3 first:mt-0";
 const H2 = "text-xl font-semibold text-foreground mt-6 mb-3 first:mt-0";
@@ -178,42 +182,6 @@ interface MdProps {
   href?: string;
 }
 
-// Links inside the corpus are written for the document's original site.
-// Rendered unchanged they resolve against the Vault origin, so a handbook
-// href such as "../../upstream-studios/" becomes /upstream-studios and 404s.
-// Resolve relative hrefs against the source's real home instead; anything
-// that cannot be placed confidently stays plain text rather than a dead link.
-const SOURCE_BASES: Record<string, string> = {
-  "gitlab-handbook": "https://handbook.gitlab.com/handbook/",
-};
-
-// "gitlab-handbook:product/ux/_index.md" -> the page's URL on the source site.
-// Handbook pages are directory-style (".../product/ux/"), so a filename becomes
-// a directory and "_index.md" becomes its parent.
-function sourcePageUrl(source?: string): string | null {
-  if (!source) return null;
-  const cut = source.indexOf(":");
-  const kind = cut === -1 ? source : source.slice(0, cut);
-  const path = cut === -1 ? "" : source.slice(cut + 1);
-  const base = SOURCE_BASES[kind];
-  if (!base) return null;
-  if (!path) return base;
-
-  const rel = path.replace(/\\/g, "/").replace(/^\/+/, "");
-  const url = rel.endsWith("_index.md")
-    ? rel.slice(0, -"_index.md".length)
-    : rel.endsWith(".md")
-      ? `${rel.slice(0, -3)}/`
-      : rel.endsWith("/")
-        ? rel
-        : `${rel}/`;
-  try {
-    return new URL(url, base).toString();
-  } catch {
-    return null;
-  }
-}
-
 function safeHref(href?: string, source?: string): string | null {
   const h = href?.trim();
   if (!h) return null;
@@ -232,12 +200,30 @@ function safeHref(href?: string, source?: string): string | null {
   }
 }
 
+// Fenced code arrives as a <code> with a language class; the languageless
+// fence and inline code are told apart by content -- a fence's body always
+// contains a newline, inline code never does.
+function childText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(childText).join("");
+  if (node && typeof node === "object" && "props" in node) {
+    return childText((node as { props: { children?: ReactNode } }).props.children);
+  }
+  return "";
+}
+
 function markdownComponents(source?: string) {
   return {
     h1: ({ children }: MdProps) => <h1 className={H1}>{children}</h1>,
     h2: ({ children }: MdProps) => <h2 className={H2}>{children}</h2>,
     h3: ({ children }: MdProps) => <h3 className={H3}>{children}</h3>,
     h4: ({ children }: MdProps) => <h4 className={H4}>{children}</h4>,
+    h5: ({ children }: MdProps) => (
+      <h5 className="text-sm font-semibold text-foreground mt-4 mb-2 first:mt-0">{children}</h5>
+    ),
+    h6: ({ children }: MdProps) => (
+      <h6 className="text-xs font-semibold uppercase tracking-wide text-ink-muted mt-4 mb-2 first:mt-0">{children}</h6>
+    ),
     p: ({ children }: MdProps) => <p className={BODY}>{children}</p>,
     ul: ({ children }: MdProps) => (
       <ul className="list-disc pl-5 my-3">{children}</ul>
@@ -264,10 +250,39 @@ function markdownComponents(source?: string) {
       <strong className="font-semibold text-foreground">{children}</strong>
     ),
     em: ({ children }: MdProps) => <em className="italic">{children}</em>,
-    code: ({ children }: MdProps) => (
-      <code className={INLINE_CODE}>{children}</code>
-    ),
+    code: ({ children, className }: MdProps & { className?: string }) => {
+      const isBlock =
+        Boolean(className?.includes("language-")) || /\n/.test(childText(children));
+      if (isBlock) {
+        // The surrounding <pre> carries the block chrome; a chip here would
+        // paint one rounded blob across the whole fenced body.
+        return (
+          <code className={className ? `${className} text-inherit` : undefined}>
+            {children}
+          </code>
+        );
+      }
+      return <code className={INLINE_CODE}>{children}</code>;
+    },
     pre: ({ children }: MdProps) => <pre className={BLOCK_CODE}>{children}</pre>,
+    // GFM tables (plan Phase 4): scrollable wrapper, bordered cells, sticky
+    // header. The wrapper is also the vertical scroller (max-h), which is
+    // what makes position:sticky on <th> actually engage.
+    table: ({ children }: MdProps) => (
+      <div className="my-3 max-h-[60vh] overflow-auto rounded border border-border">
+        <table className="min-w-full border-collapse text-sm">{children}</table>
+      </div>
+    ),
+    th: ({ children }: MdProps) => (
+      <th className="sticky top-0 z-10 border border-border bg-surface-2 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
+        {children}
+      </th>
+    ),
+    td: ({ children }: MdProps) => (
+      <td className="border border-border px-3 py-2 align-top text-ink-muted">
+        {children}
+      </td>
+    ),
     blockquote: ({ children }: MdProps) => (
       <blockquote className="border-l-2 border-border pl-3 my-3 italic">
         {children}
@@ -280,22 +295,36 @@ function markdownComponents(source?: string) {
 export function DocumentPreview({
   content,
   source,
+  markdown,
 }: {
   content: string;
   source?: string;
+  // Force the Markdown path (chunk previews always carry text_md). Without
+  // it the heuristic scores signals and a pure GFM table chunk -- no
+  // headings, fences or links -- would be misclassified as plain text.
+  markdown?: boolean;
 }) {
   const normalized = useMemo(() => normalizeContent(content), [content]);
-  const markdown = useMemo(() => looksLikeMarkdown(normalized), [normalized]);
+  const renderMarkdown = useMemo(
+    () => markdown ?? looksLikeMarkdown(normalized),
+    [markdown, normalized]
+  );
   const blocks = useMemo(
-    () => (markdown ? [] : parsePlainText(normalized)),
-    [normalized, markdown]
+    () => (renderMarkdown ? [] : parsePlainText(normalized)),
+    [normalized, renderMarkdown]
   );
   const components = useMemo(() => markdownComponents(source), [source]);
 
-  if (markdown) {
+  if (renderMarkdown) {
     return (
       <div>
-        <ReactMarkdown components={components}>{normalized}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize]}
+          components={components}
+        >
+          {normalized}
+        </ReactMarkdown>
       </div>
     );
   }

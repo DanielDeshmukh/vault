@@ -161,6 +161,45 @@ class DocumentChunk(Base):
     document: Mapped["Document"] = relationship("Document", back_populates="chunks")
 
 
+class DocumentChunkV2(Base):
+    """Corpus-rebuild chunk (plan sections A/D): the source of truth for
+    ``text_md`` (display) and ``text_embed`` (embedding) after Phase 5.
+
+    A separate table rather than new rows/columns on ``document_chunks``:
+    existing rows and their ``pinecone_id`` references stay untouched for
+    rollback, and hydration by ``chunk_id`` (``doc_id#index``) is a primary-key
+    lookup. Pinecone holds vectors plus a small metadata payload only; the
+    renderer gets ``text_md`` from here.
+    """
+
+    __tablename__ = "document_chunks_v2"
+
+    chunk_id: Mapped[str] = mapped_column(String(320), primary_key=True)
+    doc_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_path: Mapped[str | None] = mapped_column(Text)
+    source_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    doc_title: Mapped[str] = mapped_column(String(500), nullable=False)
+    heading_path: Mapped[list[str]] = mapped_column(JSON, default=list)
+    block_type: Mapped[str] = mapped_column(String(32), default="prose")
+    text_md: Mapped[str] = mapped_column(Text, nullable=False)
+    text_embed: Mapped[str] = mapped_column(Text, nullable=False)
+    token_count: Mapped[int] = mapped_column(Integer, default=0)
+    char_count: Mapped[int] = mapped_column(Integer, default=0)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    department: Mapped[str | None] = mapped_column(String(100), index=True)
+    classification: Mapped[str | None] = mapped_column(String(50))
+    allowed_roles: Mapped[list[str]] = mapped_column(JSON, default=list)
+    chunk_version: Mapped[int] = mapped_column(Integer, default=2)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        # Phase 6 canary queries: "which chunks are in department X" must not
+        # degrade into a sequential scan of the whole chunk table.
+        Index("ix_document_chunks_v2_doc_chunk", "doc_id", "chunk_index"),
+    )
+
+
 class DocumentAccess(Base):
     __tablename__ = "document_access"
 

@@ -14,10 +14,17 @@ if _db_url.startswith("postgresql://"):
 elif _db_url.startswith("postgres://"):
     _db_url = _db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
-# Strip sslmode query param (asyncpg doesn't support it; handled via connect_args)
+# Strip query params asyncpg cannot take as connect() kwargs:
+# - sslmode: applied manually via connect_args below.
+# - channel_binding: NEON appends channel_binding=require to its URL, and the
+#   SQLAlchemy asyncpg dialect forwards remaining params as explicit kwargs,
+#   which asyncpg.connect() rejects with TypeError (deployment-local URLs do
+#   not carry it; connection security is unchanged -- SSL is still enforced
+#   and asyncpg negotiates channel binding through the ssl context).
 parsed = urlparse(_db_url)
 qs = parse_qs(parsed.query)
 qs.pop("sslmode", None)
+qs.pop("channel_binding", None)
 _db_url = urlunparse(parsed._replace(query=urlencode(qs, doseq=True)))
 
 _connect_args = {}

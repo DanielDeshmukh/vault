@@ -8,7 +8,7 @@ from sqlalchemy.orm import load_only
 
 from app.auth.jwt import get_current_user
 from app.auth.permissions import document_role_names, get_user_allowed_role_names
-from app.db.models import Document, DocumentChunk, User
+from app.db.models import Document, DocumentChunk, DocumentChunkV2, User
 from app.db.sessions import get_db
 
 router = APIRouter()
@@ -86,6 +86,27 @@ class DocumentListResponse(BaseModel):
     offset: int
 
 
+class ChunkPreview(BaseModel):
+    """One chunk hydrated for the preview modal.
+
+    ``text_md`` is always present: the frontend renderer never receives
+    ``text_embed`` (embedding text is not display text, plan section A) and
+    never fetches chunk bodies from the vector store.
+    """
+
+    chunk_id: str
+    doc_id: str
+    title: str
+    heading_path: list[str] = Field(default_factory=list)
+    department: str | None = None
+    classification: str | None = None
+    source_type: str | None = None
+    source_path: str | None = None
+    block_type: str | None = None
+    chunk_version: int = 2
+    text_md: str
+
+
 async def user_role_names(user: User, db: AsyncSession) -> list[str] | None:
     """Role names granting document access, lowercased to match the ACL.
 
@@ -96,6 +117,24 @@ async def user_role_names(user: User, db: AsyncSession) -> list[str] | None:
         return None
     roles = await get_user_allowed_role_names(user, db)
     return [r.lower() for r in roles]
+
+
+def acl_grants(roles: list[str] | None, allowed: set[str]) -> bool:
+    """Shared ACL decision for chunk/document hydration.
+
+    ``roles is None`` means admin (allow). Otherwise: deny-by-default -- a
+    caller with no roles, an empty/malformed ACL, or no intersection is a
+    denial, never a widening. Both sides are lowercased here so a legacy
+    tier role such as "Internal" cannot silently deny against a lowercase
+    corpus ACL, regardless of what the caller passed. Kept as a pure
+    function so the endpoint's security decision is unit-testable without a
+    database.
+    """
+    if roles is None:
+        return True
+    user_roles = {str(r).lower() for r in roles}
+    acl = {str(r).lower() for r in allowed}
+    return bool(user_roles) and bool(user_roles & acl)
 
 
 @router.get("", response_model=DocumentListResponse)
@@ -228,6 +267,85 @@ async def get_document(
         owner_id=str(doc.owner_id) if doc.owner_id else None,
         created_at=doc.created_at.isoformat() if doc.created_at else None,
         content=doc.content,
+    )
+
+
+@router.get("/chunk/{chunk_id}", response_model=ChunkPreview)
+async def get_chunk_preview(
+    chunk_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Hydrate one chunk's display markdown for the preview UI.
+
+    Postgres is the source of truth for ``text_md`` (plan decision locked at
+    CP3: the renderer never reads chunk text from Pinecone metadata). The
+    role ACL is re-applied here on purpose: a chunk id is a bearer handle, so
+    a chunk that the retrieval filter would have excluded must not become
+    readable by id-guessing -- the same check runs again at this boundary.
+
+    ``chunk_id`` lives in the URL path and contains ``#``; clients must
+    percent-encode it (``encodeURIComponent``), which Starlette decodes back.
+    """
+    # v2 (corpus rebuild) first, then v1 ids from the live index.
+    row = (
+        await db.execute(
+            select(DocumentChunkV2).where(DocumentChunkV2.chunk_id == chunk_id)
+        )
+    ).scalar_one_or_none()
+    if row is not None:
+        roles = await user_role_names(current_user, db)
+        raw = row.allowed_roles
+        allowed = {str(r).lower() for r in raw} if isinstance(raw, list) else set()
+        if not acl_grants(roles, allowed):
+            raise HTTPException(
+                status_code=403, detail="Not authorized to view this chunk"
+            )
+        return ChunkPreview(
+            chunk_id=row.chunk_id,
+            doc_id=row.doc_id,
+            title=row.doc_title,
+            heading_path=[str(h) for h in row.heading_path]
+            if isinstance(row.heading_path, list)
+            else [],
+            department=row.department,
+            classification=row.classification,
+            source_type=row.source_type,
+            source_path=row.source_path,
+            block_type=row.block_type,
+            chunk_version=row.chunk_version,
+            text_md=row.text_md,
+        )
+
+    joined = (
+        await db.execute(
+            select(DocumentChunk, Document)
+            .join(Document, DocumentChunk.document_id == Document.id)
+            .where(DocumentChunk.pinecone_id == chunk_id)
+        )
+    ).first()
+    if joined is None:
+        raise HTTPException(status_code=404, detail="Chunk not found")
+    chunk, doc = joined
+
+    roles = await user_role_names(current_user, db)
+    if not acl_grants(roles, document_role_names(doc)):
+        raise HTTPException(
+            status_code=403, detail="Not authorized to view this chunk"
+        )
+
+    return ChunkPreview(
+        chunk_id=chunk_id,
+        doc_id=doc.doc_id or str(doc.id),
+        title=doc.title,
+        heading_path=[],
+        department=doc.department,
+        classification=doc.classification,
+        source_type=doc.source,
+        source_path=doc.source_file or doc.source,
+        block_type=None,
+        chunk_version=1,
+        text_md=chunk.content,
     )
 
 

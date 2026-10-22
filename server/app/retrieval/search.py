@@ -1,10 +1,18 @@
 import asyncio
+import hashlib
+import string
 from dataclasses import dataclass
 
 from app.db.models import User
 from app.db.pinecone import pinecone_client
 from app.db.sessions import async_session
 from app.retrieval.permission_filter import PermissionFilter
+
+# Phase 3 (corpus rebuild plan): fetch a wide candidate set, clean it, rerank
+# everything, only then cut to top_k. Never cut before the reranker.
+CANDIDATE_WIDTH = 50
+MIN_CANDIDATE_CHARS = 50
+MIN_CANDIDATE_WORDS = 5
 
 
 @dataclass
@@ -47,6 +55,20 @@ QUERY_EXPANSIONS = {
     "travel": "travel policy reimbursement mileage expense",
 }
 
+STOP_WORDS = {
+    "i", "me", "my", "we", "our", "you", "your", "he", "she", "it",
+    "they", "them", "the", "a", "an", "is", "am", "are", "was", "were",
+    "be", "been", "being", "have", "has", "had", "do", "does", "did",
+    "will", "would", "could", "should", "may", "might", "can", "shall",
+    "to", "of", "in", "for", "on", "with", "at", "by", "from", "as",
+    "into", "about", "between", "through", "during", "before", "after",
+    "and", "but", "or", "not", "no", "if", "then", "else", "when",
+    "this", "that", "these", "those", "what", "which", "who", "whom",
+    "how", "all", "each", "every", "both", "few", "more", "most",
+    "other", "some", "such", "than", "too", "very", "just", "also",
+    "now", "here", "there", "up", "out", "so", "only", "own", "same",
+}
+
 
 def expand_query(query: str) -> list[str]:
     q_lower = query.lower()
@@ -54,33 +76,58 @@ def expand_query(query: str) -> list[str]:
     for keyword, expansion in QUERY_EXPANSIONS.items():
         if keyword in q_lower:
             expansions.append(query + " " + expansion)
-    # Generate keyword-focused variant by stripping filler words
-    stop_words = {
-        "i", "me", "my", "we", "our", "you", "your", "he", "she", "it",
-        "they", "them", "the", "a", "an", "is", "am", "are", "was", "were",
-        "be", "been", "being", "have", "has", "had", "do", "does", "did",
-        "will", "would", "could", "should", "may", "might", "can", "shall",
-        "to", "of", "in", "for", "on", "with", "at", "by", "from", "as",
-        "into", "about", "between", "through", "during", "before", "after",
-        "and", "but", "or", "not", "no", "if", "then", "else", "when",
-        "this", "that", "these", "those", "what", "which", "who", "whom",
-        "how", "all", "each", "every", "both", "few", "more", "most",
-        "other", "some", "such", "than", "too", "very", "just", "also",
-        "now", "here", "there", "up", "out", "so", "only", "own", "same",
-    }
-    words = [w for w in q_lower.split() if w.isalnum() and w not in stop_words]
+    # Keyword-focused variant by stripping filler words. Punctuation must not
+    # drop words: "policies?" -> "policies" (the old isalnum() check dropped it).
+    words = []
+    for w in q_lower.split():
+        token = w.strip(string.punctuation)
+        if token and token not in STOP_WORDS:
+            words.append(token)
     if words:
         keyword_query = " ".join(words)
-        expansions.append(keyword_query)
+        if keyword_query != q_lower:
+            expansions.append(keyword_query)
     if expansions:
         return [query] + expansions[:3]
     return [query]
+
+
+def content_fingerprint(result: SearchResult) -> str:
+    stored = result.metadata.get("content_hash")
+    if isinstance(stored, str) and stored:
+        return stored
+    return hashlib.sha256(result.content.encode("utf-8", errors="replace")).hexdigest()
+
+
+def apply_safety_net(results: list[SearchResult]) -> list[SearchResult]:
+    kept = []
+    for r in results:
+        if len(r.content) < MIN_CANDIDATE_CHARS:
+            continue
+        if len(r.content.split()) < MIN_CANDIDATE_WORDS:
+            continue
+        kept.append(r)
+    return kept
+
+
+def dedupe_by_content_hash(results: list[SearchResult]) -> list[SearchResult]:
+    # Input is sorted best-first, so the first occurrence of a hash wins.
+    seen: set[str] = set()
+    deduped = []
+    for r in results:
+        fp = content_fingerprint(r)
+        if fp in seen:
+            continue
+        seen.add(fp)
+        deduped.append(r)
+    return deduped
 
 
 class HybridSearch:
 
     def __init__(self):
         self.pinecone = pinecone_client
+        self.last_flow: dict = {}
 
     async def search(
         self,
@@ -97,11 +144,12 @@ class HybridSearch:
 
         filter_dict, all_embeddings = await asyncio.gather(filter_task, embeddings_task)
 
-        # Run all Pinecone queries in parallel
+        # Wide fetch: CANDIDATE_WIDTH matches per variant, RBAC-filtered
+        # server-side inside Pinecone (build_filter -> allowed_roles $in).
         query_tasks = [
             self.pinecone.query_vectors(
                 vector=embedding,
-                top_k=top_k * 2,
+                top_k=CANDIDATE_WIDTH,
                 filter=filter_dict,
                 include_metadata=True
             )
@@ -109,30 +157,57 @@ class HybridSearch:
         ]
         all_results = await asyncio.gather(*query_tasks)
 
-        # Deduplicate results
+        # Merge across variants by id, keeping the max score for each id.
+        fetched = 0
         all_candidates: dict[str, SearchResult] = {}
         for matches in all_results:
             for match in matches:
+                fetched += 1
                 rid = match.get("id", "")
-                if rid and rid not in all_candidates:
-                    md = match.get("metadata", {}) or {}
-                    all_candidates[rid] = SearchResult(
-                        id=rid,
-                        content=md.get("text", ""),
-                        score=match.get("score", 0.0),
-                        metadata=md,
-                    )
+                if not rid:
+                    continue
+                md = match.get("metadata", {}) or {}
+                candidate = SearchResult(
+                    id=rid,
+                    content=md.get("text", ""),
+                    score=match.get("score", 0.0),
+                    metadata=md,
+                )
+                existing = all_candidates.get(rid)
+                if existing is None or candidate.score > existing.score:
+                    all_candidates[rid] = candidate
 
-        search_results = list(all_candidates.values())
-        search_results.sort(key=lambda r: r.score, reverse=True)
-        search_results = search_results[:top_k * 2]
+        candidates = sorted(all_candidates.values(), key=lambda r: r.score, reverse=True)
+        after_safety = apply_safety_net(candidates)
+        deduped = dedupe_by_content_hash(after_safety)
 
-        if use_reranker and len(search_results) > 0:
+        # Rerank the FULL cleaned set; only afterwards cut to top_k.
+        reranked = False
+        rerank_fallback = False
+        results = deduped
+        if use_reranker and deduped:
             from app.retrieval.reranker import CohereReranker
             reranker = CohereReranker()
-            search_results = await reranker.rerank_safe(query, search_results, top_k)
+            results = await reranker.rerank_safe(query, deduped, top_k)
+            reranked = True
+            rerank_fallback = reranker.used_fallback
 
-        return search_results[:top_k]
+        final = results[:top_k]
+        self.last_flow = {
+            "query": query,
+            "variants": len(query_variants),
+            "rbac_filter": filter_dict,
+            "fetched": fetched,
+            "merged_by_id": len(all_candidates),
+            "after_safety_net": len(after_safety),
+            "after_dedupe": len(deduped),
+            "reranked": reranked,
+            # Fallback keeps vector scores (cosine, not relevance), so the
+            # caller must know which score scale the final scores are on.
+            "rerank_fallback": rerank_fallback,
+            "final": len(final),
+        }
+        return final
 
     async def _get_filter(self, user: User) -> dict | None:
         async with async_session() as db:
