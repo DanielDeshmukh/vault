@@ -11,6 +11,12 @@ class Settings(BaseSettings):
     PINECONE_INDEX_HOST: str = os.environ.get("PINECONE_INDEX_HOST", "")
     PINECONE_ENVIRONMENT: str = os.environ.get("PINECONE_ENVIRONMENT", "us-east-1")
 
+    # Retrieval namespace inside PINECONE_INDEX_NAME. "" (default) is the
+    # legacy corpus that production still queries -- the rollout switch.
+    # Staging/Phase 6 points this at "v2"; production is NOT switched until
+    # Phase 6 passes and the switch is explicitly approved.
+    PINECONE_NAMESPACE: str = os.environ.get("PINECONE_NAMESPACE", "")
+
     GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY", "")
     EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL", "embed-english-v3.0")
 
@@ -24,10 +30,13 @@ class Settings(BaseSettings):
     # "nothing relevant found" instead of stretching weak chunks into a
     # confident reply. Applies to Cohere rerank scores only (0..1); the
     # vector-score fallback path is a different scale and is not gated.
-    # Default is a deliberately low floor -- tune upward with Phase 6
-    # golden-query evidence, never without it.
+    # Phase 6 tuning (30 answerable / 15 unanswerable on namespace v2):
+    # at T=0.19 all 15 unanswerables stay below the floor (FP=0, margin
+    # 0.12 over the worst unanswerable) while refusing only the two
+    # statute-snippet queries Cohere scores at ~0.00-0.01; the old 0.4
+    # refused four answerables (0.0042-0.3591) for no safety gain.
     RERANK_NO_ANSWER_THRESHOLD: float = float(
-        os.environ.get("RERANK_NO_ANSWER_THRESHOLD", "0.4")
+        os.environ.get("RERANK_NO_ANSWER_THRESHOLD", "0.19")
     )
 
     # Embeddings moved off Cohere (trial quota exhausted) onto NVIDIA NIM.

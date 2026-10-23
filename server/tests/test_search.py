@@ -216,3 +216,97 @@ def test_extract_citations_only_returns_accessed_results():
     citations = gen.extract_citations(answer, results)
 
     assert [c["document_id"] for c in citations] == ["doc_a"]
+
+
+# --- hydration ACL re-check (plan Phase 6 / line 138) ---
+#
+# An id the RBAC filter does not allow must never enter the Postgres IN list,
+# and ids without a document_chunks_v2 row (legacy corpus) keep their
+# metadata content so production behaviour is unchanged until the switch.
+
+
+class HydrationSpy:
+    """Stands in for _fetch_full_text and records exactly which ids were asked for."""
+
+    def __init__(self, rows: dict[str, str]):
+        self.rows = rows
+        self.asked: list[list[str]] = []
+
+    async def fetch(self, ids: list[str]) -> dict[str, str]:
+        self.asked.append(list(ids))
+        return {i: self.rows[i] for i in ids if i in self.rows}
+
+
+def hydrate(results, filter_dict, rows):
+    hs = HybridSearch()
+    spy = HydrationSpy(rows)
+    hs._fetch_full_text = spy.fetch
+    hydrated, checked = asyncio.run(hs._hydrate(results, filter_dict))
+    return hydrated, checked, spy
+
+
+def test_hydrate_fetches_only_acl_allowed_ids():
+    ok = make(
+        "ok",
+        "snippet",
+        md={"allowed_roles": ["Engineer"]},  # mixed case on purpose
+    )
+    forbidden = make(
+        "secret",
+        "restricted snippet",
+        md={"allowed_roles": ["legal"]},
+    )
+    filt = {"allowed_roles": {"$in": ["engineer", "admin"]}}
+
+    hydrated, checked, spy = hydrate(
+        [ok, forbidden], filt, {"ok": "full text from postgres"}
+    )
+
+    assert spy.asked == [["ok"]]
+    assert (hydrated, checked) == (1, 1)
+    assert ok.content == "full text from postgres"
+    assert forbidden.content == "restricted snippet"
+
+
+def test_hydrate_all_rejected_never_queries_postgres():
+    a = make("a", "x", md={"allowed_roles": ["legal"]})
+    b = make("b", "y", md={"allowed_roles": ["hr"]})
+    filt = {"allowed_roles": {"$in": ["engineer"]}}
+
+    hydrated, checked, spy = hydrate([a, b], filt, {"a": "should not be read"})
+
+    assert spy.asked == []
+    assert (hydrated, checked) == (0, 0)
+    assert a.content == "x" and b.content == "y"
+
+
+def test_hydrate_without_filter_checks_everything():
+    a = make("a", "snip a")
+    b = make("b", "snip b")
+
+    hydrated, checked, spy = hydrate([a, b], None, {"a": "full a"})
+
+    assert spy.asked == [["a", "b"]]
+    assert (hydrated, checked) == (1, 2)
+    assert a.content == "full a"
+    assert b.content == "snip b"  # no v2 row -> metadata content kept
+
+
+def test_hydrate_legacy_id_without_v2_row_keeps_metadata_content():
+    legacy = make("doc_hr_0001#0001", "legacy metadata text",
+                  md={"allowed_roles": ["hr"]})
+    filt = {"allowed_roles": {"$in": ["hr"]}}
+
+    hydrated, checked, spy = hydrate([legacy], filt, {})
+
+    assert spy.asked == [["doc_hr_0001#0001"]]
+    assert (hydrated, checked) == (0, 1)
+    assert legacy.content == "legacy metadata text"
+
+
+def test_hydrate_empty_results_returns_zero_without_fetch():
+    spy_rows = {"x": "text"}
+    hydrated, checked, spy = hydrate([], None, spy_rows)
+
+    assert (hydrated, checked) == (0, 0)
+    assert spy.asked == []

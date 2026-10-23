@@ -45,13 +45,17 @@ class PineconeClient:
         vector: list[float],
         top_k: int = 10,
         filter: dict | None = None,
-        include_metadata: bool = True
+        include_metadata: bool = True,
+        namespace: str | None = None,
     ) -> list[dict]:
+        if namespace is None:
+            namespace = settings.PINECONE_NAMESPACE
         results = self.index.query(
             vector=vector,
             top_k=top_k,
             filter=filter,
-            include_metadata=include_metadata
+            include_metadata=include_metadata,
+            namespace=namespace,
         )
         return results.get("matches", [])
 

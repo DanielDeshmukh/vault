@@ -3,7 +3,9 @@ import hashlib
 import string
 from dataclasses import dataclass
 
-from app.db.models import User
+from sqlalchemy import select
+
+from app.db.models import DocumentChunkV2, User
 from app.db.pinecone import pinecone_client
 from app.db.sessions import async_session
 from app.retrieval.permission_filter import PermissionFilter
@@ -193,6 +195,7 @@ class HybridSearch:
             rerank_fallback = reranker.used_fallback
 
         final = results[:top_k]
+        hydrated, hydration_checked = await self._hydrate(final, filter_dict)
         self.last_flow = {
             "query": query,
             "variants": len(query_variants),
@@ -206,8 +209,72 @@ class HybridSearch:
             # caller must know which score scale the final scores are on.
             "rerank_fallback": rerank_fallback,
             "final": len(final),
+            "hydration_checked": hydration_checked,
+            "hydrated": hydrated,
         }
         return final
+
+    async def _hydrate(
+        self, results: list[SearchResult], filter_dict: dict | None
+    ) -> tuple[int, int]:
+        """Replace snippet content with Postgres ``text_md`` for the final
+        top-k (plan sections CP3/line 136: the LLM and the UI receive the
+        full text from Postgres, never from Pinecone metadata).
+
+        The access check is re-applied BEFORE the query (plan line 138):
+        an id that ``filter_dict`` does not allow never enters the ``IN``
+        list, so it is never fetched from Postgres. Results without a
+        ``document_chunks_v2`` row (legacy-corpus ids) keep their metadata
+        content untouched, which preserves current production behaviour.
+
+        Returns (hydrated_count, ids_checked_against_acl).
+        """
+        if not results:
+            return 0, 0
+
+        allowed_roles: set[str] | None = None
+        if filter_dict is not None:
+            allowed_roles = {
+                str(r).lower()
+                for r in filter_dict.get("allowed_roles", {}).get("$in", [])
+            }
+
+        keep: list[SearchResult] = []
+        for r in results:
+            if allowed_roles is None:
+                keep.append(r)
+                continue
+            md_roles = {
+                str(x).lower() for x in (r.metadata.get("allowed_roles") or [])
+            }
+            if md_roles & allowed_roles:
+                keep.append(r)
+            # else: filtered out -- deliberately not fetched from Postgres.
+
+        if not keep:
+            return 0, 0
+
+        full_text = await self._fetch_full_text([r.id for r in keep])
+        hydrated = 0
+        for r in keep:
+            text = full_text.get(r.id)
+            if text is not None:
+                r.content = text
+                hydrated += 1
+        return hydrated, len(keep)
+
+    async def _fetch_full_text(self, ids: list[str]) -> dict[str, str]:
+        """Single Postgres fetch for the ACL-checked ids only. Split out so
+        tests can spy on exactly which chunk ids reach Postgres."""
+        async with async_session() as db:
+            rows = (
+                await db.execute(
+                    select(DocumentChunkV2.chunk_id, DocumentChunkV2.text_md).where(
+                        DocumentChunkV2.chunk_id.in_(ids)
+                    )
+                )
+            ).all()
+        return {row.chunk_id: row.text_md for row in rows}
 
     async def _get_filter(self, user: User) -> dict | None:
         async with async_session() as db:
