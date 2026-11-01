@@ -28,6 +28,26 @@ class GeneratedAnswer:
 MAX_CONTEXT_SOURCES = 6
 MAX_SOURCE_CHARS = 1000
 
+# Rule-7 focus detection: countries/entities the corpus does not speak for.
+_FOCUS_COUNTRIES = frozenset(
+    {
+        "australia", "brazil", "canada", "china", "dubai", "france", "germany",
+        "india", "ireland", "italy", "japan", "mexico", "netherlands", "nigeria",
+        "singapore", "south africa", "spain", "sweden", "switzerland",
+        "united arab emirates", "united kingdom", "united states", "usa",
+        "european union",
+    }
+)
+_STOP_CAPS = frozenset(
+    {
+        "the", "what", "how", "why", "when", "where", "who", "which", "is",
+        "are", "do", "does", "did", "can", "could", "may", "might", "should",
+        "would", "will", "shall", "must", "please", "our", "we", "you",
+        "your", "this", "that", "these", "those", "there", "here", "answer",
+        "question", "according", "per",
+    }
+)
+
 
 class CitationGenerator:
 
@@ -40,11 +60,34 @@ Rules:
 4. Never fabricate. If sources conflict, note it and cite each side.
 5. Use precise HR, legal, and policy terminology from the sources. For example, when a user asks about "time off after a kid is born," use terms like "parental leave," "maternity leave," "paternity leave," "bonding leave," and "FMLA" as they appear in the sources. When a user asks about "working from home," use terms like "remote work," "telework," "telecommute," and "flexible work arrangements" as they appear in the sources.
 6. Map colloquial user questions to the formal policy terminology used in the documents.
+7. EXCEPTION to rule 2: if the question names a country, city, or entity that appears in NO source above, do not answer about it as if the sources covered it. State briefly what the provided sources DO cover, then invite a question on that scope.
 
 Format: Direct answer first, then supporting details with citations."""
 
     def __init__(self):
         self.client = cohere.ClientV2(api_key=settings.COHERE_API_KEY)
+
+    def _focus_terms(self, query: str) -> list[str]:
+        """Country/entity terms the question is about (rule-7 candidates)."""
+        found: dict[str, str] = {}
+        low = query.lower()
+        for country in _FOCUS_COUNTRIES:
+            if re.search(rf"(?<!\w){re.escape(country)}(?!\w)", low):
+                found[country.lower()] = country
+        for quoted in re.findall(r'"([^"]{2,60})"', query):
+            found[quoted.lower()] = quoted
+        for m in re.finditer(r"[A-Za-z][A-Za-z0-9&.'-]*", query):
+            word = m.group(0)
+            before = query[: m.start()].rstrip()
+            sentence_start = not before or before[-1] in ".?!"
+            if (
+                not sentence_start
+                and word[0].isupper()
+                and len(word) >= 3
+                and word.lower() not in _STOP_CAPS
+            ):
+                found.setdefault(word.lower(), word)
+        return list(found.values())
 
     def _build_messages(self, query: str, results: list[SearchResult], conversation_context: str | None = None) -> list[dict]:
         context = self._build_context(results)
@@ -54,10 +97,22 @@ Format: Direct answer first, then supporting details with citations."""
             if conversation_context
             else ""
         )
+        guard = ""
+        focus = self._focus_terms(query)
+        if focus and context:
+            uncovered = [t for t in focus if t.lower() not in context.lower()]
+            if uncovered:
+                listed = ", ".join(uncovered)
+                guard = (
+                    f"\n\nUNMENTIONED FOCUS: {listed} -- none of the sources above "
+                    f"mention it. Per system rule 7, do NOT answer about {listed} as "
+                    "if the sources covered it. State briefly what the provided "
+                    "sources DO cover, then invite a question on that scope."
+                )
         user_message = f"""Sources ({len(results)}):
 {context}
 
-{context_block}Question: {query}
+{context_block}Question: {query}{guard}
 
 Answer comprehensively using ALL sources above. Cite each with [document_id]."""
         return [

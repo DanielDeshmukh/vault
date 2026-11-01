@@ -308,6 +308,81 @@ def test_labour_pdf_sections():
     assert all(r.char_count >= 50 for r in records)
 
 
+def test_gazette_furniture_stripped_and_sections_titled():
+    """Phase-6 checklist: repeating page furniture is stripped before heading
+    detection, statute sections promote WITH their marginal title, and
+    minimum-wage chunks carry that title in heading_path."""
+    directory = CORPUS / "hr" / "direct"
+    path = _first_file(directory, "code_on_wages*.pdf")
+    if path is None:
+        pytest.skip("no labour PDF sample")
+    rel = str(path.relative_to(CORPUS)).replace("\\", "/")
+    records, drops, _ = process_file(
+        path, _entry(rel, department="hr", allowed_roles=["hr"]), "doc_hr_9002"
+    )
+    assert len(records) > 5
+
+    joined = "\n".join(r.text_md for r in records)
+    heads = [p for r in records for p in r.heading_path]
+
+    # furniture never reaches chunk bodies or heading paths
+    assert "GAZETTE OF INDIA" not in joined.upper()
+    assert not re.search(r"\[PART\s+[IVXLC]", joined)
+    assert not re.search(r"SEC\.\s*\d+\]", joined)
+    assert not re.search(r"^\s*-\s*\d+\s*-\s*$", joined, re.M)
+    assert not any(
+        "GAZETTE" in p.upper() or re.match(r"^\[?PART\s+[IVXLC]", p) for p in heads
+    )
+
+    # letterless entries can never enter a heading path (task 2)
+    assert [p for p in heads if not re.search(r"[A-Za-z]", p)] == []
+
+    # statute sections carry a lettered title, never bare numbers
+    section_heads = [p for p in heads if re.match(r"^\d+\.", p)]
+    titled = [p for p in section_heads if re.match(r"^\d+\.\s+[A-Za-z]", p)]
+    assert len(titled) >= 30, titled[:10]
+
+    # minimum-wage chunks actually carry the section title
+    mw_titled = [
+        r
+        for r in records
+        if re.search(r"minimum wage", r.text_md, re.I)
+        and any(re.match(r"^\d+\.\s+[A-Za-z]", p) for p in r.heading_path)
+    ]
+    assert mw_titled, "minimum-wage chunks must carry their section title"
+    assert any(
+        re.search(r"wages", p, re.I)
+        for r in mw_titled
+        for p in r.heading_path
+        if re.match(r"^\d+\.", p)
+    )
+
+
+def test_letterless_heading_demoted_keeps_text_out_of_path():
+    """Numeric-only / dash-number headings demote to prose: text survives in
+    the body, heading paths stay lettered."""
+    from app.ingestion_v2.chunker import chunk_doc
+
+    parsed = parse_markdown(
+        "# Timeline of Events\n\n"
+        "The incident timeline below lists every dated update for responders.\n\n"
+        "## 2020-09-01\n\n"
+        "Initial detection of the anomaly in the ingestion pipeline today.\n\n"
+        "#### 2019\n\n"
+        "Recognition awards and annual milestones were announced this year.\n\n"
+        "## - 3 -\n\n"
+        "Closing remarks and references for future responders follow here.\n"
+    )
+    drafts, _drops = chunk_doc(parsed)
+    paths = [p for d in drafts for p in d.heading_path]
+    assert [p for p in paths if not re.search(r"[A-Za-z]", p)] == []
+    assert not any(re.match(r"^\d", p) for p in paths)
+    joined = "\n".join(d.text_md for d in drafts)
+    assert "2020-09-01" in joined  # demoted, not lost
+    assert "2019" in joined
+    assert "## " not in joined  # markdown markers stripped on demote
+
+
 def test_detect_source_type_dispatch():
     assert detect_source_type("legal/cuad/x.txt") == "cuad_txt"
     assert detect_source_type("finance/sec_10k/apple_10k_2025-09-27.htm") == "sec_htm"

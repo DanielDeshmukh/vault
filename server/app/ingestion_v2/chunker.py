@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from .blocks import Block, ParsedDoc
 from .md_parser import md_to_plain
@@ -982,7 +982,18 @@ def chunk_doc(parsed: ParsedDoc) -> tuple[list[Draft], list[DropRecord]]:
 
     block_drops = 0
     block_kept = 0
-    for block in parsed.blocks:
+    for raw_block in parsed.blocks:
+        block = raw_block
+        if block.kind == "heading" and block.plain.strip() and not _has_letter(block.plain):
+            # Headings must be human text: numeric-only ("2019"), page
+            # furniture ("- 3 -"), and symbol runs demote to prose so the
+            # text survives in the body while heading paths stay lettered.
+            block = replace(
+                block,
+                kind="prose",
+                md=block.plain.strip() or block.md,
+                level=None,
+            )
         block_reason = _drop_block_reason(block, parsed.source_type)
         if block_reason:
             drops.append(

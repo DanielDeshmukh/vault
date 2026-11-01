@@ -213,6 +213,17 @@ CANARY_PROBES = [
     "access management policy",
 ]
 
+# Positive access controls (Phase 6 checklist): the LEAST-privileged role
+# allowed on each broad department must actually retrieve it (ACL matrix:
+# general -> all roles; engineering -> engineer/manager/admin;
+# sales -> employee/manager/admin).
+POSITIVE_PROBES = [
+    ("general", "intern@vaultdemo.com", "business continuity plan"),
+    ("engineering", "engineer@vaultdemo.com",
+     "rollback strategy for organization data migrations"),
+    ("sales", "employee@vaultdemo.com", "DevOps Dozen award winner announcement"),
+]
+
 # --------------------------------------------------------------------------
 # Held-out set (Phase 6): 10 fresh answerable queries + 8 near-topic
 # unanswerables (policies for countries/entities not in the corpus).
@@ -574,6 +585,18 @@ async def _cmd_leakage() -> int:
         details.append({"kind": "admin", "dept": dept, "hits": n, "ok": ok})
         if not ok:
             failures.append(f"admin sees no {dept}: hits={n}")
+
+    # 6. positive access: roles ALLOWED on broad departments must retrieve
+    for dept, email, probe in POSITIVE_PROBES:
+        results, n = await dept_count(probe, email, dept)
+        role = email.split("@")[0]
+        ok = n > 0
+        log(f"  [posit ] role={role:<10} dept={dept:<12} hits={n} {'OK' if ok else 'FAIL'} (should see)")
+        details.append({"kind": "positive", "role": role, "dept": dept, "hits": n, "ok": ok})
+        if not ok:
+            failures.append(f"positive {role} x {dept}: hits={n} expected >0")
+        else:
+            positives.append(f"positive {role} x {dept}: {n}")
 
     log(f"\nLEAKAGE SUMMARY: {len(failures)} hard failure(s), {len(positives)} positive-controls-hit")
     for f in failures:
