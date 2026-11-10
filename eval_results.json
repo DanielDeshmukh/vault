@@ -1,0 +1,1767 @@
+{
+  "run_time": "2026-11-10T17:15:08.111161",
+  "elapsed_seconds": 695.1018558999058,
+  "summary": {
+    "total_queries": 60,
+    "successful": 40,
+    "errors": 20,
+    "refused": 14,
+    "with_citations": 26,
+    "avg_latency_ms": 21797.25238751853,
+    "avg_relevance": 0.6516666666666666,
+    "by_role": {
+      "admin": {
+        "total": 30,
+        "successful": 19,
+        "refused": 6,
+        "avg_relevance": 0.6587719298245615,
+        "avg_latency_ms": 22388.78471057519
+      },
+      "intern": {
+        "total": 30,
+        "successful": 21,
+        "refused": 8,
+        "avg_relevance": 0.6452380952380953,
+        "avg_latency_ms": 21262.05647618155
+      }
+    },
+    "by_category": {
+      "easy_lookup": {
+        "total": 30,
+        "successful": 21,
+        "avg_relevance": 0.626984126984127
+      },
+      "cross_doc_synthesis": {
+        "total": 10,
+        "successful": 6,
+        "avg_relevance": 0.48333333333333334
+      },
+      "permission_boundary": {
+        "total": 10,
+        "successful": 3,
+        "avg_relevance": 0.0
+      },
+      "edge_case": {
+        "total": 10,
+        "successful": 10,
+        "avg_relevance": 1.0
+      }
+    }
+  },
+  "results": [
+    {
+      "question_id": "EL-001",
+      "question": "What is the cloud native tools strategy?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The cloud native tools strategy involves adopting an approach to application development and operation centered around cloud computing, leveraging technologies like containers and microservices to achieve high service levels and adaptability [doc_engineering_0009]. GitLab's strategy includes compartmentalizing state by removing shared local state from application components, particularly those using shared POSIX storage (NFS), and aligning stateful services like the main database (Postgres) with cloud native capabilities, such as near-zero downtime upgrades [doc_engineering_0009]. While GitLab has already adopted some facets of cloud native, the focus is on moving closer to this model without a wholesale switch, balancing the need for new features via Kubernetes deployment methodologies with customer SRE experience and data security [doc_engineering_0916]. Development teams prioritize building features for cloud-native first, then supporting other platforms, to align with the future of",
+      "citations": [
+        {
+          "document_id": "doc_engineering_0009",
+          "chunk_id": "doc_engineering_0009#chunk_002",
+          "title": "Technology Roadmap",
+          "source": "engineering",
+          "score": 0.98582757
+        },
+        {
+          "document_id": "doc_engineering_0916",
+          "chunk_id": "doc_engineering_0916#chunk_033",
+          "title": "Segmenting Self-Managed for a Cloud Native Future",
+          "source": "engineering",
+          "score": 0.47578797
+        },
+        {
+          "document_id": "doc_general_0098",
+          "chunk_id": "doc_general_0098#chunk_048",
+          "title": "Product Principles",
+          "source": "general",
+          "score": 0.43815404
+        },
+        {
+          "document_id": "doc_sales_0306",
+          "chunk_id": "doc_sales_0306#chunk_014",
+          "title": "Developer Advocacy: Mentoring and Coaching",
+          "source": "sales",
+          "score": 0.39425924
+        },
+        {
+          "document_id": "doc_sales_0359",
+          "chunk_id": "doc_sales_0359#chunk_001",
+          "title": "Cloud Native Ecosystem Sales Enablement",
+          "source": "sales",
+          "score": 0.11736965
+        }
+      ],
+      "latency_ms": 23637.02220004052,
+      "timestamp": "2026-11-10T17:03:56.662449",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-002",
+      "question": "How does the onboarding process work at GitLab?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The onboarding process at GitLab is a structured, self-driven, and asynchronous experience designed to help new team members become productive within the first few weeks of their employment. Here’s how it works, synthesized from all provided sources:\n\n1. **Overview and Purpose**:  \n   Onboarding at GitLab refers to the initial weeks after hiring, managed cross-functionally by Corporate Security, People Operations, and Security Assurance [doc_it_security_0418]. It is self-driven and self-learning, emphasizing acclimation to GitLab’s remote work culture [doc_general_1522, doc_hr_0057].  \n\n2. **Onboarding Issue Template**:  \n   All onboarding tasks are completed in a GitLab issue using a standardized [onboarding issue template], which is owned by the People Operations team [doc_general_1522, doc_hr_0057]. This template ensures consistency and clarity for new hires.  \n\n3. **Timeline and Activities**:  \n   The first 30 days are structured into sequential tasks, such as:  \n   - **Day 1**: Ac",
+      "citations": [
+        {
+          "document_id": "doc_it_security_0418",
+          "chunk_id": "doc_it_security_0418#chunk_003",
+          "title": "CorpSec Onboarding Services",
+          "source": "it_security",
+          "score": 0.9999349
+        },
+        {
+          "document_id": "doc_general_1522",
+          "chunk_id": "doc_general_1522#chunk_004",
+          "title": "The complete guide to remote onboarding for new-hires",
+          "source": "general",
+          "score": 0.99992335
+        },
+        {
+          "document_id": "doc_hr_0057",
+          "chunk_id": "doc_hr_0057#chunk_001",
+          "title": "GitLab Onboarding",
+          "source": "hr",
+          "score": 0.9998795
+        },
+        {
+          "document_id": "doc_it_security_0229",
+          "chunk_id": "doc_it_security_0229#chunk_007",
+          "title": "HackerOne Process",
+          "source": "it_security",
+          "score": 0.99929035
+        }
+      ],
+      "latency_ms": 27933.896500151604,
+      "timestamp": "2026-11-10T17:04:00.961648",
+      "success": true,
+      "relevance_score": 0.25,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-003",
+      "question": "What are the working groups at GitLab?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "GitLab's working groups are cross-functional teams with defined roles and responsibilities, tasked with achieving high-impact business goals quickly. They disband once their goals are met, as defined by exit criteria, to avoid bureaucracy [doc_general_1475, doc_engineering_0352]. \n\n**Types of Working Groups:**\n\n* **Stage Working Groups:** Focus on initiatives requiring collaboration between multiple groups within a specific stage. They are driven by stage-level product direction and can consist of Functional Leads and members fulfilling exit criteria [doc_engineering_0352].\n * **Company-Wide Working Groups:**  Address broader company-wide initiatives, typically with an Executive Sponsor [doc_engineering_0352].\n\n**Examples of Specific Working Groups:**\n\n* **GitLab Administration Working Group:**  Temporarily owns GitLab Administrator functions, identifies owning groups for requests, and redirects issues for resolution until a permanent team is established [doc_general_1375].\n * **Featur",
+      "citations": [
+        {
+          "document_id": "doc_engineering_0352",
+          "chunk_id": "doc_engineering_0352#chunk_058",
+          "title": "Plan",
+          "source": "engineering",
+          "score": 0.9999125
+        },
+        {
+          "document_id": "doc_general_1375",
+          "chunk_id": "doc_general_1375#chunk_002",
+          "title": "GitLab Administration Working Group",
+          "source": "general",
+          "score": 0.99871576
+        },
+        {
+          "document_id": "doc_general_1410",
+          "chunk_id": "doc_general_1410#chunk_002",
+          "title": "Feature Flag usage Working Group",
+          "source": "general",
+          "score": 0.9973061
+        }
+      ],
+      "latency_ms": 47594.26759998314,
+      "timestamp": "2026-11-10T17:04:20.623200",
+      "success": true,
+      "relevance_score": 0.6666666666666666,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-004",
+      "question": "What is GitLab's remote work policy?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:04:56.669090",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-005",
+      "question": "What are the code of conduct rules?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The Code of Conduct rules encompass several key areas, including community behavior, supplier responsibilities, and handling violations. Here’s a comprehensive overview based on the provided sources:\n\n1. **Community Code of Conduct (GitLab):**  \n   - Prohibits trolling, insulting/derogatory comments, and personal or political attacks [doc_sales_0432].  \n   - Applies to the forum platform and wider GitLab Community [doc_sales_0435, doc_general_0280].  \n   - Violations can be flagged for moderator review, and posts may be hidden from public viewing [doc_sales_0435].  \n   - Continued disregard may result in account bans [doc_sales_0432].  \n\n2. **Siemens Code of Conduct (Suppliers):**  \n   - Requires legal compliance with applicable laws [doc_legal_0655, doc_legal_0117].  \n   - Prohibits corruption and bribery, including payments to government officials to influence decisions [doc_legal_0655, doc_legal_0117].  \n   - Promotes respect for basic human rights of employees and equal opportuniti",
+      "citations": [
+        {
+          "document_id": "doc_sales_0432",
+          "chunk_id": "doc_sales_0432#chunk_007",
+          "title": "Code of Conduct Enforcement",
+          "source": "sales",
+          "score": 0.7412996
+        },
+        {
+          "document_id": "doc_sales_0435",
+          "chunk_id": "doc_sales_0435#chunk_003",
+          "title": "Forum workflow",
+          "source": "sales",
+          "score": 0.97767127
+        },
+        {
+          "document_id": "doc_legal_0117",
+          "chunk_id": "doc_legal_0117#chunk_003",
+          "title": "ACCURAYINC 09 01 2010-EX-10.31-DISTRIBUTOR AGREEMENT",
+          "source": "legal",
+          "score": 0.86499614
+        },
+        {
+          "document_id": "doc_it_security_0229",
+          "chunk_id": "doc_it_security_0229#chunk_028",
+          "title": "HackerOne Process",
+          "source": "it_security",
+          "score": 0.8933094
+        },
+        {
+          "document_id": "doc_general_0280",
+          "chunk_id": "doc_general_0280#chunk_005",
+          "title": "Support Engineer Resources",
+          "source": "general",
+          "score": 0.858244
+        }
+      ],
+      "latency_ms": 26522.756499936804,
+      "timestamp": "2026-11-10T17:04:27.484700",
+      "success": true,
+      "relevance_score": 0.75,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-006",
+      "question": "What is the NIST Cybersecurity Framework?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The NIST Cybersecurity Framework (CSF) is a set of guidelines and best practices for managing and reducing cybersecurity risks. It is developed by the National Institute of Standards and Technology (NIST) and is widely recognized as a standard for improving cybersecurity across various industries [doc_it_security_0134].  \n\nThe NIST CSF is referenced in multiple contexts:  \n1. **Compliance and Industry Alignment**: GitLab’s proprietary security control framework (GCF) compares its controls against the NIST CSF to ensure alignment with industry best practices [doc_it_security_0134].  \n2. **Executive Order on Cybersecurity**: The US President’s Executive Order directs NIST to publish guidelines for enhancing software supply chain security, emphasizing the importance of frameworks like the NIST CSF in addressing cybersecurity challenges [doc_sales_0384].  \n3. **Security Architecture References**: The NIST CSF is listed as a key reference in security architecture documentation, alongside ot",
+      "citations": [
+        {
+          "document_id": "doc_it_security_0134",
+          "chunk_id": "doc_it_security_0134#chunk_005",
+          "title": "GitLab Security Compliance Controls",
+          "source": "it_security",
+          "score": 0.11417085
+        },
+        {
+          "document_id": "doc_sales_0384",
+          "chunk_id": "doc_sales_0384#chunk_004",
+          "title": "DevOps Solution Resource: Software Compliance",
+          "source": "sales",
+          "score": 0.868938
+        },
+        {
+          "document_id": "doc_it_security_0189",
+          "chunk_id": "doc_it_security_0189#chunk_050",
+          "title": "Security Architecture",
+          "source": "it_security",
+          "score": 0.52909607
+        }
+      ],
+      "latency_ms": 49257.08339991979,
+      "timestamp": "2026-11-10T17:05:09.880546",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-007",
+      "question": "What are the employee leave policies?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The employee leave policies are outlined in several documents, covering different aspects and regions. Here’s a comprehensive overview:\n\n1. **General Leave Policies**:  \n   - Employees are encouraged to review the company’s [Leave Policies](/handbook/people-group/time-off-and-absence/leave-types/) and [country-specific leave information](/handbook/total-rewards/benefits/general-and-entity-benefits/) for detailed guidance [doc_hr_0030].  \n   - For U.S.-based employees, specific leave policies are available on the [US-specific Leave of Absence](/handbook/people-policies/leave-of-absence/us/) page [doc_general_0096].  \n\n2. **Types of Leave**:  \n   - **Parental Leave**: Detailed information is available in the [Parental Leave](/handbook/total-rewards/benefits/general-and-entity-benefits/#parental-leave) section [doc_sales_0086].  \n   - **Emergency Situations**: Refer to the [Emergency Situations](/handbook/people-group/time-off-and-absence/time-off-types/) policy for guidance [doc_sales_00",
+      "citations": [
+        {
+          "document_id": "doc_hr_0030",
+          "chunk_id": "doc_hr_0030#chunk_001",
+          "title": "Leave of Absence Toolkit for Team Members and Managers",
+          "source": "hr",
+          "score": 0.180124342
+        },
+        {
+          "document_id": "doc_general_0096",
+          "chunk_id": "doc_general_0096#chunk_016",
+          "title": "People Policies - GitLab Inc (USA)",
+          "source": "general",
+          "score": 0.172550246
+        },
+        {
+          "document_id": "doc_sales_0086",
+          "chunk_id": "doc_sales_0086#chunk_134",
+          "title": "Sales Development",
+          "source": "sales",
+          "score": 0.167350814
+        },
+        {
+          "document_id": "doc_general_0065",
+          "chunk_id": "doc_general_0065#chunk_034",
+          "title": "GitLab GmbH (Germany) information & benefits",
+          "source": "general",
+          "score": 0.164724335
+        }
+      ],
+      "latency_ms": 34919.27930014208,
+      "timestamp": "2026-11-10T17:05:02.404310",
+      "success": true,
+      "relevance_score": 0.4,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-008",
+      "question": "What benefits are offered to employees?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "GitLab offers a comprehensive benefits package designed to support employees at every stage of life, with a focus on clarity and accessibility. Here’s a breakdown of the benefits based on the provided sources:\n\n**1. Globally Aligned, Locally Relevant Benefits:**\n   - GitLab takes a country-specific approach to benefits, ensuring they meet local statutory requirements, market standards, and cultural needs [doc_hr_0031].\n   - Core offerings include medical, life, and pension benefits, provided through statutory or supplementary plans [doc_hr_0031].\n   - Country-specific enhancements are based on competitive market benchmarking and local regulations [doc_hr_0031].\n\n**2. Company-Wide Benefits:**\n   - Available to all team members worldwide, unless otherwise stated [doc_hr_0049].\n   - These benefits are designed to support employees in life's big moments, such as planning for the future, starting a family, or caring for aging parents [doc_hr_0050].\n\n**3. Entity-Specific Benefits:**\n   - Add",
+      "citations": [
+        {
+          "document_id": "doc_hr_0031",
+          "chunk_id": "doc_hr_0031#chunk_004",
+          "title": "Benefits",
+          "source": "hr",
+          "score": 0.7841538
+        },
+        {
+          "document_id": "doc_hr_0049",
+          "chunk_id": "doc_hr_0049#chunk_001",
+          "title": "General & Entity Specific Benefits & Information",
+          "source": "hr",
+          "score": 0.611556
+        },
+        {
+          "document_id": "doc_hr_0050",
+          "chunk_id": "doc_hr_0050#chunk_001",
+          "title": "GitLab Inc (US) Benefits",
+          "source": "hr",
+          "score": 0.8086723
+        },
+        {
+          "document_id": "doc_hr_0035",
+          "chunk_id": "doc_hr_0035#chunk_024",
+          "title": "GitLab BV (Netherlands) Benefits",
+          "source": "hr",
+          "score": 0.5430753
+        }
+      ],
+      "latency_ms": 41063.526400132105,
+      "timestamp": "2026-11-10T17:05:37.733470",
+      "success": true,
+      "relevance_score": 0.2,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-009",
+      "question": "What is the drug-free workplace policy?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "GitLab's drug-free workplace policy prohibits the illegal use, possession, sale, or distribution of alcohol or controlled substances. It also mandates that legal or illegal substances must not impair an individual's job performance. This policy aims to maintain operational efficiency, ensure proper customer service, and comply with local laws in team members' residence and travel locations [doc_general_0097].",
+      "citations": [
+        {
+          "document_id": "doc_general_0097",
+          "chunk_id": "doc_general_0097#chunk_022",
+          "title": "People Policies",
+          "source": "general",
+          "score": 0.56385833
+        }
+      ],
+      "latency_ms": 12412.361599970609,
+      "timestamp": "2026-11-10T17:05:14.816937",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 1,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-010",
+      "question": "What is the security incident response process?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:06:09.900389",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-011",
+      "question": "What are the laptop security configuration standards?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:06:14.824898",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-012",
+      "question": "What is the Okta Verify setup process?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:06:37.745796",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-013",
+      "question": "What is GitLab's approach to automated dependency updates?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "The provided sources do not mention GitLab's approach to automated dependency updates. Instead, they cover automated dependency updates in a general engineering context [doc_engineering_0674], including design and implementation details [doc_engineering_0674], triggering via SBOM-ingestion scan profiles [doc_engineering_1203], and the use of external services like dependencies.io for automatic updates [doc_engineering_0288]. They also discuss security workflows for dependency updates [doc_it_security_0220] and CI/CD pipeline migration strategies [doc_general_1207].\n\nIf you have questions about the topics covered in these sources, feel free to ask!",
+      "citations": [
+        {
+          "document_id": "doc_engineering_0674",
+          "chunk_id": "doc_engineering_0674#chunk_001",
+          "title": "Automated dependency updates",
+          "source": "engineering",
+          "score": 0.99984765
+        },
+        {
+          "document_id": "doc_engineering_1203",
+          "chunk_id": "doc_engineering_1203#chunk_001",
+          "title": "Automated Dependency Updates ADR 002: Trigger via SBOM-ingestion scan profile",
+          "source": "engineering",
+          "score": 0.997065
+        },
+        {
+          "document_id": "doc_engineering_0288",
+          "chunk_id": "doc_engineering_0288#chunk_003",
+          "title": "Distribution Team Infrastructure and Maintenance",
+          "source": "engineering",
+          "score": 0.99242276
+        },
+        {
+          "document_id": "doc_it_security_0220",
+          "chunk_id": "doc_it_security_0220#chunk_004",
+          "title": "Security Dashboard Review",
+          "source": "it_security",
+          "score": 0.98571813
+        },
+        {
+          "document_id": "doc_general_1207",
+          "chunk_id": "doc_general_1207#chunk_003",
+          "title": "Professional Services EM Scoping - CI/CD Pipeline Migration",
+          "source": "general",
+          "score": 0.9803562
+        }
+      ],
+      "latency_ms": 17189.770800061524,
+      "timestamp": "2026-11-10T17:06:27.090530",
+      "success": true,
+      "relevance_score": 0.75,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-014",
+      "question": "What are the product principles at GitLab?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "GitLab's product principles are rooted in the company's **strategy and philosophy for product development** [doc_general_0099], emphasizing a **values-driven approach** [doc_engineering_0018, doc_general_0142]. These principles are built upon **GitLab Values** [doc_engineering_0018, doc_general_0142], which guide decision-making and ensure alignment with the company's culture [doc_engineering_0018].  \n\nKey product principles include:  \n1. **Iteration**: Emphasizing continuous improvement and learning from feedback [doc_engineering_0018].  \n2. **Efficiency**: Optimizing processes to maximize productivity [doc_engineering_0018].  \n3. **Simplicity**: Designing products that are intuitive and easy to use [doc_engineering_0018].  \n4. **Reliability**: Ensuring consistent and dependable performance [doc_engineering_0018].  \n5. **Quality**: Maintaining high standards in all aspects of product development [doc_engineering_0018].  \n6. **Velocity**: Delivering features and updates rapidly [doc_en",
+      "citations": [
+        {
+          "document_id": "doc_general_0099",
+          "chunk_id": "doc_general_0099#chunk_007",
+          "title": "Product Handbook",
+          "source": "general",
+          "score": 0.9998634
+        },
+        {
+          "document_id": "doc_engineering_0018",
+          "chunk_id": "doc_engineering_0018#chunk_001",
+          "title": "Engineering Principles",
+          "source": "engineering",
+          "score": 0.9994093
+        },
+        {
+          "document_id": "doc_general_0098",
+          "chunk_id": "doc_general_0098#chunk_038",
+          "title": "Product Principles",
+          "source": "general",
+          "score": 0.99696034
+        },
+        {
+          "document_id": "doc_it_security_0185",
+          "chunk_id": "doc_it_security_0185#chunk_008",
+          "title": "Product Security Engineering",
+          "source": "it_security",
+          "score": 0.9941801
+        },
+        {
+          "document_id": "doc_general_0124",
+          "chunk_id": "doc_general_0124#chunk_005",
+          "title": "Support Incident Response Framework",
+          "source": "general",
+          "score": 0.9881309
+        }
+      ],
+      "latency_ms": 26393.152200151235,
+      "timestamp": "2026-11-10T17:06:41.218241",
+      "success": true,
+      "relevance_score": 0.5,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-015",
+      "question": "What is the Duo messaging service architecture?",
+      "category": "easy_lookup",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:07:27.098493",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "CS-001",
+      "question": "What security frameworks and standards does GitLab follow?",
+      "category": "cross_doc_synthesis",
+      "role": "admin",
+      "answer": "GitLab adheres to several security frameworks and standards to ensure accountability, fairness, and transparency in its operations and communications with stakeholders. Here are the key frameworks and standards identified across the sources:\n\n1. **Governance, Risk, and Compliance (GRC) Framework**  \n   GitLab's security governance discipline follows a GRC framework to define, train, and measure security strategies and progress toward security objectives. This ensures accountability, fairness, and transparency across departments and functions [doc_it_security_0120].\n\n2. **Change Management Standard**  \n   GitLab maintains a Change Management Standard to govern changes in its systems and processes, ensuring they are managed securely and efficiently [doc_it_security_0064].\n\n3. **Data Classification Standard**  \n   All GitLab data is categorized and handled according to the Data Classification Standard, which ensures compliance with applicable security requirements [doc_hr_0002].\n\n4. **Sec",
+      "citations": [
+        {
+          "document_id": "doc_it_security_0120",
+          "chunk_id": "doc_it_security_0120#chunk_002",
+          "title": "Security Governance Program",
+          "source": "it_security",
+          "score": 0.9947391
+        },
+        {
+          "document_id": "doc_it_security_0064",
+          "chunk_id": "doc_it_security_0064#chunk_006",
+          "title": "Change Management Policy",
+          "source": "it_security",
+          "score": 0.99317604
+        },
+        {
+          "document_id": "doc_hr_0002",
+          "chunk_id": "doc_hr_0002#chunk_006",
+          "title": "GitLab Internal Acceptable Use Policy",
+          "source": "hr",
+          "score": 0.99209267
+        },
+        {
+          "document_id": "doc_it_security_0050",
+          "chunk_id": "doc_it_security_0050#chunk_001",
+          "title": "GitLab Security Logging Standards",
+          "source": "it_security",
+          "score": 0.9835338
+        },
+        {
+          "document_id": "doc_it_security_0044",
+          "chunk_id": "doc_it_security_0044#chunk_002",
+          "title": "GitLab Cryptography Standard",
+          "source": "it_security",
+          "score": 0.98050606
+        },
+        {
+          "document_id": "doc_engineering_0730",
+          "chunk_id": "doc_engineering_0730#chunk_002",
+          "title": "Compliance Standards Adherence Dashboard MVC",
+          "source": "engineering",
+          "score": 0.9829547
+        }
+      ],
+      "latency_ms": 16391.475099837407,
+      "timestamp": "2026-11-10T17:06:54.137710",
+      "success": true,
+      "relevance_score": 0.6,
+      "has_citations": true,
+      "citation_count": 6,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "CS-002",
+      "question": "How does GitLab handle employee onboarding and training?",
+      "category": "cross_doc_synthesis",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:07:41.234280",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "CS-003",
+      "question": "What are the key engineering practices and standards?",
+      "category": "cross_doc_synthesis",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:07:54.158084",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "CS-004",
+      "question": "What IT and security tools does GitLab use for employees?",
+      "category": "cross_doc_synthesis",
+      "role": "admin",
+      "answer": "GitLab employs a range of IT and security tools for employees, focusing on application security, secure design, and operational efficiency. Here’s a comprehensive overview based on the provided sources:\n\n1. **Application Security Tools**:  \n   GitLab utilizes its own [Application Security Tools](https://docs.gitlab.com/ee/user/application_security/) across various internal projects as part of its [dogfooding effort](/handbook/product/product-processes/dogfooding-for-r-d/) [doc_it_security_0183, doc_it_security_0204, doc_it_security_0202]. These tools are configured according to GitLab’s [policies](/handbook/security/product-security/security-platforms-architecture/application-security/inventory/#policies) [doc_it_security_0183, doc_it_security_0204]. The dynamic list of projects using these tools is maintained in the [GitLab AppSec Inventory](/handbook/security/product-security/security-platforms-architecture/application-security/inventory/) [doc_it_security_0183, doc_it_security_0204,",
+      "citations": [
+        {
+          "document_id": "doc_engineering_0445",
+          "chunk_id": "doc_engineering_0445#chunk_019",
+          "title": "Sec Section",
+          "source": "engineering",
+          "score": 0.9837225
+        },
+        {
+          "document_id": "doc_it_security_0193",
+          "chunk_id": "doc_it_security_0193#chunk_020",
+          "title": "Security Research",
+          "source": "it_security",
+          "score": 0.9670388
+        },
+        {
+          "document_id": "doc_general_0778",
+          "chunk_id": "doc_general_0778#chunk_006",
+          "title": "Recruitment Privacy Policy",
+          "source": "general",
+          "score": 0.92956835
+        }
+      ],
+      "latency_ms": 44030.997700057924,
+      "timestamp": "2026-11-10T17:08:11.129926",
+      "success": true,
+      "relevance_score": 0.4,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "CS-005",
+      "question": "What is GitLab's approach to work-life balance and employee well-being?",
+      "category": "cross_doc_synthesis",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:08:41.747856",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-001",
+      "question": "What restricted security policies exist?",
+      "category": "permission_boundary",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:08:54.347588",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-002",
+      "question": "What confidential contracts are in the system?",
+      "category": "permission_boundary",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 3176.3685001060367,
+      "timestamp": "2026-11-10T17:08:14.306448",
+      "success": true,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "PB-003",
+      "question": "Show me all internal engineering documents",
+      "category": "permission_boundary",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:09:14.319499",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-004",
+      "question": "What are the fault tolerance standards?",
+      "category": "permission_boundary",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 3273.405000101775,
+      "timestamp": "2026-11-10T17:08:45.021699",
+      "success": true,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "PB-005",
+      "question": "What database security policies are in place?",
+      "category": "permission_boundary",
+      "role": "admin",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:09:45.030233",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EC-001",
+      "question": "What is the stock price of Apple?",
+      "category": "edge_case",
+      "role": "admin",
+      "answer": "The sources do not provide a current stock price for Apple. However, they do offer some relevant financial information:\n\n* **[doc_finance_0075]** Apple's 10-K filing for 2025 mentions the average price paid per share during specific repurchase periods in 2025, with the latest period ending August 30, 2025, showing an average price of $210.43. This is not the current stock price but indicates a historical trading range.\n\nThe other sources ([doc_hr_0027], [doc_legal_0158], [doc_legal_0124], [doc_legal_0625]) do not contain information related to Apple's stock price.",
+      "citations": [
+        {
+          "document_id": "doc_finance_0075",
+          "chunk_id": "doc_finance_0075#chunk_010",
+          "title": "Apple 10-K (2025-09-27)",
+          "source": "finance",
+          "score": 0.51369894
+        },
+        {
+          "document_id": "doc_hr_0027",
+          "chunk_id": "doc_hr_0027#chunk_035",
+          "title": "Equity Compensation",
+          "source": "hr",
+          "score": 0.0009622126
+        },
+        {
+          "document_id": "doc_legal_0158",
+          "chunk_id": "doc_legal_0158#chunk_031",
+          "title": "Execution version",
+          "source": "legal",
+          "score": 0.0007096704
+        },
+        {
+          "document_id": "doc_legal_0124",
+          "chunk_id": "doc_legal_0124#chunk_001",
+          "title": "Exhibit 1.1",
+          "source": "legal",
+          "score": 0.0005295418
+        },
+        {
+          "document_id": "doc_legal_0625",
+          "chunk_id": "doc_legal_0625#chunk_001",
+          "title": "Exhibit 1.1",
+          "source": "legal",
+          "score": 0.0005053046
+        }
+      ],
+      "latency_ms": 33989.74019987509,
+      "timestamp": "2026-11-10T17:09:28.337780",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EC-002",
+      "question": "Who is the CEO of Microsoft?",
+      "category": "edge_case",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 5724.279000191018,
+      "timestamp": "2026-11-10T17:09:20.044045",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-003",
+      "question": "asdfghjkl",
+      "category": "edge_case",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 4400.9374000597745,
+      "timestamp": "2026-11-10T17:09:24.445118",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-004",
+      "question": "Tell me everything",
+      "category": "edge_case",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 4094.9342001695186,
+      "timestamp": "2026-11-10T17:09:28.540185",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-005",
+      "question": "What happened in 1999?",
+      "category": "edge_case",
+      "role": "admin",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 3381.6559000406414,
+      "timestamp": "2026-11-10T17:09:31.719589",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EL-001",
+      "question": "What is the cloud native tools strategy?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:10:28.558277",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-002",
+      "question": "How does the onboarding process work at GitLab?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "The onboarding process at GitLab is designed to be **self-driven, self-learning, and asynchronous**, reflecting the company’s remote work culture and values [doc_general_1522]. It is structured around a standardized set of tasks and steps documented in an **onboarding issue template**, which new hires complete in a GitLab issue [doc_general_1522].  \n\n**Key Components of Onboarding:**  \n1. **Onboarding Issue Template**: Contains sequential tasks for the first 30 days, such as setting up accounts, understanding remote work values, security compliance, and benefits [doc_general_1522].  \n2. **Documentation-Centric Approach**: GitLab’s **handbook** serves as the central repository for company processes, tools, and answers to logistical questions, ensuring information is easily accessible [doc_general_1522].  \n3. **Role-Specific Onboarding**: For roles like Data Engineers, Analysts, or Developers, a **Data Onboarding** issue is created in GitLab Data Analytics, tailored by the manager [doc_g",
+      "citations": [
+        {
+          "document_id": "doc_general_1522",
+          "chunk_id": "doc_general_1522#chunk_004",
+          "title": "The complete guide to remote onboarding for new-hires",
+          "source": "general",
+          "score": 0.99992335
+        },
+        {
+          "document_id": "doc_general_1048",
+          "chunk_id": "doc_general_1048#chunk_003",
+          "title": "Data Team Programs",
+          "source": "general",
+          "score": 0.9982522
+        },
+        {
+          "document_id": "doc_general_0922",
+          "chunk_id": "doc_general_0922#chunk_015",
+          "title": "GitLab IT Onboarding 101",
+          "source": "general",
+          "score": 0.9978002
+        },
+        {
+          "document_id": "doc_general_1344",
+          "chunk_id": "doc_general_1344#chunk_004",
+          "title": "A Day in the Life of a CSE",
+          "source": "general",
+          "score": 0.997783
+        }
+      ],
+      "latency_ms": 41877.360799815506,
+      "timestamp": "2026-11-10T17:10:13.597244",
+      "success": true,
+      "relevance_score": 0.25,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-003",
+      "question": "What are the working groups at GitLab?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:10:45.450125",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-004",
+      "question": "What is GitLab's remote work policy?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab operates as a fully remote company, empowering all team members to work from anywhere they feel most fulfilled, with no requirement for in-person meetings, even for executives [doc_general_1585]. This \"all-remote\" approach applies to all employees, including those at GitLab France S.A.S., who work remotely 100% of the time [doc_general_0763]. \n\n**Key aspects of GitLab's remote work policy include:**\n\n* **Global Reach:** GitLab employs over 1,700 team members in more than 65 countries, leveraging remote work to access a diverse talent pool [doc_general_0763].\n\n* **Flexibility:**  Remote work allows for flexible working hours, accommodating different time zones and individual preferences [doc_general_0763].\n\n* **Home-Based Work:** While not mandatory, most GitLab employees work from home offices [doc_general_1529].\n\n* **Business Continuity:** GitLab's all-remote structure inherently provides resilience.  Service-level agreements with data and service providers, along with a robust",
+      "citations": [
+        {
+          "document_id": "doc_general_1585",
+          "chunk_id": "doc_general_1585#chunk_005",
+          "title": "GitLab's Guide to All-Remote",
+          "source": "general",
+          "score": 0.9921841
+        },
+        {
+          "document_id": "doc_general_0763",
+          "chunk_id": "doc_general_0763#chunk_017",
+          "title": "GitLab France S.A.S. Remote Work Charter",
+          "source": "general",
+          "score": 0.9992267
+        },
+        {
+          "document_id": "doc_general_1529",
+          "chunk_id": "doc_general_1529#chunk_001",
+          "title": "Remote/work-from-home starter guide",
+          "source": "general",
+          "score": 0.99528164
+        },
+        {
+          "document_id": "doc_general_1641",
+          "chunk_id": "doc_general_1641#chunk_005",
+          "title": "Business Continuity Plan",
+          "source": "general",
+          "score": 0.9981828
+        },
+        {
+          "document_id": "doc_general_0766",
+          "chunk_id": "doc_general_0766#chunk_004",
+          "title": "GitLab India Private Limited Policy Against Sexual Harassment",
+          "source": "general",
+          "score": 0.9996923
+        }
+      ],
+      "latency_ms": 20992.684400174767,
+      "timestamp": "2026-11-10T17:10:34.590111",
+      "success": true,
+      "relevance_score": 0.5,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-005",
+      "question": "What are the code of conduct rules?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab's Code of Conduct encompasses several guidelines and policies that govern the behavior and interactions of team members, customers, and participants in GitLab events. Here are the key rules synthesized from the provided sources:\n\n1. **Focus on the design work, not the designer** during critique sessions [doc_general_0203].  \n2. **Communicate with respect** and avoid offensive language or behavior [doc_general_0203, doc_general_0280, doc_general_1362].  \n3. **Challenge directly while showing personal care** [doc_general_0203].  \n4. **Provide specific, actionable feedback** with reasoning [doc_general_0203].  \n5. **Practice genuine curiosity** to understand design decisions before critiquing [doc_general_0203].  \n6. **Remain open to different perspectives and approaches** [doc_general_0203].  \n7. **Receive critique openly** and be willing to let go of unsuccessful elements [doc_general_0203].  \n8. **Engage in candid conversation and spirited debate** with passion for the craft [do",
+      "citations": [
+        {
+          "document_id": "doc_general_0203",
+          "chunk_id": "doc_general_0203#chunk_014",
+          "title": "Product Designer Workflow",
+          "source": "general",
+          "score": 0.9904406
+        },
+        {
+          "document_id": "doc_general_1362",
+          "chunk_id": "doc_general_1362#chunk_002",
+          "title": "GitLab Events Code of Conduct",
+          "source": "general",
+          "score": 0.029367855
+        },
+        {
+          "document_id": "doc_general_0097",
+          "chunk_id": "doc_general_0097#chunk_015",
+          "title": "People Policies",
+          "source": "general",
+          "score": 0.11940814
+        },
+        {
+          "document_id": "doc_general_0064",
+          "chunk_id": "doc_general_0064#chunk_001",
+          "title": "Entity-Specific Employment Policies",
+          "source": "general",
+          "score": 0.14390805
+        }
+      ],
+      "latency_ms": 56821.99059985578,
+      "timestamp": "2026-11-10T17:11:25.380547",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-006",
+      "question": "What is the NIST Cybersecurity Framework?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 5632.491600001231,
+      "timestamp": "2026-11-10T17:10:40.222724",
+      "success": true,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EL-007",
+      "question": "What are the employee leave policies?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:11:40.238565",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-008",
+      "question": "What benefits are offered to employees?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab offers a range of benefits to its employees, focusing on mental health, remote work advantages, and comprehensive coverage for life's various needs. Here’s a detailed breakdown:\n\n1. **Mental Health Support**:  \n   - GitLab prioritizes mental health by offering resources to improve well-being and productivity. This includes advocacy through the Mental Health Team Member Advocacy Group (TMAG) [doc_general_1560].  \n\n2. **Remote Work Benefits**:  \n   - All-remote and remote-first models provide flexibility, increased productivity, and employee satisfaction. Employees can work from anywhere, with access to offices for in-person collaboration when desired [doc_general_1585, doc_general_1531, doc_general_1512].  \n   - Remote work also offers cost savings on office space and greater flexibility in daily life [doc_general_1512].  \n\n3. **Comprehensive Coverage**:  \n   - GitLab provides clear and accessible benefits for both everyday questions and life’s significant moments. This includes ",
+      "citations": [
+        {
+          "document_id": "doc_general_1560",
+          "chunk_id": "doc_general_1560#chunk_005",
+          "title": "GitLab Mental Health Team Member Advocacy Group (TMAG)",
+          "source": "general",
+          "score": 0.89460546
+        },
+        {
+          "document_id": "doc_general_1512",
+          "chunk_id": "doc_general_1512#chunk_020",
+          "title": "The definitive guide to all-remote work and its drawbacks",
+          "source": "general",
+          "score": 0.33350322
+        },
+        {
+          "document_id": "doc_general_0065",
+          "chunk_id": "doc_general_0065#chunk_004",
+          "title": "GitLab GmbH (Germany) information & benefits",
+          "source": "general",
+          "score": 0.49007547
+        }
+      ],
+      "latency_ms": 51089.864999987185,
+      "timestamp": "2026-11-10T17:11:36.540547",
+      "success": true,
+      "relevance_score": 0.4,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-009",
+      "question": "What is the drug-free workplace policy?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab maintains a drug-free workplace policy that prohibits the illegal use, possession, sale, or distribution of alcohol or controlled substances. This policy ensures that substances, whether legal or illegal, are not used in a way that impairs an individual's ability to perform their assigned tasks, thereby maintaining operational efficiency and ensuring proper customer service. Team members are required to comply with the local laws of their residence and any locations they travel to for company-sponsored events [doc_general_0097].",
+      "citations": [
+        {
+          "document_id": "doc_general_0097",
+          "chunk_id": "doc_general_0097#chunk_022",
+          "title": "People Policies",
+          "source": "general",
+          "score": 0.56385833
+        }
+      ],
+      "latency_ms": 8909.258199855685,
+      "timestamp": "2026-11-10T17:11:34.289937",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 1,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-010",
+      "question": "What is the security incident response process?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "The security incident response process at GitLab involves several key steps and teams to ensure a coordinated and efficient response. Here’s a comprehensive overview based on the provided sources:\n\n1. **Initial Detection and Reporting**:  \n   - If a security incident is suspected, immediate actions are required, such as changing passwords and revoking active sessions [doc_general_0930].  \n   - Notify the GitLab Security team via Slack (`#security-help` channel) or follow the [Security Incident Response procedure] [doc_general_0930].  \n\n2. **Engagement of the Security Incident Response Team (SIRT)**:  \n   - The SIRT is responsible for triaging and facilitating remediation during security incidents [doc_general_0659].  \n   - SIRT provides security expertise, determines information disclosure restrictions, guides support messaging, and reviews customer communications [doc_general_0124].  \n\n3. **Incident Triage and Response**:  \n   - The Support Leader on the Hook (SLOTH) acts as a notific",
+      "citations": [
+        {
+          "document_id": "doc_general_0930",
+          "chunk_id": "doc_general_0930#chunk_009",
+          "title": "Reclaim.ai",
+          "source": "general",
+          "score": 0.83642095
+        },
+        {
+          "document_id": "doc_general_0659",
+          "chunk_id": "doc_general_0659#chunk_007",
+          "title": "AI Continuity Plan",
+          "source": "general",
+          "score": 0.9974191
+        },
+        {
+          "document_id": "doc_general_0124",
+          "chunk_id": "doc_general_0124#chunk_018",
+          "title": "Support Incident Response Framework",
+          "source": "general",
+          "score": 0.99486035
+        },
+        {
+          "document_id": "doc_general_0440",
+          "chunk_id": "doc_general_0440#chunk_012",
+          "title": "How to be a Support Leader on the Hook (SLOTH 🦥)",
+          "source": "general",
+          "score": 0.45301983
+        },
+        {
+          "document_id": "doc_general_0371",
+          "chunk_id": "doc_general_0371#chunk_013",
+          "title": "Emergency Exception Workflow",
+          "source": "general",
+          "score": 0.8318272
+        }
+      ],
+      "latency_ms": 11264.847599901259,
+      "timestamp": "2026-11-10T17:11:45.564630",
+      "success": true,
+      "relevance_score": 0.75,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-011",
+      "question": "What are the laptop security configuration standards?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:12:36.557873",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EL-012",
+      "question": "What is the Okta Verify setup process?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "The Okta Verify setup process involves several steps across different devices and scenarios, as outlined in the provided sources. Here’s a comprehensive guide:\n\n### **Manual Setup (General)** [doc_general_0921]:\n1. **Prerequisite**: Ensure you have an Okta passkey saved on your phone.\n2. **Download App**: Download the Okta Verify app from the App Store (Apple) or Play Store (Android).\n3. **Open App**: Open the Okta Verify app.  \n   - If first-time use: Select **Get started** and proceed until the **Choose account type** screen.  \n   - If used before: Press the **+** button near the top.\n4. **Account Type**: Select **Organization** and then **Skip**.\n5. **Sign In**: Select **No, Sign in Instead**, enter **gitlab.okta.com** as the Organization's sign-in URL, and sign in with your Okta credentials.\n6. **Enable Touch ID**: Agree to the terms and enable Touch ID [doc_general_0921].\n\n### **QR Code Setup (General)** [doc_general_0921]:\n1. **Laptop**: Click the Okta Verify icon near the batter",
+      "citations": [
+        {
+          "document_id": "doc_general_0921",
+          "chunk_id": "doc_general_0921#chunk_005",
+          "title": "GitLab IT - Mobile Device Onboarding",
+          "source": "general",
+          "score": 0.99993396
+        },
+        {
+          "document_id": "doc_general_0922",
+          "chunk_id": "doc_general_0922#chunk_009",
+          "title": "GitLab IT Onboarding 101",
+          "source": "general",
+          "score": 0.9972638
+        }
+      ],
+      "latency_ms": 27539.730100193992,
+      "timestamp": "2026-11-10T17:12:07.778768",
+      "success": true,
+      "relevance_score": 0.5,
+      "has_citations": true,
+      "citation_count": 2,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-013",
+      "question": "What is GitLab's approach to automated dependency updates?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab's approach to automated dependency updates is multifaceted, focusing on security, integration, and open-source contributions. Here’s a comprehensive overview based on the provided sources:\n\n1. **Dependency Scanning and Security**:  \n   GitLab offers built-in **Dependency Scanning** to identify vulnerabilities in project dependencies. This feature is integrated into GitLab CI/CD pipelines and can be configured using a dedicated template [doc_general_0495]. The scanning results are accessible via the GitLab.com label `~\"group::composition analysis\"` and documented at [https://docs.gitlab.com/user/application_security/dependency_scanning/](https://docs.gitlab.com/user/application_security/dependency_scanning/) [doc_general_0495].\n\n2. **Open Core Model and Dependency Upgrades**:  \n   GitLab Inc. maintains an **open core business model**, which includes managing dependency upgrades (e.g., Rails, gems) as part of its stewardship of the GitLab platform. These upgrades are part of the m",
+      "citations": [
+        {
+          "document_id": "doc_general_0495",
+          "chunk_id": "doc_general_0495#chunk_010",
+          "title": "Sec Support Pod",
+          "source": "general",
+          "score": 0.17133833
+        },
+        {
+          "document_id": "doc_general_0039",
+          "chunk_id": "doc_general_0039#chunk_006",
+          "title": "Our stewardship of GitLab",
+          "source": "general",
+          "score": 0.07850098
+        },
+        {
+          "document_id": "doc_general_1207",
+          "chunk_id": "doc_general_1207#chunk_003",
+          "title": "Professional Services EM Scoping - CI/CD Pipeline Migration",
+          "source": "general",
+          "score": 0.9803562
+        },
+        {
+          "document_id": "doc_general_0762",
+          "chunk_id": "doc_general_0762#chunk_016",
+          "title": "Advantages of a single application",
+          "source": "general",
+          "score": 0.13939638
+        },
+        {
+          "document_id": "doc_general_0965",
+          "chunk_id": "doc_general_0965#chunk_001",
+          "title": "Claude",
+          "source": "general",
+          "score": 0.05042407
+        }
+      ],
+      "latency_ms": 16989.470400149003,
+      "timestamp": "2026-11-10T17:12:02.554500",
+      "success": true,
+      "relevance_score": 0.75,
+      "has_citations": true,
+      "citation_count": 5,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-014",
+      "question": "What are the product principles at GitLab?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "GitLab's product principles encompass several key areas, including strategy, philosophy, and specific guidelines for product development. Here’s a comprehensive overview based on the provided sources:\n\n1. **Product Principles Overview**: The [Product Principles](/handbook/product/product-principles/) section outlines GitLab's strategy and philosophy regarding product development, emphasizing the company's approach to building and improving products [doc_general_0099].\n\n2. **Component Principles**: GitLab acknowledges that certain optional software or infrastructure components are necessary to enable new capabilities. Examples include Runners for GitLab CI/CD, Elasticsearch for Advanced Search, and the Kubernetes Agent for GitOps pull-based workflows. Best practices for building such components are considered to ensure seamless integration and functionality [doc_general_0098].\n\n3. **Design Principles**: GitLab aims for **sophisticated simplicity** in product design, balancing structure,",
+      "citations": [
+        {
+          "document_id": "doc_general_0099",
+          "chunk_id": "doc_general_0099#chunk_007",
+          "title": "Product Handbook",
+          "source": "general",
+          "score": 0.9998634
+        },
+        {
+          "document_id": "doc_general_0098",
+          "chunk_id": "doc_general_0098#chunk_038",
+          "title": "Product Principles",
+          "source": "general",
+          "score": 0.99696034
+        },
+        {
+          "document_id": "doc_general_0187",
+          "chunk_id": "doc_general_0187#chunk_003",
+          "title": "Product Design",
+          "source": "general",
+          "score": 0.99273914
+        },
+        {
+          "document_id": "doc_general_0142",
+          "chunk_id": "doc_general_0142#chunk_122",
+          "title": "GitLab Values",
+          "source": "general",
+          "score": 0.9969126
+        },
+        {
+          "document_id": "doc_general_1424",
+          "chunk_id": "doc_general_1424#chunk_002",
+          "title": "High Performing Teams and Product Division",
+          "source": "general",
+          "score": 0.9940428
+        },
+        {
+          "document_id": "doc_general_0124",
+          "chunk_id": "doc_general_0124#chunk_005",
+          "title": "Support Incident Response Framework",
+          "source": "general",
+          "score": 0.9881309
+        }
+      ],
+      "latency_ms": 48750.21440000273,
+      "timestamp": "2026-11-10T17:12:51.305211",
+      "success": true,
+      "relevance_score": 0.5,
+      "has_citations": true,
+      "citation_count": 6,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "EL-015",
+      "question": "What is the Duo messaging service architecture?",
+      "category": "easy_lookup",
+      "role": "intern",
+      "answer": "The provided sources do not contain information about the Duo messaging service architecture. They primarily cover GitLab Duo's features, use cases, and related platforms such as the Duo Agent Platform [doc_general_0273, doc_general_0251, doc_general_1378], data insights [doc_general_0746], issue reporting [doc_general_0600], and support initiatives [doc_general_0478]. If you have questions about GitLab Duo's functionality or related processes, feel free to ask.",
+      "citations": [
+        {
+          "document_id": "doc_general_0746",
+          "chunk_id": "doc_general_0746#chunk_024",
+          "title": "Product Data Insights Data Models Cheat Sheet",
+          "source": "general",
+          "score": 0.5261754
+        },
+        {
+          "document_id": "doc_general_0600",
+          "chunk_id": "doc_general_0600#chunk_001",
+          "title": "DAP Rapid — Field Issue Reporting",
+          "source": "general",
+          "score": 0.19790912
+        },
+        {
+          "document_id": "doc_general_0478",
+          "chunk_id": "doc_general_0478#chunk_002",
+          "title": "AI Support Pod",
+          "source": "general",
+          "score": 0.007204769
+        }
+      ],
+      "latency_ms": 22842.50929998234,
+      "timestamp": "2026-11-10T17:12:30.621512",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "CS-001",
+      "question": "What security frameworks and standards does GitLab follow?",
+      "category": "cross_doc_synthesis",
+      "role": "intern",
+      "answer": "GitLab adheres to several security frameworks and standards to ensure robust data protection and compliance. Here’s a comprehensive overview based on the provided sources:\n\n1. **SAFE Framework**: GitLab Legal has developed the SAFE framework to guide team members on determining which information is internal-only and which can be shared publicly. This framework helps comply with Regulation Fair Disclosure [doc_general_0694]. The Data Team also follows the SAFE Framework for handling SAFE Data, sometimes referred to as `MNPI` and `RESTRICTED_SAFE` [doc_general_1029]. Support Engineers are required to think through confidentiality levels and the SAFE framework when working in public environments [doc_general_0357].\n\n2. **Infrastructure Standards**: GitLab maintains comprehensive infrastructure and security standards, including Access Requests, AWS and GCP Cloud Provider Architectures, Infrastructure-as-Code (Terraform, Ansible), Labels and Tags, and Security Standards (Application Securit",
+      "citations": [
+        {
+          "document_id": "doc_general_0694",
+          "chunk_id": "doc_general_0694#chunk_003",
+          "title": "Product Manager SAFE Guidance",
+          "source": "general",
+          "score": 0.9910493
+        },
+        {
+          "document_id": "doc_general_1029",
+          "chunk_id": "doc_general_1029#chunk_002",
+          "title": "SAFE Data Guide",
+          "source": "general",
+          "score": 0.9737447
+        },
+        {
+          "document_id": "doc_general_0357",
+          "chunk_id": "doc_general_0357#chunk_003",
+          "title": "Handling data as a Support Engineer",
+          "source": "general",
+          "score": 0.8200375
+        },
+        {
+          "document_id": "doc_general_1370",
+          "chunk_id": "doc_general_1370#chunk_001",
+          "title": "Infrastructure Standards",
+          "source": "general",
+          "score": 0.9899087
+        },
+        {
+          "document_id": "doc_general_0660",
+          "chunk_id": "doc_general_0660#chunk_007",
+          "title": "GitLab Model Vendor Selection Guidelines",
+          "source": "general",
+          "score": 0.97800976
+        },
+        {
+          "document_id": "doc_general_0778",
+          "chunk_id": "doc_general_0778#chunk_006",
+          "title": "Recruitment Privacy Policy",
+          "source": "general",
+          "score": 0.94024336
+        }
+      ],
+      "latency_ms": 21700.983500108123,
+      "timestamp": "2026-11-10T17:12:52.322870",
+      "success": true,
+      "relevance_score": 0.8,
+      "has_citations": true,
+      "citation_count": 6,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "CS-002",
+      "question": "How does GitLab handle employee onboarding and training?",
+      "category": "cross_doc_synthesis",
+      "role": "intern",
+      "answer": "GitLab's onboarding process is designed to be **self-driven, asynchronous, and remote-friendly**, leveraging their own collaboration tool and comprehensive documentation [doc_general_1522]. \n Here's a breakdown:\n\n**Process & Structure:**\n\n* **GitLab Issues:** Onboarding tasks are completed within a standardized **GitLab issue template**, ensuring consistency and structure [doc_general_1522]. This issue acts as a central hub for the onboarding journey.\n\n* **Self-Driven & Asynchronous:**  New hires are encouraged to progress through onboarding at their own pace, utilizing GitLab's **self-learning philosophy** and **asynchronous communication** principles [doc_general_1522].\n\n* **Sequential Tasks:** The first thirty days are structured with a sequence of tasks, covering essential areas like accounts, paperwork, remote work values, security, compliance, and benefits [doc_general_1522].\n\n**Key Components:**\n\n* **Handbook:** GitLab's extensive **handbook** serves as the **single source of tr",
+      "citations": [
+        {
+          "document_id": "doc_general_1522",
+          "chunk_id": "doc_general_1522#chunk_004",
+          "title": "The complete guide to remote onboarding for new-hires",
+          "source": "general",
+          "score": 0.99780875
+        },
+        {
+          "document_id": "doc_general_1646",
+          "chunk_id": "doc_general_1646#chunk_009",
+          "title": "Acquisition Integration",
+          "source": "general",
+          "score": 0.99553156
+        },
+        {
+          "document_id": "doc_general_0549",
+          "chunk_id": "doc_general_0549#chunk_003",
+          "title": "Becoming and Being an ASE",
+          "source": "general",
+          "score": 0.9944666
+        }
+      ],
+      "latency_ms": 12904.613499995321,
+      "timestamp": "2026-11-10T17:12:49.462826",
+      "success": true,
+      "relevance_score": 0.5,
+      "has_citations": true,
+      "citation_count": 3,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "CS-003",
+      "question": "What are the key engineering practices and standards?",
+      "category": "cross_doc_synthesis",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 4906.6206000279635,
+      "timestamp": "2026-11-10T17:12:54.369672",
+      "success": true,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "CS-004",
+      "question": "What IT and security tools does GitLab use for employees?",
+      "category": "cross_doc_synthesis",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:13:51.316809",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "CS-005",
+      "question": "What is GitLab's approach to work-life balance and employee well-being?",
+      "category": "cross_doc_synthesis",
+      "role": "intern",
+      "answer": "GitLab prioritizes work-life balance and employee well-being through a combination of remote work policies, asynchronous communication, and a focus on empathy and mental health.\n\n**Remote Work & Flexibility:**\n GitLab is a fully remote company, allowing employees to work from anywhere in the world with flexible hours [doc_general_0763, doc_general_0779]. This eliminates commute time and provides autonomy over work schedules, contributing to a better work-life balance.\n A dedicated \"Remote Work Charter\" outlines guidelines for remote work within GitLab France S.A.S., ensuring compliance with legal frameworks and promoting a healthy remote work environment [doc_general_0763].\n\n**Asynchronous Communication:** GitLab emphasizes asynchronous communication through tools like GitLab itself, reducing reliance on constant chat notifications and meetings [doc_general_1520]. This allows for focused work periods and prevents burnout caused by constant interruptions.\n\n**Empathy & Mental Health:**\n ",
+      "citations": [
+        {
+          "document_id": "doc_general_0763",
+          "chunk_id": "doc_general_0763#chunk_017",
+          "title": "GitLab France S.A.S. Remote Work Charter",
+          "source": "general",
+          "score": 0.87418467
+        },
+        {
+          "document_id": "doc_general_1520",
+          "chunk_id": "doc_general_1520#chunk_012",
+          "title": "Combating burnout, isolation, and anxiety in the remote workplace",
+          "source": "general",
+          "score": 0.11636177
+        },
+        {
+          "document_id": "doc_general_1510",
+          "chunk_id": "doc_general_1510#chunk_004",
+          "title": "How to be a great remote manager - the complete guide",
+          "source": "general",
+          "score": 0.11797801
+        },
+        {
+          "document_id": "doc_general_1557",
+          "chunk_id": "doc_general_1557#chunk_002",
+          "title": "Neurodivergence and NeuroInclusion at GitLab",
+          "source": "general",
+          "score": 0.87525487
+        }
+      ],
+      "latency_ms": 52939.55689994618,
+      "timestamp": "2026-11-10T17:13:45.262700",
+      "success": true,
+      "relevance_score": 0.6,
+      "has_citations": true,
+      "citation_count": 4,
+      "refused": false,
+      "error": null
+    },
+    {
+      "question_id": "PB-001",
+      "question": "What restricted security policies exist?",
+      "category": "permission_boundary",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:13:54.381448",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-002",
+      "question": "What confidential contracts are in the system?",
+      "category": "permission_boundary",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 8600.139599991962,
+      "timestamp": "2026-11-10T17:13:53.863059",
+      "success": true,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "PB-003",
+      "question": "Show me all internal engineering documents",
+      "category": "permission_boundary",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:14:51.837638",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-004",
+      "question": "What are the fault tolerance standards?",
+      "category": "permission_boundary",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:14:53.877218",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "PB-005",
+      "question": "What database security policies are in place?",
+      "category": "permission_boundary",
+      "role": "intern",
+      "answer": "",
+      "citations": [],
+      "latency_ms": 0,
+      "timestamp": "2026-11-10T17:14:54.594893",
+      "success": false,
+      "relevance_score": 0.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": false,
+      "error": ""
+    },
+    {
+      "question_id": "EC-001",
+      "question": "What is the stock price of Apple?",
+      "category": "edge_case",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 6035.531800007448,
+      "timestamp": "2026-11-10T17:14:57.873780",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-002",
+      "question": "Who is the CEO of Microsoft?",
+      "category": "edge_case",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 6718.276199884713,
+      "timestamp": "2026-11-10T17:15:00.595688",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-003",
+      "question": "asdfghjkl",
+      "category": "edge_case",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 6135.390300070867,
+      "timestamp": "2026-11-10T17:15:00.730829",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-004",
+      "question": "Tell me everything",
+      "category": "edge_case",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 6338.808799860999,
+      "timestamp": "2026-11-10T17:15:04.212789",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    },
+    {
+      "question_id": "EC-005",
+      "question": "What happened in 1999?",
+      "category": "edge_case",
+      "role": "intern",
+      "answer": "I couldn't find anything relevant in your authorized documents for that question. Try rephrasing it with more specific terms, such as the exact policy name or topic.",
+      "citations": [],
+      "latency_ms": 7512.842399999499,
+      "timestamp": "2026-11-10T17:15:08.108698",
+      "success": true,
+      "relevance_score": 1.0,
+      "has_citations": false,
+      "citation_count": 0,
+      "refused": true,
+      "error": null
+    }
+  ]
+}
