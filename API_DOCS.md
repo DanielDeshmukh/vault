@@ -7,21 +7,47 @@
 
 ## Quick Start
 
-Get a token and ask a question in 2 commands:
+Get a token and ask a question in 2 commands. Examples work on **Windows CMD**, **PowerShell**, and **Linux/macOS bash**.
+
+### Windows CMD
+
+```cmd
+:: 1. Login and save token
+curl.exe -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}" > login.json
+
+:: Extract the token (copy the access_token value from login.json, or use PowerShell below)
+set TOKEN=eyJhbGciOiJIUzI1NiIs...
+
+:: 2. Query
+curl.exe -s -X POST https://vault-rbac-rag.vercel.app/api/query -H "Content-Type: application/json" -H "Authorization: Bearer %TOKEN%" -d "{\"question\":\"What is the cloud native tools strategy?\"}"
+```
+
+### PowerShell
+
+```powershell
+# 1. Login
+$response = Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@vaultdemo.com","password":"Vault2026!"}'
+$TOKEN = $response.access_token
+
+# 2. Query
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $TOKEN"} -Body '{"question":"What is the cloud native tools strategy?"}' | ConvertTo-Json
+```
+
+### Linux / macOS (Bash)
 
 ```bash
 # 1. Login
 TOKEN=$(curl -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@vaultdemo.com","password":"Vault2026!"}' \
-  | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
 # 2. Query
 curl -s https://vault-rbac-rag.vercel.app/api/query \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"question":"What is the cloud native tools strategy?"}' \
-  | python -m json.tool
+  | python3 -m json.tool
 ```
 
 ---
@@ -60,7 +86,17 @@ All demo accounts use the password: **`Vault2026!`**
 
 **Auth:** Not required
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/health
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/health"
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/health
 ```
@@ -81,7 +117,17 @@ curl https://vault-rbac-rag.vercel.app/api/health
 
 **Auth:** Not required
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@vaultdemo.com","password":"Vault2026!"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
   -H "Content-Type: application/json" \
@@ -110,7 +156,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
 
 **Auth:** Not required
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/auth/register -H "Content-Type: application/json" -d "{\"email\":\"newuser@example.com\",\"password\":\"SecurePass123!\",\"full_name\":\"Jane Doe\",\"department\":\"Engineering\",\"requested_role\":\"employee\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/register" -Method Post -ContentType "application/json" -Body '{"email":"newuser@example.com","password":"SecurePass123!","full_name":"Jane Doe","department":"Engineering","requested_role":"employee"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/auth/register \
   -H "Content-Type: application/json" \
@@ -147,7 +203,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/auth/register \
 
 **Auth:** Required (Bearer token)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/auth/me -H "Authorization: Bearer %TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/me" -Headers @{"Authorization"="Bearer $TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/auth/me \
   -H "Authorization: Bearer $TOKEN"
@@ -189,7 +255,17 @@ curl https://vault-rbac-rag.vercel.app/api/auth/me \
 
 **Auth:** Required (Bearer token)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/query -H "Content-Type: application/json" -H "Authorization: Bearer %TOKEN%" -d "{\"question\":\"What is the cloud native tools strategy?\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $TOKEN"} -Body '{"question":"What is the cloud native tools strategy?"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/query \
   -H "Content-Type: application/json" \
@@ -259,7 +335,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/query \
 
 **Auth:** Required (Intern Bearer token)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/query -H "Content-Type: application/json" -H "Authorization: Bearer %INTERN_TOKEN%" -d "{\"question\":\"What are the working groups?\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $INTERN_TOKEN"} -Body '{"question":"What are the working groups?"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/query \
   -H "Content-Type: application/json" \
@@ -306,7 +392,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/query \
 
 Streams the answer as Server-Sent Events (SSE).
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -N -X POST https://vault-rbac-rag.vercel.app/api/query/stream -H "Content-Type: application/json" -H "Authorization: Bearer %TOKEN%" -d "{\"question\":\"What is the cloud native tools strategy?\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query/stream" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $TOKEN"} -Body '{"question":"What is the cloud native tools strategy?"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -N -X POST https://vault-rbac-rag.vercel.app/api/query/stream \
   -H "Content-Type: application/json" \
@@ -332,7 +428,17 @@ data: {"type": "done", "trace_id": "81517e9c-b265-4022-bb8f-37575ac8c67d"}
 
 **Auth:** Required (Bearer token) — returns 404 if you don't own the trace (admins can read any trace)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/query/trace/81517e9c-b265-4022-bb8f-37575ac8c67d -H "Authorization: Bearer %TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query/trace/81517e9c-b265-4022-bb8f-37575ac8c67d" -Headers @{"Authorization"="Bearer $TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/query/trace/81517e9c-b265-4022-bb8f-37575ac8c67d \
   -H "Authorization: Bearer $TOKEN"
@@ -388,7 +494,17 @@ curl https://vault-rbac-rag.vercel.app/api/query/trace/81517e9c-b265-4022-bb8f-3
 
 **Query params:** `limit` (default 20), `offset` (default 0)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe "https://vault-rbac-rag.vercel.app/api/documents?limit=5" -H "Authorization: Bearer %TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/documents?limit=5" -Headers @{"Authorization"="Bearer $TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl "https://vault-rbac-rag.vercel.app/api/documents?limit=5" \
   -H "Authorization: Bearer $TOKEN"
@@ -462,7 +578,17 @@ curl "https://vault-rbac-rag.vercel.app/api/documents?limit=5" \
 
 **Auth:** Required (Bearer token)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/documents/ffe60a68-886d-49f4-83f9-c1f7475cf028 -H "Authorization: Bearer %TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/documents/ffe60a68-886d-49f4-83f9-c1f7475cf028" -Headers @{"Authorization"="Bearer $TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/documents/ffe60a68-886d-49f4-83f9-c1f7475cf028 \
   -H "Authorization: Bearer $TOKEN"
@@ -490,7 +616,17 @@ curl https://vault-rbac-rag.vercel.app/api/documents/ffe60a68-886d-49f4-83f9-c1f
 
 **Auth:** Required (Admin only)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X DELETE https://vault-rbac-rag.vercel.app/api/documents/{document_id} -H "Authorization: Bearer %ADMIN_TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/documents/{document_id}" -Method Delete -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl -X DELETE https://vault-rbac-rag.vercel.app/api/documents/{document_id} \
   -H "Authorization: Bearer $ADMIN_TOKEN"
@@ -511,7 +647,17 @@ curl -X DELETE https://vault-rbac-rag.vercel.app/api/documents/{document_id} \
 
 Uploads a file for ingestion into the knowledge base.
 
-**cURL (multipart):**
+**cURL (Windows CMD — multipart):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/ingest -H "Authorization: Bearer %ADMIN_TOKEN%" -F "file=@C:\path\to\document.md" -F "department=engineering" -F "classification=internal"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/ingest" -Method Post -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"} -Form @{file=(Get-Item "C:\path\to\document.md"); department="engineering"; classification="internal"}
+```
+
+**cURL (Bash — multipart):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/ingest \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
@@ -526,7 +672,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/ingest \
 
 Ingest content directly via JSON body.
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST https://vault-rbac-rag.vercel.app/api/ingest/direct -H "Content-Type: application/json" -H "Authorization: Bearer %ADMIN_TOKEN%" -d "{\"title\":\"My Document\",\"content\":\"Document content here...\",\"source\":\"manual\",\"department\":\"general\",\"classification\":\"internal\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/ingest/direct" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"} -Body '{"title":"My Document","content":"Document content here...","source":"manual","department":"general","classification":"internal"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST https://vault-rbac-rag.vercel.app/api/ingest/direct \
   -H "Content-Type: application/json" \
@@ -546,7 +702,17 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/ingest/direct \
 
 Test a connector configuration before full ingestion.
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X POST "https://vault-rbac-rag.vercel.app/api/ingest/test-connector?source=jira" -H "Content-Type: application/json" -H "Authorization: Bearer %ADMIN_TOKEN%" -d "{\"jira_url\":\"https://your-company.atlassian.net\",\"jira_email\":\"user@company.com\",\"jira_token\":\"your-api-token\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/ingest/test-connector?source=jira" -Method Post -ContentType "application/json" -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"} -Body '{"jira_url":"https://your-company.atlassian.net","jira_email":"user@company.com","jira_token":"your-api-token"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X POST "https://vault-rbac-rag.vercel.app/api/ingest/test-connector?source=jira" \
   -H "Content-Type: application/json" \
@@ -568,7 +734,17 @@ curl -X POST "https://vault-rbac-rag.vercel.app/api/ingest/test-connector?source
 
 **Auth:** Required (Admin only) — returns 403 for non-admins
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/admin/users -H "Authorization: Bearer %ADMIN_TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/admin/users" -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/admin/users \
   -H "Authorization: Bearer $ADMIN_TOKEN"
@@ -631,7 +807,17 @@ curl https://vault-rbac-rag.vercel.app/api/admin/users \
 
 **Auth:** Required (Admin only)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe https://vault-rbac-rag.vercel.app/api/admin/roles -H "Authorization: Bearer %ADMIN_TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/admin/roles" -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl https://vault-rbac-rag.vercel.app/api/admin/roles \
   -H "Authorization: Bearer $ADMIN_TOKEN"
@@ -659,7 +845,17 @@ curl https://vault-rbac-rag.vercel.app/api/admin/roles \
 
 **Auth:** Required (Admin only)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/approve -H "Authorization: Bearer %ADMIN_TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/approve" -Method Put -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/approve \
   -H "Authorization: Bearer $ADMIN_TOKEN"
@@ -669,7 +865,17 @@ curl -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/approve 
 
 **Auth:** Required (Admin only)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/role -H "Content-Type: application/json" -H "Authorization: Bearer %ADMIN_TOKEN%" -d "{\"role\":\"engineer\"}"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/role" -Method Put -ContentType "application/json" -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"} -Body '{"role":"engineer"}'
+```
+
+**cURL (Bash):**
 ```bash
 curl -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/role \
   -H "Content-Type: application/json" \
@@ -681,7 +887,17 @@ curl -X PUT https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}/role \
 
 **Auth:** Required (Admin only)
 
-**cURL:**
+**cURL (Windows CMD):**
+```cmd
+curl.exe -X DELETE https://vault-rbac-rag.vercel.app/api/admin/users/{user_id} -H "Authorization: Bearer %ADMIN_TOKEN%"
+```
+
+**cURL (PowerShell):**
+```powershell
+Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/admin/users/{user_id}" -Method Delete -Headers @{"Authorization"="Bearer $ADMIN_TOKEN"}
+```
+
+**cURL (Bash):**
 ```bash
 curl -X DELETE https://vault-rbac-rag.vercel.app/api/admin/users/{user_id} \
   -H "Authorization: Bearer $ADMIN_TOKEN"
