@@ -76,6 +76,7 @@ OTHER_PROTECTED = [
     ("GET", "/api/auth/me", None),
     ("GET", "/api/documents", None),
     ("GET", f"/api/documents/{PH}", None),
+    ("GET", f"/api/documents/chunk/{PH}", None),
     ("DELETE", f"/api/documents/{PH}", None),
     ("GET", f"/api/query/trace/{PH}", None),
 ]
@@ -96,6 +97,7 @@ EXPECTED_ROUTE_TEMPLATES = {
     ("GET", "/api/query/trace/{trace_id}"),
     ("GET", "/api/documents"),
     ("GET", "/api/documents/{document_id}"),
+    ("GET", "/api/documents/chunk/{chunk_id}"),
     ("DELETE", "/api/documents/{document_id}"),
     ("POST", "/api/ingest"),
     ("POST", "/api/ingest/direct"),

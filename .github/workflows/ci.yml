@@ -69,7 +69,7 @@ jobs:
           --health-retries 5
 
     env:
-      PYTHONPATH: ${{ github.workspace }}/server
+      PYTHONPATH: ${{ github.workspace }}/server:${{ github.workspace }}
       DATABASE_URL: postgresql+asyncpg://vault_test:test_password@localhost:5432/vault_test
       JWT_SECRET_KEY: test-secret-key-for-ci
       # Live-service tests (tests/security/test_permission_leakage.py) run only
