@@ -15,6 +15,8 @@ const SOURCES = [
   { n: "Policies", d: "Company docs, SOPs, compliance" },
   { n: "CSV Upload", d: "CRM exports, spreadsheets, datasets" },
 ];
+// Current demo corpus: 4,879 GitLab handbook documents ingested via CSV upload.
+// All 7 connectors are implemented; the demo uses the handbook corpus for evaluation.
 
 const FEATURES = [
   {
@@ -40,12 +42,12 @@ const FEATURES = [
   {
     k: "05",
     t: "Full trace logging",
-    d: "User, scope, chunks with scores, answer, latency. SOC 2 and HIPAA auditors get the whole story.",
+    d: "User, scope, chunks with scores, answer, latency. Every query is traced for audit — supports compliance requirements.",
   },
   {
     k: "06",
-    t: "Account-scoped access",
-    d: "Support agents see their assigned customers. Document-level overrides handle the exceptions.",
+    t: "Role-based access control",
+    d: "8 roles from intern to admin. Each role sees only its authorized departments. Deny by default, grant explicitly.",
   },
 ];
 
@@ -57,7 +59,7 @@ const USECASES = [
 ];
 
 const METRICS = [
-  { v: "0.0", l: "Unauthorized leakage rate", s: "Non-negotiable. Exactly zero." },
+  { v: "0.0", l: "Unauthorized leakage rate", s: "Tested across all roles. Pre-retrieval filtering prevents leaks." },
   { v: "50", l: "Golden-set questions", s: "Lookups, synthesis, conflicts, stale data, refusals, adversarial." },
   { v: "7", l: "Source connectors", s: "One unified permission model." },
   { v: "8", l: "Corpus roles", s: "Intern \u2192 admin. Deny by default; each role sees only its departments." },
@@ -65,7 +67,7 @@ const METRICS = [
 
 const TECH = ["Cohere Command", "NVIDIA NIM Embeddings", "Cohere Rerank", "Pinecone", "PostgreSQL", "FastAPI", "Python 3.12", "MIT License"];
 
-const MARQUEE = ["PERMISSION BEFORE RETRIEVAL", "CITED OR REFUSED", "LEAKAGE = 0.0", "ROLE-BASED ACCESS", "FULL AUDIT TRAIL", "PRE-RETRIEVAL FILTERING"];
+const MARQUEE = ["PERMISSION BEFORE RETRIEVAL", "CITED OR REFUSED", "ROLE-BASED ACCESS", "FULL AUDIT TRAIL", "PRE-RETRIEVAL FILTERING", "7 CONNECTORS"];
 
 const API_ENDPOINTS = [
   {
@@ -73,26 +75,25 @@ const API_ENDPOINTS = [
     path: "/api/query",
     auth: true,
     request: `{
-  "question": "What did we promise Acme Corp in the last renewal call?",
-  "context": "optional conversation history"
+  "question": "What is the cloud native tools strategy?"
 }`,
     response: `{
-  "answer": "On the Mar 14 renewal call, we committed to (1) a 99.95% uptime SLA upgrade at no cost [1], (2) dedicated Slack Connect channel by Q2 [2], and (3) a 12-month price lock confirmed in Amendment #3 [3].",
+  "answer": "The provided sources cover SaaS usage, customer health scoring, cost metrics, data visualization, team operating principles, and innovation competitions... [doc_general_1113, doc_general_1098, doc_engineering_0143]",
   "citations": [
     {
-      "document_id": "doc_8f2a9c1e",
-      "title": "acme_renewal_call_0314",
-      "source": "gong",
-      "score": 0.94
+      "document_id": "doc_general_1113",
+      "title": "Freemium SaaS Usage Data",
+      "source": "general",
+      "score": 0.8135
     },
     {
-      "document_id": "doc_3b7d4e2f",
-      "title": "Acme Amendment #3",
-      "source": "confluence",
-      "score": 0.91
+      "document_id": "doc_engineering_0143",
+      "title": "Group Cost Metrics",
+      "source": "engineering",
+      "score": 0.8135
     }
   ],
-  "trace_id": "7f3a-c21e-9b4d"
+  "trace_id": "81517e9c-b265-4022-bb8f-37575ac8c67d"
 }`,
   },
   {
@@ -100,21 +101,21 @@ const API_ENDPOINTS = [
     path: "/api/auth/register",
     auth: false,
     request: `{
-  "email": "j.rivera@globex.com",
-  "password": "s3cureP@ss",
-  "full_name": "Juan Rivera",
-  "department": "Customer Success",
-  "requested_role": "manager"
+  "email": "newuser@example.com",
+  "password": "SecurePass123!",
+  "full_name": "Jane Doe",
+  "department": "Engineering",
+  "requested_role": "employee"
 }`,
     response: `{
-  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
   "token_type": "bearer",
   "user": {
-    "id": "usr_a1b2c3d4",
-    "email": "j.rivera@globex.com",
-    "full_name": "Juan Rivera",
-    "department": "Customer Success",
-    "requested_role": "manager",
+    "id": "93905154-41af-4bbd-bcc2-222aec56018e",
+    "email": "newuser@example.com",
+    "full_name": "Jane Doe",
+    "department": "Engineering",
+    "requested_role": "employee",
     "is_admin": false,
     "is_approved": false,
     "approval_screen_started_at": null
@@ -126,21 +127,21 @@ const API_ENDPOINTS = [
     path: "/api/auth/login",
     auth: false,
     request: `{
-  "email": "j.rivera@globex.com",
-  "password": "s3cureP@ss"
+  "email": "admin@vaultdemo.com",
+  "password": "Vault2026!"
 }`,
     response: `{
-  "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
   "token_type": "bearer",
   "user": {
-    "id": "usr_a1b2c3d4",
-    "email": "j.rivera@globex.com",
-    "full_name": "Juan Rivera",
-    "department": "Customer Success",
-    "requested_role": "manager",
-    "is_admin": false,
+    "id": "cdc8aff8-537d-40e5-9879-e3b8f4d63d75",
+    "email": "admin@vaultdemo.com",
+    "full_name": "Sarah Chen",
+    "department": "Administration",
+    "requested_role": null,
+    "is_admin": true,
     "is_approved": true,
-    "approval_screen_started_at": null
+    "approval_screen_started_at": "2026-10-18T05:40:14.481072"
   }
 }`,
   },
@@ -149,11 +150,9 @@ const API_ENDPOINTS = [
     path: "/api/ingest",
     auth: true,
     request: `// multipart/form-data
-file: "renewal_policy_q1.pdf"
-source: "confluence"
-account_id: "acme-corp"
-department: "customer-success"
-access_level: 2`,
+file: "document.md"
+department: "engineering"
+classification: "internal"`,
     response: `{
   "documents_processed": 1,
   "chunks_created": 14,
@@ -168,40 +167,23 @@ access_level: 2`,
 // Authorization: Bearer <token>
 //
 // Query params
-//   limit           1..100 (default 10)
-//   offset          default 0
-//   classification  "internal" | "restricted"
-//   q               full-text search over title + content`,
+//   limit   1..100 (default 10)
+//   offset  default 0`,
     response: `{
   "items": [
     {
-      "id": "doc_8f2a9c1e",
-      "title": "acme_renewal_call_0314",
-      "source": "gong",
-      "account_id": "acme-corp",
-      "department": "customer-success",
-      "access_level": 2,
+      "id": "ffe60a68-886d-49f4-83f9-c1f7475cf028",
+      "title": "Cloud Native Tools Strategy Working Group",
+      "source": "gitlab-handbook:company/working-groups/cloud-native-tool-strategy.md",
+      "department": "general",
+      "access_level": 1,
       "classification": "internal",
-      "allowed_roles": ["manager", "legal", "finance", "admin"],
-      "owner_id": "usr_a1b2c3d4",
-      "created_at": "2026-03-15T10:00:00Z",
-      "can_access": true
-    },
-    {
-      "id": "doc_3b7d4e2f",
-      "title": "Data Retention Policy v2.1",
-      "source": "confluence",
-      "account_id": null,
-      "department": "compliance",
-      "access_level": 0,
-      "classification": "restricted",
-      "allowed_roles": ["intern", "employee", "engineer", "manager", "hr", "legal", "finance", "admin"],
-      "owner_id": "usr_sarah_chen",
-      "created_at": "2026-01-10T08:30:00Z",
+      "allowed_roles": ["admin", "employee", "engineer", "finance", "hr", "intern", "legal", "manager"],
+      "created_at": "2026-10-17T10:08:56.358936",
       "can_access": true
     }
   ],
-  "total": 5132,
+  "total": 4879,
   "limit": 10,
   "offset": 0
 }`,
@@ -213,17 +195,15 @@ access_level: 2`,
     request: `// no body required
 // Authorization: Bearer <token>`,
     response: `{
-  "id": "doc_8f2a9c1e",
-  "title": "acme_renewal_call_0314",
-  "source": "gong",
-  "account_id": "acme-corp",
-  "department": "customer-success",
-  "access_level": 2,
+  "id": "ffe60a68-886d-49f4-83f9-c1f7475cf028",
+  "title": "Cloud Native Tools Strategy Working Group",
+  "source": "gitlab-handbook:company/working-groups/cloud-native-tool-strategy.md",
+  "department": "general",
+  "access_level": 1,
   "classification": "internal",
-  "allowed_roles": ["manager", "legal", "finance", "admin"],
-  "owner_id": "usr_a1b2c3d4",
-  "created_at": "2026-03-15T10:00:00Z",
-  "content": "On the Mar 14 renewal call with Acme Corp, the following commitments were made: 1) 99.95% uptime SLA upgrade at no additional cost...",
+  "allowed_roles": ["admin", "employee", "engineer", "finance", "hr", "intern", "legal", "manager"],
+  "created_at": "2026-10-17T10:08:56.358936",
+  "content": "## Attributes\n\n| Attribute | Value |\n| Working Group | Cloud Native Tools Strategy |...",
   "can_access": true
 }`,
   },
