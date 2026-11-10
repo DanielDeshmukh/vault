@@ -2,23 +2,46 @@
 """Run the Vault evaluation against the live API.
 
 Usage:
-    # Full eval (all roles, all questions):
-    python run_eval.py
+    # Quick eval: 3 questions per role (1 easy, 1 tricky, 1 out-of-scope)
+    # Runs all 8 roles by default, ~24 queries total (~2-3 minutes)
+    python run_eval.py --quick
 
-    # Quick eval (admin + intern only):
-    python run_eval.py --roles admin intern
+    # Full eval: all 30 questions × all 8 roles = 240 queries
+    python run_eval.py --full
 
-    # Single role:
-    python run_eval.py --roles admin
+    # Quick eval for specific roles only
+    python run_eval.py --quick --roles admin intern engineer
+
+    # Full eval for a single role
+    python run_eval.py --full --roles admin
 
     # Custom base URL (local dev):
-    python run_eval.py --base-url http://localhost:8000
+    python run_eval.py --quick --base-url http://localhost:8000
 
     # Save report to custom path:
-    python run_eval.py --output my_report.md
+    python run_eval.py --quick --output my_report.md
 
     # Limit concurrency (rate limiting):
-    python run_eval.py --concurrency 2
+    python run_eval.py --quick --concurrency 2
+
+    # Filter by category:
+    python run_eval.py --full --categories easy_lookup edge_case
+
+Flags:
+    --quick       Run 3 questions per role (1 easy passing, 1 tricky passing,
+                  1 out-of-scope/failing). All 8 roles by default.
+                  ~24 queries, ~2-3 minutes.
+    --full        Run all 30 questions per role. All 8 roles by default.
+                  ~240 queries, ~20-30 minutes.
+    --roles       Space-separated list of roles to evaluate.
+                  Default: all 8 demo roles (admin, intern, employee, engineer,
+                  manager, hr, legal, finance).
+    --categories  Filter by question category: easy_lookup, cross_doc_synthesis,
+                  permission_boundary, edge_case.
+    --base-url    API base URL (default: live Vercel deployment).
+    --concurrency Max concurrent API calls (default: 3, reduce if rate-limited).
+    --output      Markdown report output path (default: eval_report.md).
+    --json-output JSON results output path (default: eval_results.json).
 
 Requirements:
     pip install httpx
@@ -38,32 +61,45 @@ from datetime import datetime
 sys.path.insert(0, "")
 
 from eval.api_evaluator import APIEvaluator, print_evaluation_summary, QueryResult
-from eval.golden_set_gitlab import get_golden_set_summary, QuestionCategory
+from eval.golden_set_gitlab import (
+    get_golden_set,
+    get_golden_set_summary,
+    get_quick_select,
+    QuestionCategory,
+)
 from eval.report_generator import generate_report
 
 
-def print_banner():
+def print_banner(mode: str):
     print("=" * 70)
     print("  Vault Evaluation Runner")
-    print(f"  Started: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"  Mode: {mode}")
+    print(f"  Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
     print()
 
 
-def print_golden_set_info():
-    summary = get_golden_set_summary()
-    print(f"Golden Set: {summary['total']} questions")
+def print_golden_set_info(questions):
+    total = len(questions)
+    categories = {}
+    for q in questions:
+        cat = q.category.value
+        categories[cat] = categories.get(cat, 0) + 1
+    print(f"Questions: {total}")
     print(f"  By category:")
-    for cat, count in summary["by_category"].items():
+    for cat, count in sorted(categories.items()):
         print(f"    {cat.replace('_', ' ').title()}: {count}")
-    print(f"  By difficulty:")
-    for diff, count in summary["by_difficulty"].items():
-        print(f"    {diff}: {count}")
+    quick_count = sum(1 for q in questions if q.quick_select)
+    if quick_count:
+        print(f"  Quick select questions: {quick_count}")
     print()
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Vault Evaluation Runner")
+    parser = argparse.ArgumentParser(
+        description="Vault Evaluation Runner — test RBAC and RAG quality",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         "--base-url",
         default="https://vault-rbac-rag.vercel.app",
@@ -73,7 +109,7 @@ async def main():
         "--roles",
         nargs="+",
         default=None,
-        help="Roles to evaluate (default: all demo roles)",
+        help="Roles to evaluate (default: all 8 demo roles)",
     )
     parser.add_argument(
         "--categories",
@@ -98,26 +134,51 @@ async def main():
         default=3,
         help="Max concurrent API calls (default: 3)",
     )
-    parser.add_argument(
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
         "--quick",
         action="store_true",
-        help="Quick mode: admin + intern only, fewer questions",
+        help="Quick mode: 3 questions per role (1 easy, 1 tricky, 1 out-of-scope). "
+        "All 8 roles by default. ~24 queries, ~2-3 minutes.",
+    )
+    mode_group.add_argument(
+        "--full",
+        action="store_true",
+        help="Full mode: all 30 questions per role. All 8 roles by default. "
+        "~240 queries, ~20-30 minutes.",
     )
     args = parser.parse_args()
 
-    print_banner()
-
+    # Determine mode
     if args.quick:
-        args.roles = ["admin", "intern"]
+        mode = "quick"
+        questions = get_quick_select()
+    elif args.full:
+        mode = "full"
+        questions = get_golden_set()
+    else:
+        # Default to quick mode for convenience
+        mode = "quick"
+        questions = get_quick_select()
+        print("Note: No mode specified, defaulting to --quick (3 questions per role).")
+        print("      Use --full for all 30 questions per role.\n")
+
+    # Filter questions by category if specified
+    if args.categories:
+        category_enums = [QuestionCategory(c) for c in args.categories]
+        questions = [q for q in questions if q.category in category_enums]
+
+    print_banner(mode)
 
     # Print config
     print(f"Base URL: {args.base_url}")
-    print(f"Roles: {', '.join(args.roles) if args.roles else 'all demo roles'}")
+    print(f"Roles: {', '.join(args.roles) if args.roles else 'all 8 demo roles'}")
     print(f"Categories: {', '.join(args.categories) if args.categories else 'all'}")
+    print(f"Questions per role: {len(questions)}")
     print(f"Concurrency: {args.concurrency}")
+    total_queries = len(questions) * (len(args.roles) if args.roles else 8)
+    print(f"Total queries: ~{total_queries}")
     print()
-
-    print_golden_set_info()
 
     # Initialize evaluator
     evaluator = APIEvaluator(base_url=args.base_url)
@@ -126,27 +187,22 @@ async def main():
     print("Logging in as all roles...")
     await evaluator.login_all_roles()
     if args.roles:
-        # Filter to only requested roles
         available = [r for r in args.roles if r in evaluator.tokens]
         if not available:
             print("ERROR: No roles could login successfully")
             sys.exit(1)
-        print(f"Logged in as: {', '.join(available)}")
+        eval_roles = available
     else:
-        print(f"Logged in as: {', '.join(evaluator.tokens.keys())}")
+        eval_roles = list(evaluator.tokens.keys())
+    print(f"Logged in as: {', '.join(eval_roles)}")
     print()
 
-    # Convert category strings to enums
-    categories = None
-    if args.categories:
-        categories = [QuestionCategory(c) for c in args.categories]
-
-    # Run evaluation
+    # Run evaluation with the selected questions
     print("Running evaluation...")
     start_time = time.monotonic()
     results = await evaluator.run_evaluation(
-        roles=args.roles,
-        categories=categories,
+        roles=eval_roles,
+        questions=questions,
         max_concurrent=args.concurrency,
     )
     elapsed = time.monotonic() - start_time
@@ -204,7 +260,8 @@ async def main():
 
     # Save JSON results
     json_data = {
-        "run_time": datetime.utcnow().isoformat(),
+        "run_time": datetime.now().isoformat(),
+        "mode": mode,
         "elapsed_seconds": elapsed,
         "summary": summary,
         "results": [

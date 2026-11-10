@@ -1006,6 +1006,126 @@ The permission filter runs **before** retrieval at the Pinecone vector store lev
 
 ---
 
+## Evaluation Framework
+
+The project includes an automated evaluation system (`run_eval.py`) that tests RBAC and RAG quality against the live API. It runs queries as different roles and measures answer relevance, citation presence, latency, and permission boundary enforcement.
+
+### Quick Setup
+
+```bash
+pip install httpx
+```
+
+### Running Evaluations
+
+#### Quick Mode (Recommended for demos)
+
+Runs **3 questions per role** across all 8 roles (~24 queries, ~2-3 minutes):
+- **1 easy passing** — straightforward factual question about the corpus
+- **1 tricky passing** — cross-document synthesis requiring deeper reasoning
+- **1 out-of-scope** — irrelevant question that should be refused
+
+```bash
+# All 8 roles, 3 questions each (default)
+python run_eval.py --quick
+
+# Specific roles only
+python run_eval.py --quick --roles admin intern engineer
+
+# With lower concurrency to avoid rate limiting
+python run_eval.py --quick --concurrency 2
+```
+
+#### Full Mode
+
+Runs **all 30 questions per role** across all 8 roles (~240 queries, ~20-30 minutes):
+
+```bash
+# All roles, all questions
+python run_eval.py --full
+
+# Single role, all questions
+python run_eval.py --full --roles admin
+
+# Filter by category
+python run_eval.py --full --categories easy_lookup edge_case
+```
+
+### Command Line Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--quick` | 3 questions per role (1 easy, 1 tricky, 1 out-of-scope) | All 8 roles |
+| `--full` | All 30 questions per role | All 8 roles |
+| `--roles` | Space-separated roles to evaluate | All 8 demo roles |
+| `--categories` | Filter by category: `easy_lookup`, `cross_doc_synthesis`, `permission_boundary`, `edge_case` | All categories |
+| `--base-url` | API base URL for local dev | Live Vercel deployment |
+| `--concurrency` | Max concurrent API calls | 3 |
+| `--output` | Markdown report output path | `eval_report.md` |
+| `--json-output` | JSON results output path | `eval_results.json` |
+
+### Available Roles
+
+`admin`, `intern`, `employee`, `engineer`, `manager`, `hr`, `legal`, `finance`
+
+### Output Files
+
+- **`eval_report.md`** — Detailed markdown report with per-question answers, citations, latency, relevance scores, and timestamps
+- **`eval_results.json`** — Machine-readable JSON with all query results for programmatic analysis
+
+### Example Output
+
+```
+======================================================================
+  Vault Evaluation Runner
+  Mode: quick
+  Started: 2026-11-10 22:00:00 UTC
+======================================================================
+
+Base URL: https://vault-rbac-rag.vercel.app
+Roles: all 8 demo roles
+Questions per role: 3
+Total queries: ~24
+
+Running evaluation...
+  Progress: 10/24 queries completed
+  Progress: 20/24 queries completed
+Completed in 45.2s
+
+======================================================================
+  EVALUATION SUMMARY
+======================================================================
+Total queries:    24
+Successful:       22
+Errors:            2
+Refused:           8
+With citations:   14
+Avg latency:      21000ms
+Avg relevance:    65.00%
+
+By Role:
+  admin        |   3 queries |   3 success |   1 refused | rel=66.67% | lat=20000ms
+  intern       |   3 queries |   3 success |   1 refused | rel=63.33% | lat=22000ms
+  ...
+
+RBAC Comparison (Admin vs Intern):
+  Admin relevance:   66.67%
+  Intern relevance:  63.33%
+  Admin with citations: 2/3
+  Intern with citations: 1/3
+```
+
+### Question Categories
+
+| Category | Description | Count |
+|----------|-------------|-------|
+| `easy_lookup` | Single-source factual questions | 15 |
+| `cross_doc_synthesis` | Multi-document synthesis | 5 |
+| `permission_boundary` | Tests RBAC filtering | 5 |
+| `edge_case` | Out-of-scope / adversarial | 5 |
+
+---
+
 ## Architecture Notes
 
 - **Vector store:** Pinecone with metadata-based permission filtering

@@ -147,7 +147,7 @@ class APIEvaluator:
                 answer="",
                 citations=[],
                 latency_ms=0,
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now().isoformat(),
                 success=False,
                 error=f"No token for role {role}",
             )
@@ -168,7 +168,7 @@ class APIEvaluator:
                 answer=answer,
                 citations=citations,
                 latency_ms=latency_ms,
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now().isoformat(),
                 success=True,
                 relevance_score=relevance,
                 has_citations=len(citations) > 0,
@@ -184,7 +184,7 @@ class APIEvaluator:
                 answer="",
                 citations=[],
                 latency_ms=0,
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now().isoformat(),
                 success=False,
                 error=str(e),
             )
@@ -192,19 +192,22 @@ class APIEvaluator:
     async def run_evaluation(
         self,
         roles: Optional[list[str]] = None,
+        questions: Optional[list[GoldenQuestion]] = None,
         categories: Optional[list[QuestionCategory]] = None,
         max_concurrent: int = 3,
     ) -> list[QueryResult]:
-        """Run full evaluation across roles and questions.
+        """Run evaluation across roles and questions.
 
         Args:
             roles: Roles to evaluate (defaults to all demo roles).
-            categories: Categories to evaluate (defaults to all).
+            questions: Specific questions to evaluate. If None, uses full golden set.
+            categories: Categories to filter by (only used if questions is None).
             max_concurrent: Max concurrent API calls.
         """
         if roles is None:
             roles = list(DEMO_ROLES.keys())
-        questions = get_golden_set()
+        if questions is None:
+            questions = get_golden_set()
         if categories:
             questions = [q for q in questions if q.category in categories]
 

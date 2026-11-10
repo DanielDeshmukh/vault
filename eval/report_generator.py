@@ -25,7 +25,7 @@ def generate_report(
         The markdown report string.
     """
     summary = print_evaluation_summary(results)
-    run_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    run_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     report = f"""# Vault Evaluation Report
 

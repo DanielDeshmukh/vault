@@ -28,6 +28,8 @@ class GoldenQuestion:
     should_refuse: bool = False
     difficulty: str = "medium"
     notes: str = ""
+    quick_select: str = ""
+    """For --quick mode: 'easy', 'tricky', or 'out_of_scope'. Empty = not in quick set."""
 
 
 GOLDEN_SET: list[GoldenQuestion] = [
@@ -42,6 +44,7 @@ GOLDEN_SET: list[GoldenQuestion] = [
         expected_keywords=["cloud-native", "kubernetes", "platform"],
         difficulty="easy",
         notes="Working group document exists in corpus",
+        quick_select="easy",
     ),
     GoldenQuestion(
         id="EL-002",
@@ -167,6 +170,7 @@ GOLDEN_SET: list[GoldenQuestion] = [
         expected_keywords=["NIST", "SOC 2", "ISO", "compliance", "security"],
         difficulty="hard",
         notes="Spans security, compliance, and policy docs",
+        quick_select="tricky",
     ),
     GoldenQuestion(
         id="CS-002",
@@ -257,6 +261,7 @@ GOLDEN_SET: list[GoldenQuestion] = [
         should_refuse=True,
         difficulty="easy",
         notes="Out of scope — not in GitLab handbook",
+        quick_select="out_of_scope",
     ),
     GoldenQuestion(
         id="EC-002",
@@ -295,6 +300,14 @@ GOLDEN_SET: list[GoldenQuestion] = [
 def get_golden_set() -> list[GoldenQuestion]:
     """Get the full golden evaluation set."""
     return GOLDEN_SET
+
+
+def get_quick_select() -> list[GoldenQuestion]:
+    """Get the quick select set: 3 questions (1 easy, 1 tricky, 1 out-of-scope).
+
+    Used by --quick mode to run a fast eval: ~3 queries per role.
+    """
+    return [q for q in GOLDEN_SET if q.quick_select]
 
 
 def get_golden_set_by_category(category: QuestionCategory) -> list[GoldenQuestion]:
