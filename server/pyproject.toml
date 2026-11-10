@@ -85,6 +85,11 @@ ignore_missing_imports = true
 module = ["pymupdf4llm"]
 ignore_missing_imports = true
 
+# cohere, pinecone, passlib, markdownify — no shipped stubs and no types-* package.
+[[tool.mypy.overrides]]
+module = ["cohere", "cohere.types", "pinecone", "pinecone.*", "passlib", "passlib.*", "markdownify"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
