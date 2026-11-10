@@ -210,3 +210,15 @@ Eval system created and tested successfully (60 queries, 40 successful, 20 error
 - **`eval/__init__.py`**: Fixed to not import old evaluator requiring `app` module
 - **Results**: Admin 65.88% relevance, Intern 64.52%, edge cases 100%, reports saved to `eval_report.md` and `eval_results.json`
 - Installed `httpx` dependency for the eval runner
+
+### ✓ Step 9: Restructure eval with --quick and --full modes
+Eval system now supports per-role question selection with two modes.
+- **`--quick` mode**: 3 questions per role (1 easy passing, 1 tricky passing, 1 out-of-scope/failing). All 8 roles by default. ~24 queries, ~2-3 minutes.
+- **`--full` mode**: All 30 questions per role. All 8 roles by default. ~240 queries, ~20-30 minutes.
+- **`eval/golden_set_gitlab.py`**: Added `quick_select` field to GoldenQuestion, tagged 3 questions (EL-001=easy, CS-001=tricky, EC-001=out_of_scope), added `get_quick_select()` helper
+- **`run_eval.py`**: Rewrote with mutually exclusive `--quick`/`--full` flags, detailed help text, per-role question count display, mode tracking in JSON output
+- **`eval/api_evaluator.py`**: `run_evaluation()` now accepts `questions` parameter for custom question sets
+- **`API_DOCS.md`**: Added full "Evaluation Framework" section with all flags, examples, output format, and question categories
+- **Fixed timestamps**: All datetime calls now use local time instead of UTC (user is in IST/UTC+5:30)
+- **Tested**: `python run_eval.py --quick --roles admin intern` — 6/6 queries successful, 90% relevance, ~55 seconds
+- Git committed and pushed cleanly
