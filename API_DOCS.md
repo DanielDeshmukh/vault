@@ -12,21 +12,28 @@ Get a token and ask a question in 2 commands. Examples work on **Windows CMD**, 
 ### Windows CMD
 
 ```cmd
-:: 1. Login and save token
-curl.exe -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}" > login.json
+:: 1. Login — copies the full token to your clipboard and prints it
+powershell -Command "(Invoke-RestMethod -Uri 'https://vault-rbac-rag.vercel.app/api/auth/login' -Method Post -ContentType 'application/json' -Body '{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}').access_token | Clip; Write-Host '--- FULL TOKEN (copied to clipboard) ---'; (Invoke-RestMethod -Uri 'https://vault-rbac-rag.vercel.app/api/auth/login' -Method Post -ContentType 'application/json' -Body '{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}').access_token"
 
-:: Extract the token (copy the access_token value from login.json, or use PowerShell below)
-set TOKEN=eyJhbGciOiJIUzI1NiIs...
+:: Paste the token above into TOKEN variable
+set TOKEN=paste_your_token_here
 
 :: 2. Query
 curl.exe -s -X POST https://vault-rbac-rag.vercel.app/api/query -H "Content-Type: application/json" -H "Authorization: Bearer %TOKEN%" -d "{\"question\":\"What is the cloud native tools strategy?\"}"
 ```
 
+**Easier option — just run this single command to see your full token:**
+```cmd
+powershell -Command "(Invoke-RestMethod -Uri 'https://vault-rbac-rag.vercel.app/api/auth/login' -Method Post -ContentType 'application/json' -Body '{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}').access_token"
+```
+
 ### PowerShell
 
 ```powershell
-# 1. Login
+# 1. Login — prints the full token so you can copy it
 $response = Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@vaultdemo.com","password":"Vault2026!"}'
+Write-Host "--- FULL TOKEN (copy below) ---"
+$response.access_token
 $TOKEN = $response.access_token
 
 # 2. Query
@@ -36,11 +43,13 @@ Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/query" -Method Pos
 ### Linux / macOS (Bash)
 
 ```bash
-# 1. Login
+# 1. Login — prints the full token so you can copy it
 TOKEN=$(curl -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@vaultdemo.com","password":"Vault2026!"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+echo "--- FULL TOKEN (copy below) ---"
+echo "$TOKEN"
 
 # 2. Query
 curl -s https://vault-rbac-rag.vercel.app/api/query \
@@ -137,7 +146,7 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
 **Response (200 OK):**
 ```json
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIs...<redacted>",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...<full JWT token>",
   "token_type": "bearer",
   "user": {
     "id": "cdc8aff8-537d-40e5-9879-e3b8f4d63d75",
@@ -151,6 +160,30 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
   }
 }
 ```
+
+### 🔑 Get Your Token (Copy-Paste Ready)
+
+Use these commands to get a full token you can copy and paste into other commands:
+
+**Windows CMD:**
+```cmd
+powershell -Command "(Invoke-RestMethod -Uri 'https://vault-rbac-rag.vercel.app/api/auth/login' -Method Post -ContentType 'application/json' -Body '{\"email\":\"admin@vaultdemo.com\",\"password\":\"Vault2026!\"}').access_token"
+```
+
+**PowerShell:**
+```powershell
+(Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@vaultdemo.com","password":"Vault2026!"}').access_token
+```
+
+**Bash:**
+```bash
+curl -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@vaultdemo.com","password":"Vault2026!"}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])"
+```
+
+> **For other roles**, just replace `admin@vaultdemo.com` with the email from the [Demo Credentials](#demo-credentials) table above. All use password `Vault2026!`.
 
 ### POST /api/auth/register
 
@@ -330,6 +363,28 @@ curl -X POST https://vault-rbac-rag.vercel.app/api/query \
 > - **Source diversity:** Citations span multiple departments (general, engineering, sales)
 > - **Relevance scoring:** Each citation has a similarity score (0.81 = strong match)
 > - **Trace ID:** Every query gets a unique trace for audit
+
+### 🔑 Get Intern Token (Copy-Paste Ready)
+
+**Windows CMD:**
+```cmd
+powershell -Command "(Invoke-RestMethod -Uri 'https://vault-rbac-rag.vercel.app/api/auth/login' -Method Post -ContentType 'application/json' -Body '{\"email\":\"intern1@vaultdemo.com\",\"password\":\"Vault2026!\"}').access_token"
+```
+
+**PowerShell:**
+```powershell
+(Invoke-RestMethod -Uri "https://vault-rbac-rag.vercel.app/api/auth/login" -Method Post -ContentType "application/json" -Body '{"email":"intern1@vaultdemo.com","password":"Vault2026!"}').access_token
+```
+
+**Bash:**
+```bash
+curl -s -X POST https://vault-rbac-rag.vercel.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"intern1@vaultdemo.com","password":"Vault2026!"}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])"
+```
+
+---
 
 ### POST /api/query (Intern — Restricted Results)
 
