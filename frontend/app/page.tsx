@@ -128,7 +128,7 @@ const API_ENDPOINTS = [
     auth: false,
     request: `{
   "email": "admin@vaultdemo.com",
-  "password": "Vault2026!"
+  "password": "DEMO_PASSWORD"
 }`,
     response: `{
   "access_token": "eyJhbGciOiJIUzI1NiIs...",

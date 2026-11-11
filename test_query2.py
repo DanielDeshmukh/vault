@@ -25,8 +25,8 @@ def get(url, hdrs=None):
     except urllib.error.HTTPError as e:
         return e.code, json.loads(e.read())
 
-# Login as admin
-c, b = post(f"{BASE}/auth/login", {"email": "admin@vaultdemo.com", "password": "Vault2026!"})
+# Login as admin — replace DEMO_PASSWORD with the actual password from CREDENTIALS.md
+c, b = post(f"{BASE}/auth/login", {"email": "admin@vaultdemo.com", "password": "DEMO_PASSWORD"})
 tok = b["access_token"]
 auth = {"Authorization": f"Bearer {tok}"}
 

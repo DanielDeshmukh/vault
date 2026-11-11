@@ -42,6 +42,9 @@ Thumbs.db
 PLAN.md
 phases/
 
+# Junie agent session artifacts (plans, settings, logs)
+.junie/
+
 # Docker
 docker-compose.override.yml
 
