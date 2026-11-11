@@ -30,14 +30,14 @@ RESET = "\033[0m"
 
 # ── Credentials ───────────────────────────────────────────────────────
 CREDENTIALS = [
-    {"email": "admin@vaultdemo.com", "password": "Vault2026!", "role": "admin"},
-    {"email": "intern1@vaultdemo.com", "password": "Vault2026!", "role": "intern"},
-    {"email": "employee1@vaultdemo.com", "password": "Vault2026!", "role": "employee"},
-    {"email": "engineer1@vaultdemo.com", "password": "Vault2026!", "role": "engineer"},
-    {"email": "manager1@vaultdemo.com", "password": "Vault2026!", "role": "manager"},
-    {"email": "hr1@vaultdemo.com", "password": "Vault2026!", "role": "hr"},
-    {"email": "legal1@vaultdemo.com", "password": "Vault2026!", "role": "legal"},
-    {"email": "finance1@vaultdemo.com", "password": "Vault2026!", "role": "finance"},
+    {"email": "levi.ackerman@vaultdemo.com", "password": "HumblePie23!", "role": "admin"},
+    {"email": "connie.springer@vaultdemo.com", "password": "RoundTabl3!", "role": "intern"},
+    {"email": "armin.arlert@vaultdemo.com", "password": "CunningPl4n!", "role": "employee"},
+    {"email": "eren.yeager@vaultdemo.com", "password": "FoundingR3x!", "role": "engineer"},
+    {"email": "mikasa.ackerman@vaultdemo.com", "password": "ScarletP4th!", "role": "manager"},
+    {"email": "sasha.blouse@vaultdemo.com", "password": "Pot4toLover!", "role": "hr"},
+    {"email": "hange.zoe@vaultdemo.com", "password": "Explos1veMind!", "role": "legal"},
+    {"email": "jean.kirstein@vaultdemo.com", "password": "Command3r!", "role": "finance"},
 ]
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ def step_health():
 def step_login_all():
     """2. Login all roles."""
     section("2. Login All Roles")
-    info("All demo accounts use password: Vault2026!")
+    info("Each account has a unique password — see CREDENTIALS.md")
     print()
 
     tokens = {}

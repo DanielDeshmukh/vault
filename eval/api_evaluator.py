@@ -19,18 +19,17 @@ import httpx
 from eval.golden_set_gitlab import GoldenQuestion, QuestionCategory, get_golden_set
 
 
-# Demo credentials — all use the same password
-DEMO_ROLES = {
-    "admin": "admin@vaultdemo.com",
-    "intern": "intern1@vaultdemo.com",
-    "employee": "employee1@vaultdemo.com",
-    "engineer": "engineer1@vaultdemo.com",
-    "manager": "manager1@vaultdemo.com",
-    "hr": "hr1@vaultdemo.com",
-    "legal": "legal1@vaultdemo.com",
-    "finance": "finance1@vaultdemo.com",
+# Demo credentials — each role has a unique password
+DEMO_CREDENTIALS = {
+    "admin": ("levi.ackerman@vaultdemo.com", "HumblePie23!"),
+    "intern": ("connie.springer@vaultdemo.com", "RoundTabl3!"),
+    "employee": ("armin.arlert@vaultdemo.com", "CunningPl4n!"),
+    "engineer": ("eren.yeager@vaultdemo.com", "FoundingR3x!"),
+    "manager": ("mikasa.ackerman@vaultdemo.com", "ScarletP4th!"),
+    "hr": ("sasha.blouse@vaultdemo.com", "Pot4toLover!"),
+    "legal": ("hange.zoe@vaultdemo.com", "Explos1veMind!"),
+    "finance": ("jean.kirstein@vaultdemo.com", "Command3r!"),
 }
-DEMO_PASSWORD = os.environ.get("VAULT_DEMO_PASSWORD", "Vault2026!")  # noqa: S105
 
 
 @dataclass
@@ -93,20 +92,20 @@ class APIEvaluator:
         """Login as all demo roles and cache tokens."""
         async with httpx.AsyncClient(timeout=30.0) as client:
             tasks = []
-            for role, email in DEMO_ROLES.items():
-                tasks.append(self._login(client, role, email))
+            for role, (email, password) in DEMO_CREDENTIALS.items():
+                tasks.append(self._login(client, role, email, password))
             results = await asyncio.gather(*tasks)
             for role, token in results:
                 if token:
                     self.tokens[role] = token
 
     async def _login(
-        self, client: httpx.AsyncClient, role: str, email: str
+        self, client: httpx.AsyncClient, role: str, email: str, password: str
     ) -> tuple[str, Optional[str]]:
         try:
             resp = await client.post(
                 f"{self.base_url}/api/auth/login",
-                json={"email": email, "password": DEMO_PASSWORD},
+                json={"email": email, "password": password},
             )
             if resp.status_code == 200:
                 return (role, resp.json()["access_token"])
@@ -205,7 +204,7 @@ class APIEvaluator:
             max_concurrent: Max concurrent API calls.
         """
         if roles is None:
-            roles = list(DEMO_ROLES.keys())
+            roles = list(DEMO_CREDENTIALS.keys())
         if questions is None:
             questions = get_golden_set()
         if categories:

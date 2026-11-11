@@ -107,18 +107,18 @@ python run_eval.py --quick --base-url http://localhost:8000
 
 ## Available Roles
 
-| Role | Documents Visible | Use Case |
-|------|-------------------|----------|
-| `admin` | 4,879 | Full access baseline |
-| `manager` | 3,397 | Mid-level access |
-| `engineer` | 3,099 | Technical docs |
-| `legal` | 2,661 | Legal/policy docs |
-| `employee` | 2,076 | General staff |
-| `hr` | 1,648 | HR documents |
-| `finance` | 1,619 | Financial docs |
-| `intern` | 1,556 | Restricted access |
+| Role | Email | Documents | Use Case |
+|------|-------|-----------|----------|
+| `admin` | `levi.ackerman@vaultdemo.com` | 4,879 | Full access baseline |
+| `manager` | `mikasa.ackerman@vaultdemo.com` | 3,397 | Mid-level access |
+| `engineer` | `eren.yeager@vaultdemo.com` | 3,099 | Technical docs |
+| `legal` | `hange.zoe@vaultdemo.com` | 2,661 | Legal/policy docs |
+| `employee` | `armin.arlert@vaultdemo.com` | 2,076 | General staff |
+| `hr` | `sasha.blouse@vaultdemo.com` | 1,648 | HR documents |
+| `finance` | `jean.kirstein@vaultdemo.com` | 1,619 | Financial docs |
+| `intern` | `connie.springer@vaultdemo.com` | 1,556 | Restricted access |
 
-All roles log in with password `Vault2026!`.
+Each role has a unique password — see `CREDENTIALS.md` for the full roster.
 
 ---
 

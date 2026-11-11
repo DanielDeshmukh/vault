@@ -27,12 +27,12 @@
 **What to do:**
 1. Click "Sign In" or navigate to `/login`
 2. Login with:
-   - Email: `admin@vaultdemo.com`
-   - Password: `Vault2026!`
+   - Email: `levi.ackerman@vaultdemo.com`
+    - Password: `HumblePie23!`
 3. You'll be redirected to the dashboard
 
 **What to say:**
-> "I'm logging in as the admin — Sarah Chen. The admin has full access to all 4,879 documents across all departments. After login, I land on the dashboard with the chat interface."
+> "I'm logging in as the admin — Levi Ackerman. The admin has full access to all 4,879 documents across all departments. After login, I land on the dashboard with the chat interface."
 
 ---
 
@@ -76,8 +76,8 @@
 **What to do:**
 1. Click logout (or open incognito window)
 2. Login with:
-   - Email: `intern1@vaultdemo.com`
-   - Password: `Vault2026!`
+   - Email: `connie.springer@vaultdemo.com`
+    - Password: `RoundTabl3!`
 
 **What to say:**
 > "Now I'm logging in as an intern — the lowest privilege role. The intern can only see documents classified as public or internal in the general department."

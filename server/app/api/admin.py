@@ -100,45 +100,6 @@ async def reject_user(
     return {"status": "rejected", "user_id": user_id}
 
 
-@router.put("/users/{user_id}/promote-admin")
-async def promote_to_admin(
-    user_id: str,
-    admin: User = Depends(require_admin),
-    db: AsyncSession = Depends(get_db),
-):
-    """Promote a user to admin status. Temporary endpoint for roster management."""
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.is_admin:
-        raise HTTPException(status_code=400, detail="User is already admin")
-
-    user.is_admin = True
-    user.is_approved = True
-    await db.commit()
-    return {"status": "promoted_to_admin", "user_id": user_id}
-
-
-@router.put("/users/{user_id}/demote-admin")
-async def demote_admin(
-    user_id: str,
-    admin: User = Depends(require_admin),
-    db: AsyncSession = Depends(get_db),
-):
-    """Demote an admin user to regular user. Temporary endpoint for roster management."""
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user.is_admin:
-        raise HTTPException(status_code=400, detail="User is not an admin")
-
-    user.is_admin = False
-    await db.commit()
-    return {"status": "demoted_from_admin", "user_id": user_id}
-
-
 @router.put("/users/{user_id}/role")
 async def assign_role(
     user_id: str,
