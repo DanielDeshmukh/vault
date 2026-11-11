@@ -19,16 +19,17 @@ import httpx
 from eval.golden_set_gitlab import GoldenQuestion, QuestionCategory, get_golden_set
 
 
-# Demo credentials — each role has a unique password
+# Demo credentials — passwords loaded from CREDENTIALS.md (local only, .gitignored).
+# Replace DEMO_PASSWORD with the actual password from CREDENTIALS.md.
 DEMO_CREDENTIALS = {
-    "admin": ("levi.ackerman@vaultdemo.com", "HumblePie23!"),
-    "intern": ("connie.springer@vaultdemo.com", "RoundTabl3!"),
-    "employee": ("armin.arlert@vaultdemo.com", "CunningPl4n!"),
-    "engineer": ("eren.yeager@vaultdemo.com", "FoundingR3x!"),
-    "manager": ("mikasa.ackerman@vaultdemo.com", "ScarletP4th!"),
-    "hr": ("sasha.blouse@vaultdemo.com", "Pot4toLover!"),
-    "legal": ("hange.zoe@vaultdemo.com", "Explos1veMind!"),
-    "finance": ("jean.kirstein@vaultdemo.com", "Command3r!"),
+    "admin": ("levi.ackerman@vaultdemo.com", "DEMO_PASSWORD"),
+    "intern": ("connie.springer@vaultdemo.com", "DEMO_PASSWORD"),
+    "employee": ("armin.arlert@vaultdemo.com", "DEMO_PASSWORD"),
+    "engineer": ("eren.yeager@vaultdemo.com", "DEMO_PASSWORD"),
+    "manager": ("mikasa.ackerman@vaultdemo.com", "DEMO_PASSWORD"),
+    "hr": ("sasha.blouse@vaultdemo.com", "DEMO_PASSWORD"),
+    "legal": ("hange.zoe@vaultdemo.com", "DEMO_PASSWORD"),
+    "finance": ("jean.kirstein@vaultdemo.com", "DEMO_PASSWORD"),
 }
 
 

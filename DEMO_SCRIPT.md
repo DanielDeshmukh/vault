@@ -28,7 +28,7 @@
 1. Click "Sign In" or navigate to `/login`
 2. Login with:
    - Email: `levi.ackerman@vaultdemo.com`
-    - Password: `HumblePie23!`
+    - Password: (see `CREDENTIALS.md`)
 3. You'll be redirected to the dashboard
 
 **What to say:**
@@ -77,7 +77,7 @@
 1. Click logout (or open incognito window)
 2. Login with:
    - Email: `connie.springer@vaultdemo.com`
-    - Password: `RoundTabl3!`
+    - Password: (see `CREDENTIALS.md`)
 
 **What to say:**
 > "Now I'm logging in as an intern — the lowest privilege role. The intern can only see documents classified as public or internal in the general department."

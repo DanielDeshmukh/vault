@@ -29,15 +29,17 @@ DIM = "\033[2m"
 RESET = "\033[0m"
 
 # ── Credentials ───────────────────────────────────────────────────────
+# Passwords are stored in CREDENTIALS.md (local only, .gitignored).
+# Replace DEMO_PASSWORD with the actual password from CREDENTIALS.md.
 CREDENTIALS = [
-    {"email": "levi.ackerman@vaultdemo.com", "password": "HumblePie23!", "role": "admin"},
-    {"email": "connie.springer@vaultdemo.com", "password": "RoundTabl3!", "role": "intern"},
-    {"email": "armin.arlert@vaultdemo.com", "password": "CunningPl4n!", "role": "employee"},
-    {"email": "eren.yeager@vaultdemo.com", "password": "FoundingR3x!", "role": "engineer"},
-    {"email": "mikasa.ackerman@vaultdemo.com", "password": "ScarletP4th!", "role": "manager"},
-    {"email": "sasha.blouse@vaultdemo.com", "password": "Pot4toLover!", "role": "hr"},
-    {"email": "hange.zoe@vaultdemo.com", "password": "Explos1veMind!", "role": "legal"},
-    {"email": "jean.kirstein@vaultdemo.com", "password": "Command3r!", "role": "finance"},
+    {"email": "levi.ackerman@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "admin"},
+    {"email": "connie.springer@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "intern"},
+    {"email": "armin.arlert@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "employee"},
+    {"email": "eren.yeager@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "engineer"},
+    {"email": "mikasa.ackerman@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "manager"},
+    {"email": "sasha.blouse@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "hr"},
+    {"email": "hange.zoe@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "legal"},
+    {"email": "jean.kirstein@vaultdemo.com", "password": "DEMO_PASSWORD", "role": "finance"},
 ]
 
 # ── Helpers ───────────────────────────────────────────────────────────
